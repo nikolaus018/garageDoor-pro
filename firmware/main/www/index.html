@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>garageDoor</title>
+<style>
+  :root { --bg:#f4f5f7; --card:#fff; --ink:#1b1f24; --muted:#6a7280; --line:#e3e6ea;
+          --accent:#1f6feb; --ok:#1a7f37; --warn:#b35900; --bad:#cf222e; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0f1115; --card:#181b21; --ink:#e8eaee; --muted:#9aa3ae; --line:#2a2f37;
+            --accent:#4c8dff; --ok:#3fb950; --warn:#d29922; --bad:#f85149; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; font:16px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+         background:var(--bg); color:var(--ink); }
+  main { max-width:520px; margin:0 auto; padding:16px; }
+  h1 { font-size:22px; margin:8px 0 16px; }
+  h2 { font-size:15px; margin:0 0 10px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); }
+  section { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; margin-bottom:14px; }
+  .grid { display:grid; grid-template-columns:auto 1fr; gap:6px 14px; }
+  .grid dt { color:var(--muted); } .grid dd { margin:0; font-variant-numeric:tabular-nums; }
+  .pill { display:inline-block; padding:2px 10px; border-radius:999px; font-weight:600; font-size:14px; }
+  .ok { color:var(--ok); } .warn { color:var(--warn); } .bad { color:var(--bad); }
+  label { display:block; margin:10px 0 4px; font-size:14px; color:var(--muted); }
+  input { width:100%; padding:10px 12px; font:inherit; border:1px solid var(--line); border-radius:8px;
+          background:var(--bg); color:var(--ink); }
+  .row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  button { width:100%; margin-top:12px; padding:12px; font:inherit; font-weight:600; border:0; border-radius:8px;
+           background:var(--accent); color:#fff; cursor:pointer; }
+  button.secondary { background:transparent; color:var(--accent); border:1px solid var(--line); }
+  button:disabled { opacity:.5; cursor:default; }
+  .msg { margin-top:10px; font-size:14px; min-height:1.2em; }
+  .hint { font-size:14px; color:var(--muted); margin:6px 0 0; }
+  .hidden { display:none; }
+</style>
+</head>
+<body>
+<main>
+  <h1>garageDoor</h1>
+
+  <section id="pw-first" class="hidden">
+    <h2>First: secure this Wi-Fi</h2>
+    <p class="hint">The setup Wi-Fi still uses the default password. Choose your own (8–63 characters);
+      you will reconnect with it.</p>
+    <label for="pw1">New Wi-Fi password</label>
+    <input id="pw1" type="password" minlength="8" maxlength="63" autocomplete="new-password">
+    <button onclick="setPassword('pw1', 'pw1-msg')">Save password</button>
+    <div class="msg" id="pw1-msg"></div>
+  </section>
+
+  <section>
+    <h2>Status</h2>
+    <dl class="grid">
+      <dt>State</dt><dd><span id="state" class="pill">…</span></dd>
+      <dt>GPS</dt><dd id="gps">…</dd>
+      <dt>Position</dt><dd id="pos">–</dd>
+      <dt>Home</dt><dd id="home">–</dd>
+      <dt>Distance</dt><dd id="dist">–</dd>
+      <dt>Pressing</dt><dd id="pressing">–</dd>
+    </dl>
+  </section>
+
+  <div id="needs-pw">
+    <section>
+      <h2>Home</h2>
+      <p class="hint">Park at home with the antenna seeing the sky, wait for a GPS fix, then:</p>
+      <button id="here" onclick="post('/api/home', {mode:'here'}, 'home-msg')">Set home to where the car is now</button>
+      <div class="row">
+        <div><label for="lat">Latitude</label><input id="lat" inputmode="decimal" placeholder="48.208176"></div>
+        <div><label for="lon">Longitude</label><input id="lon" inputmode="decimal" placeholder="16.373819"></div>
+      </div>
+      <button class="secondary" onclick="post('/api/home', {lat:val('lat'), lon:val('lon')}, 'home-msg')">Set home to these coordinates</button>
+      <div class="msg" id="home-msg"></div>
+    </section>
+
+    <section>
+      <h2>Behaviour</h2>
+      <div class="row">
+        <div><label for="arrive">Arrive radius (m)</label><input id="arrive" type="number" min="30" max="2000"></div>
+        <div><label for="leave">Leave radius (m)</label><input id="leave" type="number" min="80" max="5000"></div>
+        <div><label for="presses">Presses on leaving</label><input id="presses" type="number" min="0" max="30"></div>
+        <div><label for="duration">Arrival pressing (s)</label><input id="duration" type="number" min="10" max="600"></div>
+      </div>
+      <p class="hint">Arriving starts inside the arrive radius; you count as gone beyond the leave radius.
+        Presses are 2 s apart.</p>
+      <button onclick="saveSettings()">Save</button>
+      <div class="msg" id="set-msg"></div>
+    </section>
+
+    <section>
+      <h2>Test</h2>
+      <button class="secondary" onclick="post('/api/test', {}, 'test-msg')">Press the remote once</button>
+      <div class="msg" id="test-msg"></div>
+    </section>
+
+    <section>
+      <h2>Wi-Fi password</h2>
+      <label for="pw2">New password</label>
+      <input id="pw2" type="password" minlength="8" maxlength="63" autocomplete="new-password">
+      <button class="secondary" onclick="setPassword('pw2', 'pw2-msg')">Change password</button>
+      <div class="msg" id="pw2-msg"></div>
+    </section>
+
+    <section>
+      <h2>Firmware</h2>
+      <p class="hint" id="version">–</p>
+      <input id="fw" type="file" accept=".bin">
+      <button class="secondary" onclick="upload()">Install update</button>
+      <div class="msg" id="fw-msg"></div>
+    </section>
+  </div>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const val = id => $(id).value.trim();
+let loaded = false;
+
+function say(id, text, cls) { const m = $(id); m.textContent = text; m.className = 'msg ' + (cls || ''); }
+
+async function post(url, data, msg) {
+  say(msg, 'Working…');
+  try {
+    const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                 body: new URLSearchParams(data) });
+    const j = await r.json();
+    say(msg, j.ok ? 'Done.' : j.error, j.ok ? 'ok' : 'bad');
+    refresh();
+    return j.ok;
+  } catch (e) { say(msg, 'No connection to the board.', 'bad'); return false; }
+}
+
+async function setPassword(field, msg) {
+  if (await post('/api/password', { password: $(field).value }, msg))
+    say(msg, 'Saved. The Wi-Fi restarts now - reconnect with the new password.', 'ok');
+}
+
+function saveSettings() {
+  post('/api/settings', { arrive_radius_m: val('arrive'), leave_radius_m: val('leave'),
+                          leave_presses: val('presses'), arrive_duration_s: val('duration') }, 'set-msg');
+}
+
+async function upload() {
+  const f = $('fw').files[0];
+  if (!f) return say('fw-msg', 'Choose a .bin file first.', 'bad');
+  say('fw-msg', 'Uploading ' + Math.round(f.size / 1024) + ' kB…');
+  try {
+    const r = await fetch('/api/ota', { method: 'POST', headers: { 'Content-Type': 'application/octet-stream' }, body: f });
+    const j = await r.json();
+    say('fw-msg', j.ok ? 'Installed. The board restarts; reconnect in a few seconds.' : j.error, j.ok ? 'ok' : 'bad');
+  } catch (e) { say('fw-msg', 'Upload failed.', 'bad'); }
+}
+
+const STATES = { NO_HOME: ['Home not set', 'warn'], LEAVING: ['At home', 'ok'], AWAY: ['Away', 'ok'],
+                 ARRIVED: ['Arrived home', 'ok'] };
+
+async function refresh() {
+  let s;
+  try { s = await (await fetch('/api/status')).json(); } catch (e) { return; }
+  const [label, cls] = STATES[s.state] || [s.state, ''];
+  $('state').textContent = label; $('state').className = 'pill ' + cls;
+  const g = s.gps;
+  $('gps').innerHTML = !g.seen ? '<span class="bad">receiver not answering</span>'
+    : g.usable ? `<span class="ok">fix</span> · ${g.sats} satellites · ±${g.acc_m.toFixed(0)} m`
+    : `<span class="warn">searching</span> · ${g.sats} satellites`;
+  $('pos').textContent = g.usable ? `${g.lat.toFixed(6)}, ${g.lon.toFixed(6)}` : '–';
+  $('home').textContent = s.home.set ? `${s.home.lat.toFixed(6)}, ${s.home.lon.toFixed(6)}` : 'not set';
+  $('dist').textContent = s.distance_m >= 0 && s.home.set ? `${Math.round(s.distance_m)} m` : '–';
+  $('pressing').textContent = s.presses_remaining ? `${s.presses_remaining} presses left` : 'no';
+  $('here').disabled = !g.usable;
+  $('version').textContent = `Installed: v${s.version} · up ${Math.round(s.uptime_s / 60)} min`;
+  $('pw-first').classList.toggle('hidden', s.password_changed);
+  $('needs-pw').classList.toggle('hidden', !s.password_changed);
+  if (!loaded) {
+    loaded = true;
+    $('arrive').value = s.settings.arrive_radius_m; $('leave').value = s.settings.leave_radius_m;
+    $('presses').value = s.settings.leave_presses; $('duration').value = s.settings.arrive_duration_s;
+  }
+  if (s.home.set && !val('lat') && !val('lon') && document.activeElement.tagName !== 'INPUT') {
+    $('lat').value = s.home.lat.toFixed(6); $('lon').value = s.home.lon.toFixed(6);
+  }
+}
+
+refresh();
+setInterval(refresh, 2000);
+</script>
+</body>
+</html>

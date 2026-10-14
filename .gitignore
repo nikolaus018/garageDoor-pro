@@ -11,3 +11,7 @@ hardware/fp-info-cache
 hardware/*.kicad_prl
 hardware/*-backups/
 hardware/*-incomplete.*
+firmware/build/
+firmware/sdkconfig
+firmware/sdkconfig.old
+firmware/managed_components/
