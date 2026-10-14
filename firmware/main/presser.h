@@ -1,4 +1,4 @@
-// Drives the PhotoMOS switch across the remote's button: 150 ms presses every 2 s.
+// Drives the isolated switch (PhotoMOS / optocoupler) across the remote's button: 150 ms presses every 2 s.
 #pragma once
 
 #include <stdbool.h>

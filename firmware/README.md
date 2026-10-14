@@ -9,7 +9,7 @@ ESP-IDF v6.1. One firmware for three boards (menuconfig: garageDoor -> Board, pi
 | ESP32-S3 DevKitC on perfboard | `idf.py set-target esp32s3 build` | LED + 1 kΩ on GPIO10 / BOOT (GPIO0) |
 | garageDoor-pro PCB v1.0 | `idf.py -D SDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.defaults.pcb-v1" build` | green LED (GPIO10) / SETUP (GPIO9) |
 
-All boards: GPIO4 → GPS RX, GPIO5 ← GPS TX, GPIO7 → PhotoMOS (high = pressed).
+All boards: GPIO4 → GPS RX, GPIO5 ← GPS TX, GPIO7 → remote switch (PhotoMOS on the PCB, PC817C on the perfboard; high = pressed).
 
 ## Build, test, flash
 
@@ -86,7 +86,7 @@ changed, the panel only shows status and the password form.
 | `main/ubx.c`, `main/nmea.c`, `main/geo.c` | UBX frames/parser, NMEA GGA parser, distance (pure C, unit-tested) |
 | `main/gnss.c` | GPS driver: u-blox configuration, baud-rate search, UBX/NMEA |
 | `main/board.h`, `main/Kconfig.projbuild` | pin maps and the board choice |
-| `main/presser.c` | PhotoMOS output: 150 ms presses every 2 s |
+| `main/presser.c` | remote switch output: 150 ms presses every 2 s |
 | `main/settings.c` | NVS: settings and the parked state |
 | `main/ui.c` | LED patterns, SETUP button |
 | `main/web.c`, `main/www/index.html` | soft AP, captive portal, HTTP API, OTA |

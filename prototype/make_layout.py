@@ -27,8 +27,8 @@ NETS = {
     "RXD":  ("#1971c2", "GPIO4 → GPS RX"),
     "IO7":  ("#f08c00", "GPIO7 → R1"),
     "LED":  ("#e8590c", "R1 → K1 pin 1 (+ R2)"),
-    "OUT1": ("#9c36b5", "K1 pin 4 → terminal 1"),
-    "OUT2": ("#c2255c", "K1 pin 3 → terminal 2"),
+    "OUT1": ("#9c36b5", "K1 pin 4 (C) → terminal 1 (+)"),
+    "OUT2": ("#c2255c", "K1 pin 3 (E) → terminal 2 (−)"),
 }
 
 SUPERMINI_TOP = ["5", "6", "7", "8", "9", "10", "20", "21"]      # row D, columns 2..9
@@ -80,7 +80,7 @@ STEPS = [  # (title, view, items new in this step, instructions)
     ("Parts on top", "top", ["R1", "R2", "K1", "J1"], [
         "R1 330 Ω: B4 + B9, lying flat.",
         "R2 100 kΩ: B10 + C10, standing upright.",
-        "K1 AQY212EH: dot (pin 1) in B11;",
+        "K1 PC817C: dot (pin 1) in B11;",
         "  its pins go to B11, C11, C14, B14.",
         "J1 screw terminal: B18 + D18,",
         "  wire openings toward the right edge.",
@@ -110,7 +110,8 @@ STEPS = [  # (title, view, items new in this step, instructions)
         "GPS onto the header with 4 jumpers, by the",
         "labels on the GPS module: TX→L2, GND→L3,",
         "VCC→L4, RX→L5.",
-        "Remote button wires into J1, either way.",
+        "Remote button into J1: its + side to screw 1,",
+        "  its − side to screw 2.",
         "USB-C to the car charger.",
     ]),
 ]
@@ -289,7 +290,7 @@ def top_item(v, key, pin_labels=True):
             dx = -18 if n in "12" else 18
             s.append(f'<rect x="{x - 5}" y="{y - 5}" width="10" height="10" fill="#adb5bd"/>'
                      f'<text x="{x + dx}" y="{y + 5}" class="lab">{n}</text>')
-        s.append(f'<text x="{(p1x + p3x) / 2 + 14}" y="{p1y - 22}" class="lab">AQY212EH</text>')
+        s.append(f'<text x="{(p1x + p3x) / 2 + 14}" y="{p1y - 22}" class="lab">PC817C</text>')
     elif key == "J1":
         (tx, ty), (_ux, uy) = v.xy("B18"), v.xy("D18")
         s.append(f'<rect x="{tx - 1.25 * P}" y="{ty - 0.85 * P}" width="{2.5 * P}" height="{uy - ty + 1.7 * P}" rx="5" '
@@ -450,7 +451,7 @@ def wiring():
 
     s += box(40, 80, 300, 480, "ESP32-C3 SuperMini", "USB-C ← car charger", "#1c2b4a")
     s += box(780, 80, 250, 210, "GPS module", "e.g. ATGM336H, 3.3 V", "#5f3dc4")
-    s += box(660, 370, 220, 190, "K1 AQY212EH", "PhotoMOS relay", "#212529")
+    s += box(660, 370, 220, 190, "K1 PC817C", "optocoupler", "#212529")
     s += box(980, 390, 170, 150, "Spare remote", "button contacts", "#495057")
     esp = {"3V3": 160, "GND": 220, "GPIO5": 280, "GPIO4": 340, "GPIO7": 440}
     for lab, y in esp.items():
@@ -460,7 +461,7 @@ def wiring():
     for lab, y in gps.items():
         s += pin(780, y, lab, "right")
     for lab, (x, y, inside) in {"1 (+)": (660, 420, "right"), "2 (−)": (660, 510, "right"),
-                                "4": (880, 420, "left"), "3": (880, 510, "left")}.items():
+                                "4 (C)": (880, 420, "left"), "3 (E)": (880, 510, "left")}.items():
         s += pin(x, y, lab, inside)
     s += wire([(346, 160), (774, 160)], "3V3", "3V3", 380, 152)
     s += wire([(346, 220), (720, 220), (720, 200), (774, 200)], "GND", "GND", 380, 212)
@@ -480,9 +481,9 @@ def wiring():
     s += wire([(886, 510), (974, 510)], "OUT2")
     for (x, y, net) in ((600, 440, "LED"), (600, 580, "GND"), (370, 220, "GND")):   # junctions
         s.append(f'<circle cx="{x}" cy="{y}" r="7" fill="{NETS[net][0]}"/>')
-    s.append('<text x="1065" y="470" class="body" text-anchor="middle" fill="#fff">either way round</text>')
+    s.append('<text x="1065" y="470" class="body" text-anchor="middle" fill="#fff">+ to 1, − to 2</text>')
     s.append(f'<text x="40" y="{H - 24}" class="body">Same colours as on the board pictures. '
-             'K1 closes like a pressed button and stays open without power.</text>')
+             'K1 closes like a pressed button (+ side to terminal 1) and stays open without power.</text>')
     return svg(W, H, "".join(s))
 
 

@@ -11,19 +11,23 @@ car USB-C ─► USB-C
             GPIO5 ◄────┼────────────┼───────── GPS TX
             GPIO4 ─────┼────────────┼────────► GPS RX
             GPIO7 ── R1 330Ω ──┬── 1 ┌──────────┐ 4 ──► screw terminal 1 ─┐  across the
-                               │     │ AQY212EH │                        ├─ remote's
-                         R2 100k     │ PhotoMOS │                        │  button
-                               │     └──────────┘                        │
-            GND ───────────────┴── 2            3 ──► screw terminal 2 ─┘
+                               │     │  PC817C  │  (C)   (+ side)        ├─ remote's
+                         R2 100k     │ opto-    │                        │  button
+                               │     │ coupler  │  (E)   (− side)        │
+            GND ───────────────┴── 2 └──────────┘ 3 ──► screw terminal 2 ─┘
             GPIO8: blue LED on the SuperMini (status)   GPIO9: BOOT button (= SETUP)
 ```
 
 ![what connects to what](img/wiring.svg)
 
-- **R1** sets the PhotoMOS LED current (~6 mA).
+- **R1** sets the optocoupler's LED current (~6 mA).
 - **R2** keeps the switch off while the ESP32 boots.
-- **The PhotoMOS** connects the two screw-terminal wires exactly like a pressed button: either
-  polarity works, and it's fully isolated from the rest of the board. Unpowered, it stays open.
+- **The PC817C** connects the two screw-terminal wires like a pressed button, and it's fully
+  isolated from the rest of the board. Unpowered, it stays open. Its output is a transistor, so
+  **polarity matters**: terminal 1 goes to the button's **+ side**, terminal 2 to the **− side**
+  (see Bench test). It switches up to ~10–20 mA, plenty for a remote's button, which only signals
+  the remote's chip. If a remote's button carries the transmitter's whole current instead, use a
+  PhotoMOS relay (AQY212EH, TLP222A, G3VM-61A1: same DIP-4 holes, any polarity).
 
 ## Parts list
 
@@ -31,7 +35,7 @@ car USB-C ─► USB-C
 |---|------|----:|-------|---:|
 | 1 | **ESP32-C3 SuperMini** | 2 | Get the **standard** one, not "SuperMini **Plus**": the Plus has different pins and an RGB LED on GPIO8. The second one is a spare. | 3 each |
 | 2 | **GPS module with UART that runs on 3.3 V**, e.g. **ATGM336H** with its antenna | 1 | Powered from the SuperMini's **3V3** pin (most of these modules are 2.7–3.6 V only; boards with their own regulator work on 3.3 V too). The firmware finds the baud rate itself and reads NMEA (ATGM336H, NEO-6M, ...) or u-blox UBX. A module that needs 5 V (e.g. Beitian BE-220) does **not** fit this layout. | 12–18 |
-| 3 | **AQY212EH** PhotoMOS relay, DIP-4 | 2 | Same pinout alternatives: AQY210EH, TLP222A, Omron G3VM-61A1. LCSC C2894775 (was out of stock in Oct 2026: check, or take an alternative). Must be the **through-hole DIP-4**: not the SMD variants (AQY212EH**A**/**AX**, AQY212**S**). The second one is a spare. | 1–2 each |
+| 3 | **PC817C** optocoupler, DIP-4 | 2 | Sold in cheap packs; the second one is a spare. Must be the **4-pin** through-hole version (PC827/PC847 are 8/16 pins; "PC817C SMD"/"S" types don't fit). A PhotoMOS relay (AQY212EH, TLP222A) fits the same holes and works either way round. | 0.1–0.5 |
 | 4 | Resistor 330 Ω, ¼ W | 1 | R1. A resistor assortment kit is handy. | – |
 | 5 | Resistor 100 kΩ, ¼ W | 1 | R2 | – |
 | 6 | Screw terminal, 2-pin, 5.08 mm pitch, e.g. KF301-2P | 1 | J1, for the remote wires. 5.0 mm pitch fits too; 3.5 / 3.81 mm don't. | 0.3 |
@@ -89,7 +93,7 @@ trails T5/T6/T7 (three side by side: GND, 3V3, GPIO4). Leave every hole that isn
 3. **Parts on top** (solder from the bottom, and keep the cut-off legs for the trails):
    - **R1 330 Ω:** B4 and B9, lying flat.
    - **R2 100 kΩ:** B10 and C10, standing upright (bend one leg down alongside the body).
-   - **K1 AQY212EH:** **pin 1 (dot or notch) in B11**. The pins then go to B11, C11, C14 and B14.
+   - **K1 PC817C:** **pin 1 (dot or notch) in B11**. The pins then go to B11, C11, C14 and B14.
    - **J1 screw terminal:** B18 and D18, with the wire openings toward the right edge.
 
    ![step 2: parts on top](img/step2.svg)
@@ -111,7 +115,7 @@ trails T5/T6/T7 (three side by side: GND, 3V3, GPIO4). Leave every hole that isn
    | J2 (5V) and J3 (GND) | open |
    | J4 and L4, J3 and L3, J5 and L5, D2 and L2 | beep (connected) |
    | D4 (GPIO7) and B11 (K1 pin 1) | ~330 Ω |
-   | B11 and J3 (GND) | ~100 kΩ (some meters show less: their test voltage lights the PhotoMOS LED) |
+   | B11 and J3 (GND) | ~100 kΩ (some meters show less: their test voltage lights the optocoupler's LED) |
    | C11 and J3 | beep |
    | Terminal screw 1 and B14 / screw 2 and C14 | beep |
    | Terminal screw 1 and screw 2 | open |
@@ -139,9 +143,14 @@ trails T5/T6/T7 (three side by side: GND, 3V3, GPIO4). Leave every hole that isn
    modules show `115200 baud (UBX)`). Within about a minute the panel shows a fix.
 3. **Panel:** on the phone, join **GarageDoor-XXXX** (password `garagedoor`), set your own password,
    then tap **Press the remote once**. A multimeter in continuity mode across the two terminal screws
-   beeps briefly.
+   beeps briefly (red probe on screw 1: the optocoupler only conducts that way).
 4. **Remote:** open the spare remote and solder two thin wires across the button's contacts (the two
-   sides it connects). Screw them into J1 (either way round). Test press again: the door reacts.
+   sides it connects).
+   - Find the **+ side**: battery in, multimeter on DC volts across the two contacts. If it reads
+     positive, the red probe is on the + side; if negative, the black one is.
+   - **+ side → J1 screw 1, − side → screw 2.** Test press again: the door reacts.
+   - Nothing happens? Swap the two wires once. Still nothing: this remote's button carries more
+     current than the PC817C switches, use a PhotoMOS relay (see Parts list).
 
 ## Install in the car
 
