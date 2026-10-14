@@ -21,7 +21,7 @@ OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "img")
 
 # One colour per connection; the same colours in every picture.
 NETS = {
-    "5V":   ("#e03131", "5V"),
+    "3V3":  ("#e03131", "3V3 → GPS VCC"),
     "GND":  ("#343a40", "GND"),
     "TXD":  ("#2f9e44", "GPS TX → GPIO5"),
     "RXD":  ("#1971c2", "GPIO4 → GPS RX"),
@@ -33,19 +33,20 @@ NETS = {
 
 SUPERMINI_TOP = ["5", "6", "7", "8", "9", "10", "20", "21"]      # row D, columns 2..9
 SUPERMINI_BOTTOM = ["5V", "G", "3V3", "4", "3", "2", "1", "0"]   # row J, columns 2..9
-GPS_PADS = {"L2": "VCC", "L3": "GND", "L4": "TX", "L5": "RX"}
+# GPS VCC sits under 3V3 (J4) so a straight trail reaches it; most of these modules are 3.3 V only.
+GPS_PADS = {"L2": "TX", "L3": "GND", "L4": "VCC", "L5": "RX"}
 
 TRAILS = {  # bare tinned wire on the bottom, soldered at every pad
     "T1": (["D4", "C4", "B4"], "IO7"),
     "T2": (["B9", "B10", "B11"], "LED"),
     "T3": (["C10", "C11"], "GND"),
     "T4": (["B14", "B15", "B16", "B17", "B18"], "OUT1"),
-    "T5": (["J2", "K2", "L2"], "5V"),
+    "T5": (["J4", "K4", "L4"], "3V3"),
     "T6": (["J3", "K3", "L3"], "GND"),
     "T7": (["J5", "K5", "L5"], "RXD"),
 }
 WIRES = {  # insulated wire on the bottom, pad to pad
-    "W1": ("L4", "D2", "TXD"),
+    "W1": ("L2", "D2", "TXD"),
     "W2": ("K3", "C11", "GND"),
     "W3": ("C14", "D18", "OUT2"),
 }
@@ -62,7 +63,7 @@ EXPECTED = [  # the circuit: each group connected, nothing else
     {"U1.G", "R2.b", "K1.2", "GPS.GND"},
     {"K1.4", "J1.1"},
     {"K1.3", "J1.2"},
-    {"U1.5V", "GPS.VCC"},
+    {"U1.3V3", "GPS.VCC"},
     {"U1.5", "GPS.TX"},
     {"U1.4", "GPS.RX"},
 ]
@@ -90,7 +91,7 @@ STEPS = [  # (title, view, items new in this step, instructions)
         "Lay a cut-off leg flat over the pads and",
         "solder it at every pad it crosses:",
         "T1 D4–B4    T2 B9–B11    T3 C10–C11",
-        "T4 B14–B18  T5 J2–L2     T6 J3–L3",
+        "T4 B14–B18  T5 J4–L4     T6 J3–L3",
         "T7 J5–L5",
         "T5, T6, T7 run side by side: they must",
         "not touch each other.",
@@ -98,7 +99,7 @@ STEPS = [  # (title, view, items new in this step, instructions)
     ("Wires underneath", "bottom", list(WIRES), [
         "Insulated wire, 2 mm stripped at each end,",
         "soldered onto the pads:",
-        "W1  L4 → D2    GPS TX → GPIO5",
+        "W1  L2 → D2    GPS TX → GPIO5",
         "W2  K3 → C11   GND → K1 pin 2",
         "W3  C14 → D18  K1 pin 3 → terminal 2",
         "Then do the measurements in the README",
@@ -106,9 +107,9 @@ STEPS = [  # (title, view, items new in this step, instructions)
     ]),
     ("Plug in and connect", "top", ["module", "ext"], [
         "Plug the SuperMini back in, USB-C on the left.",
-        "GPS cable onto the header, by the labels",
-        "on the GPS module: VCC→L2, GND→L3,",
-        "TX→L4, RX→L5.",
+        "GPS onto the header with 4 jumpers, by the",
+        "labels on the GPS module: TX→L2, GND→L3,",
+        "VCC→L4, RX→L5.",
         "Remote button wires into J1, either way.",
         "USB-C to the car charger.",
     ]),
@@ -317,12 +318,12 @@ def top_item(v, key, pin_labels=True):
         bottom = v.oy + bh() + 28
         for pad, lab in GPS_PADS.items():
             x, y = v.xy(pad)
-            net = {"VCC": "5V", "GND": "GND", "TX": "TXD", "RX": "RXD"}[lab]
+            net = {"VCC": "3V3", "GND": "GND", "TX": "TXD", "RX": "RXD"}[lab]
             s.append(f'<path d="M{x},{y} L{x},{bottom}" fill="none" stroke="{NETS[net][0]}" '
                      f'stroke-width="5" stroke-linecap="round"/>')
         x, _ = v.xy("L6")
         s.append(f'<text x="{x - 6}" y="{bottom + 2}" class="labd" text-anchor="start">'
-                 f'↓ GPS module cable: VCC → L2, GND → L3, TX → L4, RX → L5</text>')
+                 f'↓ GPS module: TX → L2, GND → L3, VCC → L4, RX → L5</text>')
         for pad, net in (("B18", "OUT1"), ("D18", "OUT2")):
             x, y = v.xy(pad)
             s.append(f'<path d="M{x + 12},{y} L{x + 2.2 * P},{y}" stroke="{NETS[net][0]}" stroke-width="5" stroke-linecap="round"/>')
@@ -448,10 +449,10 @@ def wiring():
         return out
 
     s += box(40, 80, 300, 480, "ESP32-C3 SuperMini", "USB-C ← car charger", "#1c2b4a")
-    s += box(780, 80, 250, 210, "GPS module", "e.g. Beitian BE-220", "#5f3dc4")
+    s += box(780, 80, 250, 210, "GPS module", "e.g. ATGM336H, 3.3 V", "#5f3dc4")
     s += box(660, 370, 220, 190, "K1 AQY212EH", "PhotoMOS relay", "#212529")
     s += box(980, 390, 170, 150, "Spare remote", "button contacts", "#495057")
-    esp = {"5V": 160, "GND": 220, "GPIO5": 280, "GPIO4": 340, "GPIO7": 440}
+    esp = {"3V3": 160, "GND": 220, "GPIO5": 280, "GPIO4": 340, "GPIO7": 440}
     for lab, y in esp.items():
         s += pin(340, y, lab, "left")
     s.append('<text x="60" y="520" class="body" fill="#dee2e6">LED = GPIO8 · BOOT/SETUP = GPIO9</text>')
@@ -461,7 +462,7 @@ def wiring():
     for lab, (x, y, inside) in {"1 (+)": (660, 420, "right"), "2 (−)": (660, 510, "right"),
                                 "4": (880, 420, "left"), "3": (880, 510, "left")}.items():
         s += pin(x, y, lab, inside)
-    s += wire([(346, 160), (774, 160)], "5V", "5V", 380, 152)
+    s += wire([(346, 160), (774, 160)], "3V3", "3V3", 380, 152)
     s += wire([(346, 220), (720, 220), (720, 200), (774, 200)], "GND", "GND", 380, 212)
     s += wire([(346, 280), (740, 280), (740, 240), (774, 240)], "TXD", "GPS TX → GPIO5", 380, 272)
     s += wire([(346, 340), (755, 340), (755, 270), (774, 270)], "RXD", "GPIO4 → GPS RX", 380, 332)

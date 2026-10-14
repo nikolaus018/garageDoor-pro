@@ -6,7 +6,7 @@ as the PCB version, and the build takes about an hour.
 ```
             ESP32-C3 SuperMini
 car USB-C ─► USB-C
-            5V   ───────────────────────────► GPS VCC
+            3V3  ───────────────────────────► GPS VCC
             GND  ──────┬────────────┬────────► GPS GND
             GPIO5 ◄────┼────────────┼───────── GPS TX
             GPIO4 ─────┼────────────┼────────► GPS RX
@@ -30,7 +30,7 @@ car USB-C ─► USB-C
 | # | Part | Qty | Notes | ~€ |
 |---|------|----:|-------|---:|
 | 1 | **ESP32-C3 SuperMini** | 2 | Get the **standard** one, not "SuperMini **Plus**": the Plus has different pins and an RGB LED on GPIO8. The second one is a spare. | 3 each |
-| 2 | **GPS module, u-blox M10, with built-in ceramic antenna and UART**, e.g. **Beitian BE-220** | 1 | Runs on the SuperMini's 5 V, 115200 baud by default (the firmware finds other rates itself). Any GPS module with UART output works (NMEA fallback, e.g. BN-220, GY-NEO6MV2), but M10 is the most sensitive. Its TX must be 3.3 V logic, which is normal for these modules. | 12–18 |
+| 2 | **GPS module with UART that runs on 3.3 V**, e.g. **ATGM336H** with its antenna | 1 | Powered from the SuperMini's **3V3** pin (most of these modules are 2.7–3.6 V only; boards with their own regulator work on 3.3 V too). The firmware finds the baud rate itself and reads NMEA (ATGM336H, NEO-6M, ...) or u-blox UBX. A module that needs 5 V (e.g. Beitian BE-220) does **not** fit this layout. | 12–18 |
 | 3 | **AQY212EH** PhotoMOS relay, DIP-4 | 2 | Same pinout alternatives: AQY210EH, TLP222A, Omron G3VM-61A1. LCSC C2894775 (was out of stock in Oct 2026: check, or take an alternative). Must be the **through-hole DIP-4**: not the SMD variants (AQY212EH**A**/**AX**, AQY212**S**). The second one is a spare. | 1–2 each |
 | 4 | Resistor 330 Ω, ¼ W | 1 | R1. A resistor assortment kit is handy. | – |
 | 5 | Resistor 100 kΩ, ¼ W | 1 | R2 | – |
@@ -38,7 +38,7 @@ car USB-C ─► USB-C
 | 7 | Perfboard 5 × 7 cm, 2.54 mm, plated holes | 1 | Packs of several are cheap | 1 |
 | 8 | Female pin header 1×8, 2.54 mm | 2 | The SuperMini plugs in, so it can be swapped and wires fit underneath | 0.5 |
 | 9 | Male pin header 1×4, 2.54 mm | 1 | GPS connector at L2–L5 | 0.2 |
-| 10 | 4 female–female Dupont jumper wires, 20–30 cm | 4 | Board header to the GPS module cable (solder and heat-shrink them onto the module's cable) | 1 |
+| 10 | 4 female–female Dupont jumper wires, 20–30 cm | 4 | Board header to the GPS module's pins | 1 |
 | 11 | Insulated hookup wire, 26–30 AWG (silicone or wire-wrap) | 1 m | W1–W3, and the remote wires | 2 |
 | 12 | Bare tinned copper wire, 0.4–0.6 mm | – | Trails T1–T7; the resistor leg offcuts are enough | – |
 | 13 | **Spare garage remote** for your door, already working | 1 | It stays in use as the transmitter | own / 15–30 |
@@ -72,7 +72,7 @@ the circuit above.
 | Anything else (corners, long runs, crossing other connections, under the SuperMini) | **insulated wire**, soldered pad to pad on the bottom | W1, W2, W3 |
 
 Keep trails centred on their row. A trail must never touch the pad beside it, so watch the parallel
-trails T5/T6/T7 and pads J3/J4/J5. Leave every hole that isn't in the drawing unsoldered.
+trails T5/T6/T7 (three side by side: GND, 3V3, GPIO4). Leave every hole that isn't in the drawing unsoldered.
 
 ## Assembly
 
@@ -94,11 +94,11 @@ trails T5/T6/T7 and pads J3/J4/J5. Leave every hole that isn't in the drawing un
 
    ![step 2: parts on top](img/step2.svg)
 4. **Trails on the bottom:** T1 D4–C4–B4, T2 B9–B10–B11, T3 C10–C11, T4 B14 → B18 along row B,
-   T5 J2–K2–L2, T6 J3–K3–L3, T7 J5–K5–L5.
+   T5 J4–K4–L4, T6 J3–K3–L3, T7 J5–K5–L5.
 
    ![step 3: trails underneath](img/step3.svg)
 5. **Wires on the bottom:**
-   - **W1:** L4 → D2 (GPS TX → GPIO5).
+   - **W1:** L2 → D2 (GPS TX → GPIO5).
    - **W2:** K3 → C11 (GND → K1 pin 2).
    - **W3:** C14 → D18 (K1 pin 3 → terminal 2).
 
@@ -107,18 +107,20 @@ trails T5/T6/T7 and pads J3/J4/J5. Leave every hole that isn't in the drawing un
 
    | Between | Expect |
    |---------|--------|
-   | J2 (5V) and J3 (GND) | **open, no beep**. If this beeps, find the short before going on. |
-   | J2 and L2, J3 and L3, J5 and L5, D2 and L4 | beep (connected) |
+   | J4 (3V3) and J3 (GND) | **open, no beep**. If this beeps, find the short before going on. |
+   | J2 (5V) and J3 (GND) | open |
+   | J4 and L4, J3 and L3, J5 and L5, D2 and L2 | beep (connected) |
    | D4 (GPIO7) and B11 (K1 pin 1) | ~330 Ω |
    | B11 and J3 (GND) | ~100 kΩ (some meters show less: their test voltage lights the PhotoMOS LED) |
    | C11 and J3 | beep |
    | Terminal screw 1 and B14 / screw 2 and C14 | beep |
    | Terminal screw 1 and screw 2 | open |
-   | Every pair of neighbouring pads in D2–D9, J2–J9 and L2–L5 | open (except J2/J3 and L2/L3: that's the 5V/GND check above) |
-7. **GPS cable.**
-   - Cut the module's cable and solder 4 Dupont jumpers to it, matching the labels **on the module**.
-     Wire colours are not standard.
-   - Then plug them onto the board header: **VCC → L2, GND → L3, TX → L4, RX → L5**.
+   | Every pair of neighbouring pads in D2–D9, J2–J9 and L2–L5 | open |
+7. **GPS.** Connect the module with 4 female–female Dupont jumpers, by the labels **on the module**:
+   **TX → L2, GND → L3, VCC → L4, RX → L5**.
+   - Check VCC twice: it must go to L4 (3.3 V). Never connect it to the SuperMini's 5V pin.
+   - If your module has a cable instead of pins, cut it and solder the jumpers on (wire colours are
+     not standard, go by the labels).
 
    ![step 5: plug in and connect](img/step5.svg)
 8. **Plug in the SuperMini** and flash it from the Mac, with the SuperMini on USB:
@@ -133,8 +135,8 @@ trails T5/T6/T7 and pads J3/J4/J5. Leave every hole that isn't in the drawing un
 
 1. **First start:** the log says `start: NO_HOME` and the blue LED blinks fast, because the setup
    Wi-Fi is on.
-2. **GPS:** near a window, the log shows `receiver found at 115200 baud (UBX)` (or NMEA for other
-   modules). Within about a minute the panel shows a fix.
+2. **GPS:** near a window, the log shows `receiver found at 9600 baud (NMEA)` (ATGM336H; u-blox M9/M10
+   modules show `115200 baud (UBX)`). Within about a minute the panel shows a fix.
 3. **Panel:** on the phone, join **GarageDoor-XXXX** (password `garagedoor`), set your own password,
    then tap **Press the remote once**. A multimeter in continuity mode across the two terminal screws
    beeps briefly.
@@ -147,7 +149,7 @@ trails T5/T6/T7 and pads J3/J4/J5. Leave every hole that isn't in the drawing un
   - Wi-Fi is only used for setup, with the phone right next to it, so the board's position doesn't
     matter for range. That was different for the old beacon.
   - Still, don't put the SuperMini's antenna end (opposite the USB-C) against metal.
-- **GPS module:** put it where it sees the sky, e.g. on the dashboard under the windscreen, ceramic
-  side up, and run its cable to the box.
+- **GPS module:** put it (or its antenna) where it sees the sky, e.g. on the dashboard under the
+  windscreen, ceramic side up, and run the cable to the box.
 - **Power:** USB-C from the ignition-switched charger.
 - **Setup:** follow `docs/user-guide.md` from "Set it up".
