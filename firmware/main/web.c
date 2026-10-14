@@ -14,7 +14,6 @@
 #include "esp_http_server.h"
 #include "esp_log.h"
 #include "esp_mac.h"
-#include "esp_netif.h"
 #include "esp_ota_ops.h"
 #include "esp_system.h"
 #include "esp_timer.h"
@@ -279,7 +278,8 @@ static esp_err_t ota_post(httpd_req_t *req)
         return send_result(req, "Firmware file missing or too large");
     }
     esp_ota_handle_t ota;
-    if (esp_ota_begin(part, OTA_SIZE_UNKNOWN, &ota) != ESP_OK) {
+    // Erase only as much as the upload needs (the whole slot would take ~20 s).
+    if (esp_ota_begin(part, req->content_len, &ota) != ESP_OK) {
         return send_result(req, "Could not start the update");
     }
     char buf[1024];
