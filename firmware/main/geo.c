@@ -3,7 +3,7 @@
 #include <math.h>
 
 #define EARTH_RADIUS_M 6371008.8
-#define DEG_TO_RAD (M_PI / 180.0)
+#define DEG_TO_RAD (3.14159265358979323846 / 180.0)  // M_PI is not standard C
 
 double geo_distance_m(int32_t lat1_e7, int32_t lon1_e7, int32_t lat2_e7, int32_t lon2_e7)
 {

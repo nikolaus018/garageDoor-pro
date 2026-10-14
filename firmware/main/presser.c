@@ -46,7 +46,7 @@ static void presser_task(void *arg)
 void presser_init(void)
 {
     // Idle level before enabling the output so the switch never closes during boot
-    // (R9 holds it low until here).
+    // (R9 on the PCB, R2 on the perfboard, holds it low until here).
     gpio_set_level(PIN_SWITCH, 0);
     gpio_config_t io = { .pin_bit_mask = 1ULL << PIN_SWITCH, .mode = GPIO_MODE_OUTPUT };
     ESP_ERROR_CHECK(gpio_config(&io));

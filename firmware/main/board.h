@@ -1,4 +1,4 @@
-// Pin maps. Pick the board in menuconfig ("garageDoor" -> "Board"); see docs/prototype-build.md.
+// Pin maps. Pick the board in menuconfig ("garageDoor" -> "Board"); see prototype/README.md.
 #pragma once
 
 #include "driver/gpio.h"
