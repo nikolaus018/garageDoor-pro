@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "geo.h"
+#include "nmea.h"
 #include "trip.h"
 #include "ubx.h"
 
@@ -197,10 +198,56 @@ static int test_trip_bad_fixes_and_no_home(void)
     return 0;
 }
 
+static void with_checksum(char *out, size_t len, const char *body)
+{
+    unsigned char sum = 0;
+    for (const char *p = body; *p; p++) sum ^= (unsigned char)*p;
+    snprintf(out, len, "$%s*%02X\r\n", body, sum);
+}
+
+static int feed_all(nmea_parser_t *p, const char *s, nmea_gga_t *out)
+{
+    int n = 0;
+    for (; *s; s++) n += nmea_feed(p, *s, out);
+    return n;
+}
+
+static int test_nmea(void)
+{
+    nmea_parser_t p;
+    nmea_gga_t g;
+    nmea_parser_reset(&p);
+    // The classic NMEA reference sentence (checksum 47).
+    CHECK(feed_all(&p, "$GPGGA,123519,4807.038,N,01131.000,E,1,08,0.9,545.4,M,46.9,M,,*47\r\n", &g) == 1);
+    CHECK(g.fix && g.num_sv == 8);
+    CHECK(g.lat_e7 == 481173000 && g.lon_e7 == 115166667);
+    CHECK(g.h_acc_mm == 4500);
+
+    // Searching (no fix yet): decoded, but fix == false.
+    char line[128];
+    with_checksum(line, sizeof line, "GNGGA,,,,,,0,00,99.99,,,,,,");
+    CHECK(feed_all(&p, line, &g) == 1 && !g.fix && g.num_sv == 0);
+
+    // Southern / western hemisphere, multi-GNSS talker.
+    with_checksum(line, sizeof line, "GNGGA,101010.00,3352.1280,S,15112.9360,W,1,12,0.7,30.0,M,20.0,M,,");
+    CHECK(feed_all(&p, line, &g) == 1 && g.fix);
+    CHECK(g.lat_e7 == -338688000 && g.lon_e7 == -1512156000);
+
+    // Bad checksum, other sentences and noise are ignored.
+    CHECK(feed_all(&p, "$GPGGA,123519,4807.038,N,01131.000,E,1,08,0.9,545.4,M,46.9,M,,*48\r\n", &g) == 0);
+    with_checksum(line, sizeof line, "GPRMC,123519,A,4807.038,N,01131.000,E,022.4,084.4,230394,003.1,W");
+    CHECK(feed_all(&p, line, &g) == 0);
+    CHECK(feed_all(&p, "\xB5\x62garbage$$$\r\n$GPGGA,broken\r\n", &g) == 0);
+    // Malformed coordinates are rejected.
+    with_checksum(line, sizeof line, "GPGGA,1,48x7.0,N,01131.000,E,1,08,0.9,1,M,1,M,,");
+    CHECK(feed_all(&p, line, &g) == 0);
+    return 0;
+}
+
 int main(void)
 {
     int fails = test_geo() + test_ubx_valset() + test_ubx_parse_nav_pvt() + test_trip_leaving_then_arriving() +
-                test_trip_boot_away_and_drive_by() + test_trip_bad_fixes_and_no_home();
+                test_trip_boot_away_and_drive_by() + test_trip_bad_fixes_and_no_home() + test_nmea();
     printf("%s: %d checks\n", fails ? "FAILED" : "all tests passed", checks);
     return fails ? 1 : 0;
 }

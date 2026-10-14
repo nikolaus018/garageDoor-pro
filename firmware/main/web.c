@@ -19,6 +19,7 @@
 #include "esp_system.h"
 #include "esp_timer.h"
 #include "esp_wifi.h"
+#include "gnss.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
 #include "freertos/task.h"
@@ -155,7 +156,7 @@ static esp_err_t status_get(httpd_req_t *req)
     snprintf(json, sizeof json,
              "{\"state\":\"%s\",\"parked\":\"%s\",\"distance_m\":%.0f,"
              "\"gps\":{\"seen\":%s,\"usable\":%s,\"fix\":%s,\"lat\":%.7f,\"lon\":%.7f,\"acc_m\":%.1f,\"sats\":%u,"
-             "\"age_s\":%ld},"
+             "\"age_s\":%ld,\"proto\":\"%s\"},"
              "\"home\":{\"set\":%s,\"lat\":%.7f,\"lon\":%.7f},"
              "\"settings\":{\"arrive_radius_m\":%u,\"leave_radius_m\":%u,\"leave_presses\":%u,"
              "\"arrive_duration_s\":%u},"
@@ -164,6 +165,7 @@ static esp_err_t status_get(httpd_req_t *req)
              st.have_fix ? "true" : "false", st.fix_usable ? "true" : "false", st.fix.valid ? "true" : "false",
              st.fix.lat_e7 * 1e-7, st.fix.lon_e7 * 1e-7, st.fix.h_acc_mm / 1000.0, st.fix.num_sv,
              st.gnss_age_s == UINT32_MAX ? -1L : (long)st.gnss_age_s,
+             gnss_protocol() == GNSS_UBX ? "UBX" : gnss_protocol() == GNSS_NMEA ? "NMEA" : "none",
              s.home_set ? "true" : "false", s.home_lat_e7 * 1e-7, s.home_lon_e7 * 1e-7,
              s.arrive_radius_m, s.leave_radius_m, s.leave_presses, s.arrive_duration_s,
              st.presses_remaining, s.password_changed ? "true" : "false", app->version,

@@ -63,7 +63,7 @@ static void ui_task(void *arg)
         } else {
             led = pattern_led(t, s_status == UI_FIX ? 1 : s_status == UI_NO_FIX ? 2 : 3);
         }
-        gpio_set_level(PIN_LED_STATUS, led);
+        gpio_set_level(PIN_LED_STATUS, led ^ LED_ACTIVE_LOW);
 
         vTaskDelay(pdMS_TO_TICKS(TICK_MS));
         t += TICK_MS;
@@ -73,6 +73,7 @@ static void ui_task(void *arg)
 void ui_start(const ui_callbacks_t *cb)
 {
     s_cb = *cb;
+    gpio_set_level(PIN_LED_STATUS, LED_ACTIVE_LOW);  // off
     gpio_config_t led = { .pin_bit_mask = 1ULL << PIN_LED_STATUS, .mode = GPIO_MODE_OUTPUT };
     ESP_ERROR_CHECK(gpio_config(&led));
     gpio_config_t btn = { .pin_bit_mask = 1ULL << PIN_BUTTON, .mode = GPIO_MODE_INPUT,

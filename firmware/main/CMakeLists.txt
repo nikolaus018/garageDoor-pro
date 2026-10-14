@@ -1,4 +1,4 @@
-idf_component_register(SRCS "app.c" "geo.c" "gnss.c" "presser.c" "settings.c" "trip.c" "ubx.c" "ui.c" "web.c"
+idf_component_register(SRCS "app.c" "geo.c" "gnss.c" "nmea.c" "presser.c" "settings.c" "trip.c" "ubx.c" "ui.c" "web.c"
                     INCLUDE_DIRS "."
                     EMBED_FILES "www/index.html"
                     PRIV_REQUIRES app_update dns_server esp_app_format esp_driver_gpio esp_driver_uart
