@@ -1,0 +1,7 @@
+build/
+sdkconfig.old
+managed_components/
+.DS_Store
+*-backups/
+*.kicad_prl
+fp-info-cache
