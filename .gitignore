@@ -5,3 +5,8 @@ managed_components/
 *-backups/
 *.kicad_prl
 fp-info-cache
+hardware/*.dsn
+hardware/*.ses
+hardware/fp-info-cache
+hardware/*.kicad_prl
+hardware/*-backups/
