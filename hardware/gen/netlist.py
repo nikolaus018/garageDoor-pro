@@ -128,7 +128,7 @@ PLACEMENT = {
     "J1": (24.0, 4.18, 180, "F"),    # USB-C on the top edge, opening up
     "U4": (19.8, 12.6, 0, "F"),
     "R7": (22.9, 11.4, 90, "F"),
-    "R6": (26.2, 11.4, 90, "F"),
+    "R6": (25.25, 11.4, 90, "F"),   # straight below CC1, clear of the hand-routed VBUS path
     "F1": (32.8, 6.4, 0, "F"),
     "D1": (32.8, 9.6, 180, "F"),
     "U3": (32.8, 13.4, 0, "F"),
@@ -158,11 +158,11 @@ PLACEMENT = {
     "R11": (8.0, 27.0, 0, "F"),
     "D3": (8.0, 29.3, 180, "F"),
     "J3": (36.0, BOARD_H - 5.6, 0, "F"),  # wire entry 1 mm inside the bottom edge
-    # bottom-side test pads: two columns, labels to the right
+    # bottom-side test pads, labels to the right: power/GNSS on the right, ESP32 debug next to the ESP32
     "TP1": (44.6, 21.4, 0, "B"), "TP2": (44.6, 23.4, 0, "B"), "TP3": (44.6, 25.4, 0, "B"),
     "TP4": (44.6, 27.4, 0, "B"), "TP10": (44.6, 29.4, 0, "B"),
-    "TP5": (54.0, 21.4, 0, "B"), "TP6": (54.0, 23.4, 0, "B"), "TP7": (54.0, 25.4, 0, "B"),
-    "TP8": (54.0, 27.4, 0, "B"), "TP9": (54.0, 29.4, 0, "B"),
+    "TP5": (18.8, 19.6, 0, "B"), "TP6": (18.8, 21.6, 0, "B"), "TP7": (11.6, 26.4, 0, "B"),
+    "TP8": (8.0, 5.6, 0, "B"), "TP9": (8.0, 7.6, 0, "B"),
     "H1": (56.5, 3.5, 0, "F"),
     "H2": (14.0, 3.5, 0, "F"),
 }
@@ -170,11 +170,12 @@ PLACEMENT = {
 TEST_POINT_FOOTPRINT = "TestPoint:TestPoint_Pad_D1.0mm"
 MOUNTING_HOLE_FOOTPRINT = "MountingHole:MountingHole_2.7mm_M2.5"
 
-# Net classes (applied in the KiCad project file).
+# Net classes (applied in the KiCad project file). Default: 0.15 mm track / 0.2 mm clearance;
+# one clearance for all signal classes keeps the autorouter and KiCad's DRC in agreement.
 NET_CLASSES = {
     "Power": {"nets": ["VBUS", "VIN_5V", "+3V3", "GND"], "track": 0.5, "clearance": 0.2},
     "RF": {"nets": ["GPS_RF_IN", "ANT_FEED"], "track": 0.36, "clearance": 0.25},
-    "USB": {"nets": ["USB_DP", "USB_DM"], "track": 0.25, "clearance": 0.15},
+    "USB": {"nets": ["USB_DP", "USB_DM"], "track": 0.25, "clearance": 0.2},
 }
 
 

@@ -249,7 +249,7 @@ def write_project_files():
                 "diff_pair_gap": 0.25, "diff_pair_via_gap": 0.25, "wire_width": 6, "bus_width": 12,
                 "line_style": 0, "priority": priority}
 
-    classes = [nc("Default", 0.2, 0.15, 2147483647)]
+    classes = [nc("Default", 0.15, 0.2, 2147483647)]
     patterns = []
     for i, (name, c) in enumerate(netlist.NET_CLASSES.items()):
         classes.append(nc(name, c["track"], c["clearance"], i))
@@ -260,7 +260,7 @@ def write_project_files():
             "defaults": {"copper_line_width": 0.2, "silk_line_width": 0.15, "silk_text_size_h": 0.8,
                          "silk_text_size_v": 0.8, "silk_text_thickness": 0.15},
             "rules": {  # JLCPCB 4-layer standard capabilities, with margin
-                "min_clearance": 0.15, "min_track_width": 0.15, "min_via_diameter": 0.5,
+                "min_clearance": 0.15, "min_track_width": 0.11, "min_via_diameter": 0.5,
                 "min_through_hole_diameter": 0.3, "min_via_annular_width": 0.13,
                 "min_copper_edge_clearance": 0.3, "min_hole_clearance": 0.25, "min_hole_to_hole": 0.25,
                 "min_silk_clearance": 0.0, "min_text_height": 0.6, "min_text_thickness": 0.1,

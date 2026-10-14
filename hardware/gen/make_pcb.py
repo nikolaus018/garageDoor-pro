@@ -8,6 +8,7 @@ Run with KiCad's bundled Python (see hardware/build.sh):
 """
 import math
 import os
+import re
 import subprocess
 import sys
 
@@ -250,6 +251,27 @@ def route_bias(board, fps, nets):
     track(board, knee2, l1a, w, nets["ANT_BIAS"])
 
 
+def route_vbus(board, fps, nets):
+    """USB-C VBUS pads -> F1, by hand: the pads sit between CC/D+/D- and GND pads, a tight spot
+    for the autorouter. Right pad pair: F.Cu down, right and up into F1. Left pad pair: via and a
+    B.Cu run joining the right one."""
+    w = netlist.NET_CLASSES["Power"]["track"]
+    vbus = nets["VBUS"]
+    pads = sorted({(p.GetPosition().x, p.GetPosition().y) for p in fps["J1"].Pads() if p.GetNetname() == "/VBUS"})
+    (lx, ly), (rx, ry) = pads[0], pads[-1]
+    f1 = pad_of(fps["F1"], "1").GetPosition()
+    drop = ry + F(1.4)
+    turn_x = rx + F(3.05)
+    pts = [pcbnew.VECTOR2I(rx, ry), pcbnew.VECTOR2I(rx, drop), pcbnew.VECTOR2I(turn_x, drop),
+           pcbnew.VECTOR2I(turn_x, f1.y), f1]
+    for a, b in zip(pts, pts[1:]):
+        track(board, a, b, w, vbus)
+    via(board, pcbnew.VECTOR2I(rx, drop), vbus)
+    track(board, pcbnew.VECTOR2I(lx, ly), pcbnew.VECTOR2I(lx, drop), w, vbus)
+    via(board, pcbnew.VECTOR2I(lx, drop), vbus)
+    track(board, pcbnew.VECTOR2I(lx, drop), pcbnew.VECTOR2I(rx, drop), w, vbus, layer=pcbnew.B_Cu)
+
+
 def thermal_vias_under_esp(board, fps, nets):
     """Vias inside the ESP32 module's centre GND pads: tie them to the In1 plane and conduct heat."""
     seen = set()
@@ -262,22 +284,187 @@ def thermal_vias_under_esp(board, fps, nets):
                 via(board, p, nets["GND"])
 
 
-def freeroute(board):
-    dsn = PCB.replace(".kicad_pcb", ".dsn")
-    ses = PCB.replace(".kicad_pcb", ".ses")
-    if os.path.exists(ses):
-        os.remove(ses)
+FANOUT_NETS = ("GND", "+3V3")
+FANOUT_TRACK = 0.3
+COPPER_CLEARANCE = 0.2
+
+
+def clear_of_other_nets(board, pos, radius, net_code):
+    """True if no pad, track or via of another net is within `radius` of pos."""
+    for fp in board.GetFootprints():
+        for pad in fp.Pads():
+            if pad.GetNetCode() != net_code and pad.HitTest(pos, radius):
+                return False
+    for t in board.GetTracks():
+        if t.GetNetCode() != net_code and t.HitTest(pos, radius):
+            return False
+    return True
+
+
+def segment_clear(board, a, b, half_width, net_code):
+    steps = max(2, int(math.hypot(b.x - a.x, b.y - a.y) / F(0.1)))
+    for i in range(steps + 1):
+        p = pcbnew.VECTOR2I(int(a.x + (b.x - a.x) * i / steps), int(a.y + (b.y - a.y) * i / steps))
+        if not clear_of_other_nets(board, p, half_width + F(COPPER_CLEARANCE), net_code):
+            return False
+    return True
+
+
+def in_bounds(pos, margin=0.6):
+    x, y = pcbnew.ToMM(pos.x) - OX, pcbnew.ToMM(pos.y) - OY
+    return (netlist.ANTENNA_KEEPOUT_X + margin < x < netlist.BOARD_W - 0.8
+            and 0.8 < y < netlist.BOARD_H - 0.8)
+
+
+MIN_VIA_PITCH = 0.7  # mm between via centres: 0.3 mm holes keep >= 0.4 mm apart
+
+
+def far_from_vias(board, pos):
+    return all(math.hypot(v.GetPosition().x - pos.x, v.GetPosition().y - pos.y) >= F(MIN_VIA_PITCH)
+               for v in board.GetTracks() if v.Type() == pcbnew.PCB_VIA_T)
+
+
+def fanout(board):
+    """Short track + via from every SMD GND/3V3 pad down to its inner plane.
+
+    Freerouting then only has to route the signal nets. Pads that already have a via inside
+    them (ESP32 centre pads) are skipped.
+    """
+    failed = []
+    vias_in_pads = [t for t in board.GetTracks() if t.Type() == pcbnew.PCB_VIA_T]
+    for fp in board.GetFootprints():
+        centre = fp.GetPosition()
+        for pad in fp.Pads():
+            if pad.GetNetname() not in FANOUT_NETS or pad.GetAttribute() != pcbnew.PAD_ATTRIB_SMD:
+                continue
+            layer = pcbnew.F_Cu if pad.IsOnLayer(pcbnew.F_Cu) else pcbnew.B_Cu
+            p0 = pad.GetPosition()
+            if any(pad.HitTest(v.GetPosition(), 0) for v in vias_in_pads):
+                continue
+            code = pad.GetNetCode()
+            base = math.atan2(p0.y - centre.y, p0.x - centre.x) if p0 != centre else 0.0
+            half = max(pad.GetSize(layer).x, pad.GetSize(layer).y) / 2
+            done = False
+            for extra in (0.55, 0.8, 1.1, 1.5, 2.0):
+                for k in (0, 1, -1, 2, -2, 3, -3, 4):
+                    ang = base + k * math.pi / 4
+                    d = half + F(extra)
+                    ux, uy = math.cos(ang), math.sin(ang)
+                    pos = pcbnew.VECTOR2I(int(p0.x + d * ux), int(p0.y + d * uy))
+                    # Start the track a little inside the pad, towards the via, so its edge never
+                    # pokes past the pad (matters for pads at the antenna keep-out line).
+                    inset = min(F(0.25), half - F(0.1))
+                    start = pcbnew.VECTOR2I(int(p0.x + inset * ux), int(p0.y + inset * uy))
+                    if not (in_bounds(pos) and in_bounds(start, margin=FANOUT_TRACK / 2 + 0.05)):
+                        continue
+                    if not far_from_vias(board, pos):
+                        continue
+                    if not clear_of_other_nets(board, pos, F(0.3 + COPPER_CLEARANCE), code):
+                        continue
+                    if not segment_clear(board, start, pos, F(FANOUT_TRACK / 2), code):
+                        continue
+                    track(board, start, pos, FANOUT_TRACK, pad.GetNet(), layer=layer)
+                    vias_in_pads.append(via(board, pos, pad.GetNet()))
+                    done = True
+                    break
+                if done:
+                    break
+            if not done:
+                done = bridge_to_neighbour(board, fp, pad)
+            if not done:
+                failed.append(f"{fp.GetReference()}.{pad.GetNumber()}")
+    return failed
+
+
+def bridge_to_neighbour(board, fp, pad):
+    """Fallback: short track to the nearest same-net pad of the same footprint."""
+    p0 = pad.GetPosition()
+    others = sorted((o for o in fp.Pads() if o is not pad and o.GetNetCode() == pad.GetNetCode()),
+                    key=lambda o: math.hypot(o.GetPosition().x - p0.x, o.GetPosition().y - p0.y))
+    for o in others[:3]:
+        q = o.GetPosition()
+        dist = math.hypot(q.x - p0.x, q.y - p0.y)
+        if dist < F(0.05):
+            continue  # coincident pad, already the same copper
+        if dist > F(2.0):
+            break
+        ux, uy = (q.x - p0.x) / dist, (q.y - p0.y) / dist
+        half = max(pad.GetSize(pcbnew.F_Cu).x, pad.GetSize(pcbnew.F_Cu).y) / 2
+        inset = min(F(0.25), half - F(0.1))
+        start = pcbnew.VECTOR2I(int(p0.x + inset * ux), int(p0.y + inset * uy))
+        if in_bounds(start, margin=FANOUT_TRACK / 2 + 0.05) and segment_clear(
+                board, start, q, F(FANOUT_TRACK / 2), pad.GetNetCode()):
+            track(board, start, q, FANOUT_TRACK, pad.GetNet())
+            return True
+    return False
+
+
+ROUTER_STRATEGIES = [
+    ["-mp", "60"],
+    ["-mp", "100", "-is", "random"],
+    ["-mp", "100", "-us", "global"],
+    ["-mp", "100", "-us", "hybrid", "-hr", "1:1"],
+    ["-mp", "150", "-is", "sequential"],
+]
+
+
+def export_dsn(board, dsn):
     if not pcbnew.ExportSpecctraDSN(board, dsn):
         raise RuntimeError("DSN export failed")
-    cmd = [JAVA, "-jar", FREEROUTING, "-de", dsn, "-do", ses, "-mp", "40", "--gui.enabled=false"]
-    print("running", " ".join(cmd), flush=True)
-    subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=1800)
-    if not os.path.exists(ses):
-        raise RuntimeError("Freerouting produced no session file")
-    if not pcbnew.ImportSpecctraSES(board, ses):
-        raise RuntimeError("SES import failed")
-    os.remove(dsn)
-    os.remove(ses)
+    # Inner layers are solid GND / 3V3 planes: mark them as power layers so the router only
+    # drops vias onto them and keeps signals on F.Cu / B.Cu.
+    text = open(dsn).read()
+    for layer in ("In1.Cu", "In2.Cu"):
+        old = f"(layer {layer}\n      (type signal)"
+        if old not in text:
+            raise RuntimeError(f"unexpected DSN layer format for {layer}")
+        text = text.replace(old, f"(layer {layer}\n      (type power)")
+    # GND and 3V3 are complete already (fanout vias into the planes, verified by KiCad DRC).
+    # Keep the nets, so their tracks/vias stay fixed obstacles, but give them no pins to route.
+    for net in FANOUT_NETS:
+        text, n = re.subn(r"\(net %s\n\s*\(pins [^)]*\)\n\s*\)" % re.escape(net), f"(net {net})", text)
+        if n != 1:
+            raise RuntimeError(f"could not strip pins of {net} from the DSN")
+    open(dsn, "w").write(text)
+
+
+def unconnected(board):
+    board.BuildConnectivity()
+    return board.GetConnectivity().GetUnconnectedCount(False)
+
+
+def freeroute():
+    """Tries router strategies on fresh copies of the placed board until one routes 100 %.
+
+    Returns the routed board (zones not yet filled)."""
+    dsn = PCB.replace(".kicad_pcb", ".dsn")
+    ses = PCB.replace(".kicad_pcb", ".ses")
+    best = None
+    for opts in ROUTER_STRATEGIES:
+        board = pcbnew.LoadBoard(PCB)
+        export_dsn(board, dsn)
+        if os.path.exists(ses):
+            os.remove(ses)
+        cmd = [JAVA, "-jar", FREEROUTING, "-de", dsn, "-do", ses, "--gui.enabled=false",
+               "--router.neck_width_um=130"] + opts  # neck-down at fine-pitch pins, never below 0.13 mm
+        subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=1800)
+        if not os.path.exists(ses) or not pcbnew.ImportSpecctraSES(board, ses):
+            continue
+        pcbnew.ZONE_FILLER(board).Fill(board.Zones())
+        left = unconnected(board)
+        print(f"router {' '.join(opts)}: {left} unconnected", flush=True)
+        if best is None or left < best[0]:
+            best = (left, board)
+        if left == 0:
+            break
+    for f in (dsn, ses):
+        if os.path.exists(f):
+            os.remove(f)
+    if best is not None and best[0] != 0:
+        pcbnew.SaveBoard(PCB.replace(".kicad_pcb", "-incomplete.kicad_pcb"), best[1])
+    if best is None or best[0] != 0:
+        raise RuntimeError(f"no router strategy completed the board (best: {best and best[0]} unconnected)")
+    return best[1]
 
 
 def add_silkscreen(board):
@@ -302,7 +489,7 @@ def add_silkscreen(board):
     text("STATUS", 3.6, 29.3, 0.8)
     text("PRESS", 15.2, 30.1, 0.8)
     # JLCPCB prints its order number where this placeholder is (bottom side).
-    text("JLCJLCJLCJLC", 24.0, 20.0, 0.8, layer=pcbnew.B_SilkS, mirror=True)
+    text("JLCJLCJLCJLC", 30.0, 16.5, 0.8, layer=pcbnew.B_SilkS, mirror=True)
     for ref, label in netlist.TEST_POINT_LABELS.items():
         x, y, _r, _s = netlist.PLACEMENT[ref]
         t = text(label, x + 1.1 + 0.45 * len(label), y, 0.8, layer=pcbnew.B_SilkS, mirror=True)
@@ -313,6 +500,8 @@ def build():
     board.SetCopperLayerCount(4)
     ds = board.GetDesignSettings()
     ds.SetBoardThickness(F(1.6))
+    ds.m_TentViasFront = True   # vias under the ESP32 module and parts stay covered
+    ds.m_TentViasBack = True
 
     nets = {}
     for name in netlist.NETS:
@@ -326,7 +515,10 @@ def build():
     add_zone(board, nets, "GND", pcbnew.In1_Cu, 1)
     add_zone(board, nets, "+3V3", pcbnew.In2_Cu, 1)
     route_rf(board, fps, nets)
+    route_vbus(board, fps, nets)
     thermal_vias_under_esp(board, fps, nets)
+    failed = fanout(board)
+    print("fanout failed for:", failed or "none")
     add_silkscreen(board)
     pcbnew.SaveBoard(PCB, board)
     return PCB

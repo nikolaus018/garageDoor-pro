@@ -10,3 +10,4 @@ hardware/*.ses
 hardware/fp-info-cache
 hardware/*.kicad_prl
 hardware/*-backups/
+hardware/*-incomplete.*
