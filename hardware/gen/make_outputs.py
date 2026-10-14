@@ -87,6 +87,24 @@ def bom():
     print("wrote", path)
 
 
+LCSC_BOARDS = 3  # parts for this many boards in bom-lcsc.csv (self-assembly)
+
+
+def bom_lcsc():
+    """Upload at lcsc.com -> BOM tool; it rounds up to each part's minimum order quantity."""
+    qty = {}
+    for ref, (_v, _s, _fp, lcsc, mpn, _d) in netlist.PARTS.items():
+        qty.setdefault((lcsc, mpn), 0)
+        qty[(lcsc, mpn)] += 1
+    path = os.path.join(OUT, "bom-lcsc.csv")
+    with open(path, "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["LCSC Part Number", "Manufacture Part Number", "Quantity"])
+        for (lcsc, mpn), n in sorted(qty.items()):
+            w.writerow([lcsc, mpn, n * LCSC_BOARDS])
+    print("wrote", path)
+
+
 def natural(ref):
     m = re.match(r"([A-Z]+)(\d+)", ref)
     return (m.group(1), int(m.group(2)))
@@ -136,5 +154,6 @@ if __name__ == "__main__":
     check_clean()
     gerbers()
     bom()
+    bom_lcsc()
     cpl()
     docs()

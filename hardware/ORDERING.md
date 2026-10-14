@@ -1,15 +1,37 @@
-# Ordering the board (JLCPCB, assembled)
+# Ordering the board
 
-Everything JLCPCB needs is in `production/`:
+Two ways: **bare boards + stencil and solder them yourself** (cheapest), or **assembled by JLCPCB**.
+Everything needed is in `production/`:
 
 | File | Upload at |
 |------|-----------|
 | `garageDoor-pro-gerbers.zip` | PCB order: "Add gerber file" |
 | `bom-jlcpcb.csv` | PCB Assembly: "BOM" |
 | `cpl-jlcpcb.csv` | PCB Assembly: "CPL" (pick and place) |
+| `bom-lcsc.csv` | lcsc.com BOM tool: all parts for 3 boards (self-assembly) |
 
 `schematic.pdf`, `assembly-top.pdf` and the `render-*.png` files are for checking and for your records.
 `erc.rpt` / `drc.rpt` are the clean electrical and design-rule check reports the files were produced from.
+
+## Self-assembly: bare PCB + stencil
+
+1. Order the PCB with the options in section 1, **without** assembly. In the same order add an
+   **SMT stencil**: frameless, **top side only**, **0.12 mm** thick (right for the 0.5 mm-pitch
+   USB-C and the 0402 parts). It is cut from the same Gerber zip, no extra file needed.
+2. Order the parts from LCSC: upload `bom-lcsc.csv` in LCSC's BOM tool. It rounds every line up to
+   the part's minimum order quantity, so cheap passives come in tens or hundreds.
+3. Solder (all SMD parts are on the top side):
+   - Tape two spare boards around the one you print on, as a level frame, so the stencil lies flat.
+     Line the stencil up, put on a line of paste and draw it across once with a card.
+   - Place the parts with tweezers, following `assembly-top.pdf` and the orientation notes in
+     section 3 below.
+   - Reflow on a hot plate (or a preheated board plus hot air). Paste: Sn63Pb37 (183 °C) is the
+     easiest by hand, SAC305 (217 °C) if you want lead-free.
+   - Afterwards: solder the screw terminal J3 with an iron, then check the USB-C pins under a
+     magnifier and clear any bridges with flux and solder wick.
+   - Keep the MAX-M10S sealed until use (moisture sensitive), and bake it as its label says if it
+     sat open for days.
+4. Go through the first power-up checklist (section 5).
 
 ## 1. PCB options
 
@@ -26,7 +48,7 @@ Everything JLCPCB needs is in `production/`:
 | Mark on PCB (order number) | **Specify a location** | placeholder `JLCJLCJLCJLC` on the bottom side |
 | Solder mask / silkscreen | any colour | |
 
-## 2. Assembly options
+## 2. Assembly options (only if JLCPCB assembles)
 
 | Option | Value |
 |--------|-------|
@@ -41,7 +63,7 @@ checked on 2026-10-14 (GNSS module ~11 $, ESP32-C3 module ~3 $, everything else 
 is out of stock, pick an equivalent in the BOM step (same value, package and rating; for U1 only
 ESP32-C3-MINI-1-**H4X** or **H4**, which are rated to 105 °C).
 
-## 3. Check the placement preview (important)
+## 3. Part orientation (check the JLCPCB placement preview, or when placing by hand)
 
 JLCPCB's part models are not always rotated like KiCad's footprints. `cpl-jlcpcb.csv` already
 contains the usual corrections, but check every part with a pin 1 or polarity in the 3D/2D
