@@ -23,6 +23,8 @@ car USB-C ─► USB-C
 - **The PhotoMOS** connects the two screw-terminal wires exactly like a pressed button: either
   polarity works, and it's fully isolated from the rest of the board. Unpowered, it stays open.
 
+![what connects to what](img/wiring.svg)
+
 ## Parts list
 
 | # | Part | Qty | Notes | ~€ |
@@ -51,7 +53,7 @@ is the easiest), flux pen, flush cutters, tweezers, multimeter with continuity b
 
 ## Layout
 
-![perfboard layout, top and bottom view](layout.svg)
+![perfboard layout, top and bottom view](img/layout.svg)
 
 Holes are named **row letter + column number**: rows **A–M** top to bottom, columns **1–20** left to
 right, looking at the **component side** with the USB-C on the left. The right half of the drawing
@@ -81,18 +83,30 @@ trails T5/T6/T7 and pads J3/J4/J5. Leave every hole that isn't in the drawing un
    - The rows are 6 holes (15.24 mm) apart on the SuperMini. If yours don't line up with D and J,
      stop and measure.
    - Solder the header pins from the bottom, then pull the SuperMini off again.
+
+   ![Step 1: headers](img/step1.svg)
+
 3. **Parts on top** (solder from the bottom, and keep the cut-off legs for the trails):
    - **R1 330 Ω:** B4 and B9, lying flat.
    - **R2 100 kΩ:** B10 and C10, standing upright (bend one leg down alongside the body).
    - **K1 AQY212EH:** **pin 1 (dot or notch) in B11**. The pins then go to B11, C11, C14 and B14.
    - **J1 screw terminal:** B18 and D18, with the wire openings toward the right edge.
    - **1×4 male header:** L2–L5 (the GPS connector).
+
+   ![Step 2: parts on top](img/step2.svg)
+
 4. **Trails on the bottom:** T1 D4–C4–B4, T2 B9–B10–B11, T3 C10–C11, T4 B14 → B18 along row B,
    T5 J2–K2–L2, T6 J3–K3–L3, T7 J5–K5–L5.
+
+   ![Step 3: trails underneath](img/step3.svg)
+
 5. **Wires on the bottom:**
    - **W1:** L4 → D2 (GPS TX → GPIO5).
    - **W2:** K3 → C11 (GND → K1 pin 2).
    - **W3:** C14 → D18 (K1 pin 3 → terminal 2).
+
+   ![Step 4: wires underneath](img/step4.svg)
+
 6. **Measure before plugging anything in** (multimeter, SuperMini still unplugged):
 
    | Between | Expect |
@@ -109,6 +123,9 @@ trails T5/T6/T7 and pads J3/J4/J5. Leave every hole that isn't in the drawing un
    - Cut the module's cable and solder 4 Dupont jumpers to it, matching the labels **on the module**.
      Wire colours are not standard.
    - Then plug them onto the board header: **VCC → L2, GND → L3, TX → L4, RX → L5**.
+
+   ![Step 5: plug in and connect](img/step5.svg)
+
 8. **Plug in the SuperMini** and flash it from the Mac, with the SuperMini on USB:
 
    ```bash
