@@ -19,5 +19,3 @@ below is the later, integrated version; the firmware runs on both.
 | `hardware/gen/` | the generator: `netlist.py` is the single source for schematic and PCB |
 
 ![PCB version](hardware/production/render-iso.png)
-
-The working predecessor lives in `~/Documents/garageDoor` (tag `legacy-v1`).
