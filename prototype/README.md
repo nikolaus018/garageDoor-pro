@@ -18,6 +18,8 @@ car USB-C ─► USB-C
             GPIO8: blue LED on the SuperMini (status)   GPIO9: BOOT button (= SETUP)
 ```
 
+![what connects to what](img/wiring.svg)
+
 - **R1** sets the PhotoMOS LED current (~6 mA).
 - **R2** keeps the switch off while the ESP32 boots.
 - **The PhotoMOS** connects the two screw-terminal wires exactly like a pressed button: either
@@ -27,12 +29,12 @@ car USB-C ─► USB-C
 
 | # | Part | Qty | Notes | ~€ |
 |---|------|----:|-------|---:|
-| 1 | **ESP32-C3 SuperMini** | 2 | Get the **standard** one, not "SuperMini **Plus**": the Plus has an RGB LED on GPIO8. The second one is a spare. | 3 each |
-| 2 | **GPS module, u-blox M10, with built-in ceramic antenna and UART**, e.g. **Beitian BE-220** | 1 | 3.6–5.5 V, 115200 baud by default. Any GPS module with UART output works (NMEA fallback, e.g. BN-220, GY-NEO6MV2), but M10 is the most sensitive. Its TX must be 3.3 V logic, which is normal for these modules. | 12–18 |
-| 3 | **AQY212EH** PhotoMOS relay, DIP-4 | 2 | Same pinout alternatives: AQY210EH, TLP222A, Omron G3VM-61A1. LCSC C2894775. The second one is a spare. | 1–2 each |
+| 1 | **ESP32-C3 SuperMini** | 2 | Get the **standard** one, not "SuperMini **Plus**": the Plus has different pins and an RGB LED on GPIO8. The second one is a spare. | 3 each |
+| 2 | **GPS module, u-blox M10, with built-in ceramic antenna and UART**, e.g. **Beitian BE-220** | 1 | Runs on the SuperMini's 5 V, 115200 baud by default (the firmware finds other rates itself). Any GPS module with UART output works (NMEA fallback, e.g. BN-220, GY-NEO6MV2), but M10 is the most sensitive. Its TX must be 3.3 V logic, which is normal for these modules. | 12–18 |
+| 3 | **AQY212EH** PhotoMOS relay, DIP-4 | 2 | Same pinout alternatives: AQY210EH, TLP222A, Omron G3VM-61A1. LCSC C2894775 (was out of stock in Oct 2026: check, or take an alternative). Must be the **through-hole DIP-4**: not the SMD variants (AQY212EH**A**/**AX**, AQY212**S**). The second one is a spare. | 1–2 each |
 | 4 | Resistor 330 Ω, ¼ W | 1 | R1. A resistor assortment kit is handy. | – |
 | 5 | Resistor 100 kΩ, ¼ W | 1 | R2 | – |
-| 6 | Screw terminal, 2-pin, 5.08 mm pitch (KF301-2P / KF128-2P) | 1 | J1, for the remote wires | 0.3 |
+| 6 | Screw terminal, 2-pin, 5.08 mm pitch, e.g. KF301-2P | 1 | J1, for the remote wires. 5.0 mm pitch fits too; 3.5 / 3.81 mm don't. | 0.3 |
 | 7 | Perfboard 5 × 7 cm, 2.54 mm, plated holes | 1 | Packs of several are cheap | 1 |
 | 8 | Female pin header 1×8, 2.54 mm | 2 | The SuperMini plugs in, so it can be swapped and wires fit underneath | 0.5 |
 | 9 | Male pin header 1×4, 2.54 mm | 1 | GPS connector at L2–L5 | 0.2 |
@@ -51,14 +53,14 @@ is the easiest), flux pen, flush cutters, tweezers, multimeter with continuity b
 
 ## Layout
 
-![perfboard layout, top and bottom view](layout.svg)
+![perfboard layout, top and bottom view](img/layout.svg)
 
 Holes are named **row letter + column number**: rows **A–M** top to bottom, columns **1–20** left to
 right, looking at the **component side** with the USB-C on the left. The right half of the drawing
 is the **bottom** as you see it while soldering, so it's mirrored: column 1 is on the right there.
 
 Turn the 5 × 7 cm board so the **7 cm side is horizontal** (24 × 18 holes), use the top-left
-20 × 13 holes, and mark row A and column 1 with a pen before you start. `make_layout.py` draws the picture and checks that the trails and wires produce exactly
+20 × 13 holes, and mark row A and column 1 with a pen before you start. `make_layout.py` draws all the pictures in `img/` and checks that the trails and wires produce exactly
 the circuit above.
 
 ### Bridge, trail or wire?
@@ -76,23 +78,31 @@ trails T5/T6/T7 and pads J3/J4/J5. Leave every hole that isn't in the drawing un
 
 1. **Check the SuperMini.** The labels on the back should read `5V G 3.3 4 3 2 1 0` on one side and
    `5 6 7 8 9 10 20 21` on the other. If its male pins came loose, solder them on now (long side down).
-2. **Female headers.** Plug both 1×8 female headers onto the SuperMini and set it into the board:
+2. **Headers.** Plug both 1×8 female headers onto the SuperMini and set it into the board:
    the `5 … 21` row in **D2–D9** and the `5V … 0` row in **J2–J9**, USB-C toward the left edge.
    - The rows are 6 holes (15.24 mm) apart on the SuperMini. If yours don't line up with D and J,
      stop and measure.
    - Solder the header pins from the bottom, then pull the SuperMini off again.
+   - **1×4 male header:** L2–L5 (the GPS connector), short pins through the board.
+
+   ![step 1: headers](img/step1.svg)
 3. **Parts on top** (solder from the bottom, and keep the cut-off legs for the trails):
    - **R1 330 Ω:** B4 and B9, lying flat.
    - **R2 100 kΩ:** B10 and C10, standing upright (bend one leg down alongside the body).
    - **K1 AQY212EH:** **pin 1 (dot or notch) in B11**. The pins then go to B11, C11, C14 and B14.
    - **J1 screw terminal:** B18 and D18, with the wire openings toward the right edge.
-   - **1×4 male header:** L2–L5 (the GPS connector).
+
+   ![step 2: parts on top](img/step2.svg)
 4. **Trails on the bottom:** T1 D4–C4–B4, T2 B9–B10–B11, T3 C10–C11, T4 B14 → B18 along row B,
    T5 J2–K2–L2, T6 J3–K3–L3, T7 J5–K5–L5.
+
+   ![step 3: trails underneath](img/step3.svg)
 5. **Wires on the bottom:**
    - **W1:** L4 → D2 (GPS TX → GPIO5).
    - **W2:** K3 → C11 (GND → K1 pin 2).
    - **W3:** C14 → D18 (K1 pin 3 → terminal 2).
+
+   ![step 4: wires underneath](img/step4.svg)
 6. **Measure before plugging anything in** (multimeter, SuperMini still unplugged):
 
    | Between | Expect |
@@ -104,11 +114,13 @@ trails T5/T6/T7 and pads J3/J4/J5. Leave every hole that isn't in the drawing un
    | C11 and J3 | beep |
    | Terminal screw 1 and B14 / screw 2 and C14 | beep |
    | Terminal screw 1 and screw 2 | open |
-   | Every pair of neighbouring pads in D2–D9 and J2–J9 | open (except J2/J3, already checked) |
+   | Every pair of neighbouring pads in D2–D9, J2–J9 and L2–L5 | open (except J2/J3 and L2/L3: that's the 5V/GND check above) |
 7. **GPS cable.**
    - Cut the module's cable and solder 4 Dupont jumpers to it, matching the labels **on the module**.
      Wire colours are not standard.
    - Then plug them onto the board header: **VCC → L2, GND → L3, TX → L4, RX → L5**.
+
+   ![step 5: plug in and connect](img/step5.svg)
 8. **Plug in the SuperMini** and flash it from the Mac, with the SuperMini on USB:
 
    ```bash

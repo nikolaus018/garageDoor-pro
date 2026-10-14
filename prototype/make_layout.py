@@ -187,8 +187,17 @@ text{font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
 
 
 def svg(w, h, body):
-    # A colour given on a <text> must win over its CSS class: move it into a style attribute.
-    body = re.sub(r'(<text[^>]*?) fill="([^"]+)"', r'\1 style="fill:\2"', body)
+    # CSS classes beat presentation attributes, so a fill, size or anchor given on a <text>
+    # would be ignored: turn those attributes into an inline style, which beats the class.
+    def inline(m):
+        props = re.findall(r' (fill|font-size|font-weight|text-anchor)="([^"]+)"', m.group(0))
+        tag = re.sub(r' (fill|font-size|font-weight|text-anchor)="[^"]+"', "", m.group(0))
+        if not props:
+            return tag
+        size = lambda k, val: val + "px" if k == "font-size" and val.isdigit() else val
+        style = ";".join(f"{k}:{size(k, val)}" for k, val in props)
+        return tag[:-1] + f' style="{style}">'
+    body = re.sub(r"<text[^>]*>", inline, body)
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="{w}" height="{h}">'
             f'<style>{CSS}</style><rect width="100%" height="100%" fill="#fff"/>{body}</svg>')
 
@@ -237,7 +246,7 @@ def group(items, state):
 
 # ---------------------------------------------------------------- top-view items
 
-def top_item(v, key):
+def top_item(v, key, pin_labels=True):
     s = []
     if key in ("hdrD", "hdrJ"):
         row = "D" if key == "hdrD" else "J"
@@ -247,8 +256,9 @@ def top_item(v, key):
         for i, lab in enumerate(labels):
             x, yy = v.xy(f"{row}{i + 2}")
             s.append(f'<rect x="{x - 4}" y="{yy - 4}" width="8" height="8" fill="#868e96"/>')
-            ty = yy - 20 if row == "D" else yy + 30
-            s.append(f'<text x="{x}" y="{ty}" class="lab">{lab}</text>')
+            if pin_labels:
+                ty = yy - 20 if row == "D" else yy + 30
+                s.append(f'<text x="{x}" y="{ty}" class="lab">{lab}</text>')
     elif key == "hdrL":
         (x0, y), (x1, _) = v.xy("L2"), v.xy("L5")
         s.append(f'<rect x="{x0 - 14}" y="{y - 12}" width="{x1 - x0 + 28}" height="24" rx="2" fill="#111"/>')
@@ -326,7 +336,8 @@ def top_board(v, show, new):
     for key in ["hdrD", "hdrJ", "hdrL", "R1", "R2", "K1", "J1", "module", "ext"]:
         if key in show:
             state = "new" if key in new else ("done" if new else "final")
-            s += group(top_item(v, key), state)
+            # with the SuperMini plugged in its own pin labels replace the header labels
+            s += group(top_item(v, key, pin_labels="module" not in show), state)
     return s
 
 
@@ -349,7 +360,8 @@ def bottom_board(v, show_trails, show_wires, new):
         if y0 == y1:
             items.append(f'<text x="{(x0 + x1) / 2}" y="{y0 - 14}" class="lab">{name}</text>')
         else:
-            items.append(f'<text x="{x0 - 20}" y="{(y0 + y1) / 2 + 5}" class="lab">{name}</text>')
+            # below the lower end: beside the trail the label would sit between parallel trails
+            items.append(f'<text x="{x0}" y="{max(y0, y1) + 26}" class="lab">{name}</text>')
         s += group(items, "new" if name in new else ("done" if new else "final"))
     for name in show_wires:
         a, b, net = WIRES[name]

@@ -5,7 +5,7 @@ menu "garageDoor"
         default GARAGE_BOARD_S3_DEVKIT if IDF_TARGET_ESP32S3
         default GARAGE_BOARD_C3_SUPERMINI
         help
-            Pin map to build for. See board.h and docs/prototype-build.md.
+            Pin map to build for. See board.h and prototype/README.md.
 
         config GARAGE_BOARD_C3_SUPERMINI
             bool "ESP32-C3 SuperMini on perfboard"
