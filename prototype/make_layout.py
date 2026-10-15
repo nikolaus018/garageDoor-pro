@@ -100,22 +100,26 @@ STEPS = [  # (title, view, items new in this step, instructions)
         "Solder from below, keep the cut-off legs.",
     ]),
     ("Trails underneath", "bottom", list(TRAILS), [
-        "Turn the board over like a page: A stays at",
-        "the bottom, column 1 is now on the right.",
+        "Turn the board over like a page. This side has",
+        "no print: find your way by the solder joints.",
+        "USB-C end now on the right, J1 on the left.",
         "Lay a cut-off leg flat over the pads and",
         "solder it at every pad it crosses:",
-        "T1 E4–C4    T2 C9–C11    T3 B10–B11",
-        "T4 B14–B18  T5 K4–M4     T6 K3–M3",
-        "T7 K5–M5",
-        "T5, T6, T7 run side by side: they must",
-        "not touch each other.",
+        "T1  pin 7 → R1 (2 pads down)",
+        "T2  R1 → R2 → K1 pin 1",
+        "T3  R2 → K1 pin 2",
+        "T4  K1 pin 3 → J1 screw 2 (along the edge)",
+        "T5  3V3 → GPS VCC",
+        "T6  G → GPS GND",
+        "T7  pin 4 → GPS RX",
+        "T5, T6, T7 side by side: must not touch.",
     ]),
     ("Wires underneath", "bottom", list(WIRES), [
         "Insulated wire, 2 mm stripped at each end,",
         "soldered onto the pads:",
-        "W1  M2 → E2    GPS TX → GPIO5",
-        "W2  L3 → B11   GND → K1 pin 2",
-        "W3  C14 → D18  K1 pin 4 → terminal 1",
+        "W1  GPS TX → pin 5",
+        "W2  middle pad of T6 → K1 pin 2",
+        "W3  K1 pin 4 → J1 screw 1",
         "Then do the measurements in the README",
         "before plugging anything in.",
     ]),
@@ -191,7 +195,9 @@ def verify():
 CSS = """
 text{font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
 .pcb{fill:#1e6b45}.pad{fill:#c9a65b}.hole{fill:#0e2a1d}
-.axis{font-size:13px;fill:#f1f3f5;text-anchor:middle;font-weight:600}.faint{opacity:.45}
+.axis{font-size:13px;fill:#f1f3f5;text-anchor:middle;font-weight:600}
+.ghost{fill:none;stroke:#d3f0df;stroke-width:2;stroke-dasharray:6 4;opacity:.75}
+.ghostt{font-size:12px;font-weight:700;fill:#d3f0df;text-anchor:middle;opacity:.9}
 .cap{font-size:17px;fill:#212529;font-weight:700}
 .body{font-size:15px;fill:#212529}
 .mono{font-family:Menlo,Consolas,monospace;font-size:14px;fill:#212529}
@@ -237,8 +243,7 @@ class View:
         return self.ox + M + (c - 1) * P, self.oy + M + (ROWS - 1 - row) * P
 
     def board(self):
-        # The print is only on the parts side; the mirrored bottom view shows it faded for reference.
-        axis = "axis" if not self.mirror else "axis faint"
+        # Letters, numbers and "50*70MM" are printed on the parts side only; the solder side is bare.
         s = [f'<rect x="{self.ox}" y="{self.oy}" width="{bw()}" height="{bh()}" rx="12" class="pcb"/>']
         for x in (self.ox + 15, self.ox + bw() - 15):   # mounting holes and the edge pad strips
             for y in (self.oy + 15, self.oy + bh() - 15):
@@ -248,13 +253,13 @@ class View:
                 s.append(f'<rect x="{x - 7}" y="{y - 11}" width="14" height="22" rx="6" class="pad"/>')
         if not self.mirror:
             s.append(f'<text x="{self.ox + bw() / 2}" y="{self.oy + 26}" class="axis">50*70MM</text>')
-        for c in range(1, COLS + 1):
-            x, _ = self.xy(f"A{c}")
-            s.append(f'<text x="{x}" y="{self.oy + bh() - 22}" class="{axis}">{c}</text>')
+            for c in range(1, COLS + 1):
+                x, _ = self.xy(f"A{c}")
+                s.append(f'<text x="{x}" y="{self.oy + bh() - 22}" class="axis">{c}</text>')
         for r in ROW_NAMES:
             _, y = self.xy(f"{r}1")
-            x = self.ox + 37 if not self.mirror else self.ox + bw() - 37
-            s.append(f'<text x="{x}" y="{y + 5}" class="{axis}">{r}</text>')
+            if not self.mirror:
+                s.append(f'<text x="{self.ox + 37}" y="{y + 5}" class="axis">{r}</text>')
             for c in range(1, COLS + 1):
                 hx, hy = self.xy(f"{r}{c}")
                 s.append(f'<circle cx="{hx}" cy="{hy}" r="6.5" class="pad"/>'
@@ -372,8 +377,64 @@ def top_board(v, show, new):
 
 # ---------------------------------------------------------------- bottom-view items
 
+def ghost_parts(v):
+    """Dashed outlines of the parts on the other side, as seen through the board from below."""
+    s = []
+
+    def box(pads, mx, my, label, ly=None):
+        xs, ys = zip(*(v.xy(p) for p in pads))
+        l, r, t, b = min(xs) - mx, max(xs) + mx, min(ys) - my, max(ys) + my
+        s.append(f'<rect x="{l}" y="{t}" width="{r - l}" height="{b - t}" rx="5" class="ghost"/>')
+        if label:
+            s.append(f'<text x="{(l + r) / 2}" y="{(t + b) / 2 + 5 if ly is None else ly}" class="ghostt">{label}</text>')
+        return l, r, t, b
+
+    l, r, t, b = box([f"{TOP_ROW}2", f"{BOTTOM_ROW}9"], 1.3 * P, 0.65 * P, None)
+    usb_right = v.xy(f"{TOP_ROW}2")[0] > v.xy(f"{TOP_ROW}9")[0]
+    ux = r - 18 if usb_right else l - 22
+    mx = (l + r) / 2 + (r - l) * (-0.22 if usb_right else 0.22)   # toward the far end, clear of W2
+    s.append(f'<rect x="{ux}" y="{(t + b) / 2 - 26}" width="40" height="52" rx="9" class="ghost"/>'
+             f'<text x="{ux + 20}" y="{(t + b) / 2 + 5}" class="ghostt">USB-C</text>'
+             f'<text x="{mx}" y="{(t + b) / 2 - 4}" class="ghostt">SuperMini</text>'
+             f'<text x="{mx}" y="{(t + b) / 2 + 14}" class="ghostt">(on the other side)</text>')
+    box(list(GPS_PADS), 14, 12, None)
+    (ax, ay), (bx, _) = v.xy(R1[0]), v.xy(R1[1])
+    s.append(f'<rect x="{(ax + bx) / 2 - 42}" y="{ay - 12}" width="84" height="24" rx="10" class="ghost"/>'
+             f'<text x="{(ax + bx) / 2}" y="{ay + 5}" class="ghostt">R1</text>')
+    rx_, ry_ = v.xy(R2[0])
+    s.append(f'<circle cx="{rx_}" cy="{ry_}" r="13" class="ghost"/>')
+    box(list(K1.values()), 10, 14, "K1")
+    box(list(J1.values()), 1.25 * P, 0.85 * P, "J1", v.xy(J1["2"])[1] - (v.xy(J1["2"])[1] - v.xy(J1["1"])[1]) / 2 + 5)
+    return s
+
+
+def joint_labels(v):
+    """What each solder joint is: SuperMini pin names, GPS pins, K1 pin numbers, J1 screws."""
+    s = []
+    lab = lambda x, y, t: s.append(f'<text x="{x}" y="{y}" class="pinl">{t}</text>')
+    for i, name in enumerate(SUPERMINI_TOP):      # labels inside the SuperMini outline
+        x, y = v.xy(f"{TOP_ROW}{i + 2}")
+        lab(x, y + 25, name)
+    for i, name in enumerate(SUPERMINI_BOTTOM):
+        x, y = v.xy(f"{BOTTOM_ROW}{i + 2}")
+        lab(x, y - 15, name)
+    for pad, name in GPS_PADS.items():            # above the trail labels T5-T7
+        x, y = v.xy(pad)
+        lab(x, y - 32, name)
+    kx = sum(v.xy(p)[0] for p in K1.values()) / 4
+    for n, pad in K1.items():   # inside the outline: trails and wires arrive from outside
+        x, y = v.xy(pad)
+        lab(x + (-16 if x > kx else 16), y + 5, n)
+    for n, pad in J1.items():
+        x, y = v.xy(pad)
+        lab(x - 22, y + 5, n)
+    (x, _), (_, y) = v.xy(R2[0]), v.xy(R2[1])   # beside the lower leg, away from K1 and the T2 label
+    lab(x + (26 if x > kx else -26), y + 5, "R2")
+    return s
+
+
 def bottom_board(v, show_trails, show_wires, new):
-    s = v.board()
+    s = v.board() + ghost_parts(v)
     for pad in PINS.values():   # solder joints of everything that sits on top
         x, y = v.xy(pad)
         s.append(f'<circle cx="{x}" cy="{y}" r="8.5" fill="#dee2e6" stroke="#868e96" stroke-width="1.5"/>')
@@ -407,6 +468,7 @@ def bottom_board(v, show_trails, show_wires, new):
                  f'<circle cx="{bx}" cy="{by}" r="6" fill="{col}" stroke="#fff" stroke-width="2"/>',
                  f'<text x="{(ax + bx) / 2 + (by - ay) * 0.11}" y="{(ay + by) / 2 - (bx - ax) * 0.11 + 5}" class="lab">{name}</text>']
         s += group(items, "new" if name in new else ("done" if new else "final"))
+    s += joint_labels(v)
     return s
 
 
@@ -437,7 +499,7 @@ def step_picture(n, title, view, new, lines):
     text = [f'<text x="0" y="30" class="h1">Step {n} of 5 · {title}</text>',
             f'<text x="{tx}" y="{top + 26}" class="cap">{side}</text>']
     for i, line in enumerate(lines):
-        cls = "mono" if line[:2] in ("T1", "T4", "T7", "W1", "W2", "W3") else "body"
+        cls = "mono" if re.match(r"[TW]\d ", line) else "body"
         text.append(f'<text x="{tx}" y="{top + 64 + i * 26}" class="{cls}" xml:space="preserve">{line}</text>')
     y = top + 64 + len(lines) * 26 + 16
     text.append(f'<text x="{tx}" y="{y}" class="body" fill="#868e96">glowing = do now · faded = done before</text>')

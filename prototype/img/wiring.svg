@@ -1,7 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 640" width="1180" height="640"><style>
 text{font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
 .pcb{fill:#1e6b45}.pad{fill:#c9a65b}.hole{fill:#0e2a1d}
-.axis{font-size:13px;fill:#f1f3f5;text-anchor:middle;font-weight:600}.faint{opacity:.45}
+.axis{font-size:13px;fill:#f1f3f5;text-anchor:middle;font-weight:600}
+.ghost{fill:none;stroke:#d3f0df;stroke-width:2;stroke-dasharray:6 4;opacity:.75}
+.ghostt{font-size:12px;font-weight:700;fill:#d3f0df;text-anchor:middle;opacity:.9}
 .cap{font-size:17px;fill:#212529;font-weight:700}
 .body{font-size:15px;fill:#212529}
 .mono{font-family:Menlo,Consolas,monospace;font-size:14px;fill:#212529}
