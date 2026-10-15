@@ -17,6 +17,7 @@ typedef struct {
     bool fix_usable;
     uint32_t gnss_age_s;        // since last NAV-PVT, UINT32_MAX if none
     uint16_t presses_remaining;
+    bool holding;               // the panel's 5 s wiring test is running
     uint32_t uptime_s;
 } app_status_t;
 
@@ -27,3 +28,4 @@ const char *app_set_home(int32_t lat_e7, int32_t lon_e7);
 // Applies radius / press settings (the home fields of `s` are ignored).
 const char *app_apply_settings(const settings_t *s);
 void app_test_press(void);
+void app_test_hold(void);

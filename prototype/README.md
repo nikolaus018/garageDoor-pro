@@ -201,6 +201,10 @@ battery out until the wiring is proven.
 3. **Switch:** on the phone, join **GarageDoor-XXXX** (open, no password), then tap **Press the
    remote once**. **The red LED D1 flashes.**
    - No flash: GPIO7 isn't reaching R3/D1. Check T1 and that D1's long leg is in A9.
+   - Then, remote not connected yet: multimeter on Ω, red probe on screw 1, black on screw 2, and
+     tap **Hold the remote for 5 s**. D1 stays lit and the meter drops from open to a low reading
+     (typically under 1 kΩ) for 5 s. Still open: the PC817C isn't switching; check T2, T3, W2
+     and that its dot is in C11.
 4. **Remote, on its own first:** open the spare remote and solder two thin wires across the
    button's contacts (the two sides it connects). Keep them short and away from the remote's
    antenna (the copper loop or wire near its edge). Touch the two free wire ends together: the
@@ -217,7 +221,8 @@ battery out until the wiring is proven.
 D1 flashes, the remote works on its own (Bench test step 4), but pressing through the board does
 nothing:
 
-1. Check the wires in J1 and the measurements above (screw 1 ↔ C14, screw 2 ↔ B14).
+1. Check the wires in J1 and the measurements above (screw 1 ↔ C14, screw 2 ↔ B14). Tap **Hold
+   the remote for 5 s** and watch the remote's LED: it should stay lit for the whole 5 s.
 2. Swap the two remote wires in J1 once. The PC817C only conducts from screw 1 to screw 2.
 3. Still nothing: this remote's button carries more current than the PC817C can switch (many cheap
    433 MHz remotes switch their battery on with the button). A **PhotoMOS relay** (AQY212EH,

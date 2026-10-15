@@ -80,6 +80,8 @@
   <section>
     <h2>Test</h2>
     <button class="secondary" onclick="post('/api/test', {}, 'test-msg')">Press the remote once</button>
+    <button class="secondary" onclick="post('/api/hold', {}, 'test-msg')">Hold the remote for 5 s</button>
+    <p class="hint">Holding keeps the button pressed long enough to check the wiring with a multimeter.</p>
     <div class="msg" id="test-msg"></div>
   </section>
 
@@ -141,7 +143,8 @@ async function refresh() {
   $('pos').textContent = g.usable ? `${g.lat.toFixed(6)}, ${g.lon.toFixed(6)}` : '–';
   $('home').textContent = s.home.set ? `${s.home.lat.toFixed(6)}, ${s.home.lon.toFixed(6)}` : 'not set';
   $('dist').textContent = s.distance_m >= 0 && s.home.set ? `${Math.round(s.distance_m)} m` : '–';
-  $('pressing').textContent = s.presses_remaining ? `${s.presses_remaining} presses left` : 'no';
+  $('pressing').textContent = s.holding ? 'holding (test)'
+    : s.presses_remaining ? `${s.presses_remaining} presses left` : 'no';
   $('here').disabled = !g.usable;
   $('version').textContent = `Installed: v${s.version} · up ${Math.round(s.uptime_s / 60)} min`;
   if (!loaded) {

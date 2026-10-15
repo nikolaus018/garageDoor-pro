@@ -69,11 +69,12 @@ blinking = setup Wi-Fi on. Red LED = the remote is being pressed.
 
 Setup Wi-Fi `GarageDoor-XXXX`, open (no password). Phones open the panel automatically (captive
 portal), otherwise go to http://192.168.4.1. It only runs during setup and switches off after 10
-minutes without use.
+minutes without use. It transmits at 8.5 dBm: the phone is right next to the board, and lower power
+spares the SuperMini's small regulator.
 
 - **Set home to where the car is now** (needs a GPS fix), or enter coordinates
 - Arrive / leave radius, presses on leaving, arrival pressing duration
-- **Press the remote once** (test)
+- **Press the remote once**, and **Hold the remote for 5 s** to check the wiring with a multimeter
 - Firmware update: upload `build/garageDoor_pro.bin`. The image is verified before it is
   activated; a new image that does not run for 60 s is rolled back by the bootloader.
 
@@ -86,7 +87,7 @@ minutes without use.
 | `main/ubx.c`, `main/nmea.c`, `main/geo.c` | UBX frames/parser, NMEA GGA parser, distance (pure C, unit-tested) |
 | `main/gnss.c` | GPS driver: u-blox configuration, baud-rate search, UBX/NMEA |
 | `main/board.h`, `main/Kconfig.projbuild` | pin maps and the board choice |
-| `main/presser.c` | remote switch output: 150 ms presses every 2 s |
+| `main/presser.c` | remote switch output: 400 ms presses every 2 s, and the 5 s test hold |
 | `main/settings.c` | NVS: settings and the parked state |
 | `main/ui.c` | LED patterns, SETUP button |
 | `main/web.c`, `main/www/index.html` | soft AP, captive portal, HTTP API, OTA |

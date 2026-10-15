@@ -34,7 +34,8 @@ Keep the remote's battery in it: the board only "presses" the button, the remote
 2. On your phone, join the Wi-Fi **GarageDoor-XXXX** (open, no password). The panel opens by
    itself; if not, browse to http://192.168.4.1.
 3. Wait until the panel shows a GPS fix, then tap **Set home to where the car is now**.
-4. Tap **Press the remote once** and check that the door reacts.
+4. Tap **Press the remote once** and check that the door reacts. If it doesn't, **Hold the remote
+   for 5 s** keeps the button pressed long enough to check the wiring with a multimeter.
 5. Optional: adjust the radii. Arriving starts inside the arrive radius (default 150 m), and you
    count as gone beyond the leave radius (default 300 m). If the door opens too late when you
    come home, increase the arrive radius; the board keeps pressing for 3 minutes.

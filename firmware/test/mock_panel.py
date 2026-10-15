@@ -4,11 +4,12 @@
 """
 import json
 import os
+import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import parse_qs
 
 HTML = os.path.join(os.path.dirname(__file__), "..", "main", "www", "index.html")
-state = {"home": None, "presses": 0,
+state = {"home": None, "presses": 0, "hold_until": 0,
          "settings": {"arrive_radius_m": 150, "leave_radius_m": 300, "leave_presses": 10, "arrive_duration_s": 180}}
 FIX = (48.2081760, 16.3738190)
 
@@ -36,6 +37,7 @@ class Handler(BaseHTTPRequestHandler):
                         "sats": 14, "age_s": 0},
                 "home": {"set": bool(home), "lat": home[0] if home else 0, "lon": home[1] if home else 0},
                 "settings": state["settings"], "presses_remaining": state["presses"],
+                "holding": time.time() < state["hold_until"],
                 "version": "1.0.0", "uptime_s": 754}))
         self.send(404, "{}")
 
@@ -55,6 +57,9 @@ class Handler(BaseHTTPRequestHandler):
             return ok()
         if self.path == "/api/test":
             state["presses"] = 1
+            return ok()
+        if self.path == "/api/hold":
+            state["hold_until"] = time.time() + 5
             return ok()
         err("unknown")
 

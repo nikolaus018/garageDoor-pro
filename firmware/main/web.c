@@ -148,7 +148,7 @@ static esp_err_t status_get(httpd_req_t *req)
              "\"home\":{\"set\":%s,\"lat\":%.7f,\"lon\":%.7f},"
              "\"settings\":{\"arrive_radius_m\":%u,\"leave_radius_m\":%u,\"leave_presses\":%u,"
              "\"arrive_duration_s\":%u},"
-             "\"presses_remaining\":%u,\"version\":\"%s\",\"uptime_s\":%lu}",
+             "\"presses_remaining\":%u,\"holding\":%s,\"version\":\"%s\",\"uptime_s\":%lu}",
              trip_state_name(st.state), st.parked == PARKED_HOME ? "HOME" : "AWAY", st.distance_m,
              st.have_fix ? "true" : "false", st.fix_usable ? "true" : "false", st.fix.valid ? "true" : "false",
              st.fix.lat_e7 * 1e-7, st.fix.lon_e7 * 1e-7, st.fix.h_acc_mm / 1000.0, st.fix.num_sv,
@@ -156,7 +156,7 @@ static esp_err_t status_get(httpd_req_t *req)
              gnss_protocol() == GNSS_UBX ? "UBX" : gnss_protocol() == GNSS_NMEA ? "NMEA" : "none",
              s.home_set ? "true" : "false", s.home_lat_e7 * 1e-7, s.home_lon_e7 * 1e-7,
              s.arrive_radius_m, s.leave_radius_m, s.leave_presses, s.arrive_duration_s,
-             st.presses_remaining, app->version,
+             st.presses_remaining, st.holding ? "true" : "false", app->version,
              (unsigned long)st.uptime_s);
     return send_json(req, "200 OK", json);
 }
@@ -204,6 +204,13 @@ static esp_err_t test_post(httpd_req_t *req)
 {
     touch();
     app_test_press();
+    return send_result(req, NULL);
+}
+
+static esp_err_t hold_post(httpd_req_t *req)
+{
+    touch();
+    app_test_hold();
     return send_result(req, NULL);
 }
 
@@ -322,6 +329,12 @@ void web_start(void)
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
     apply_ap_config();
     ESP_ERROR_CHECK(esp_wifi_start());
+    // The phone is right next to the board during setup, so 8.5 dBm (units of 0.25 dBm) is plenty.
+    // It cuts the transmit current peaks that a SuperMini's small regulator has to deliver.
+    esp_err_t err = esp_wifi_set_max_tx_power(34);
+    if (err != ESP_OK) {
+        ESP_LOGW(TAG, "could not lower Wi-Fi TX power: %s", esp_err_to_name(err));
+    }
 
     // DHCP option 114 (RFC 8910) points phones straight at the panel.
     static const char uri[] = "http://" AP_IP;
@@ -342,6 +355,7 @@ void web_start(void)
             { .uri = "/api/home", .method = HTTP_POST, .handler = home_post },
             { .uri = "/api/settings", .method = HTTP_POST, .handler = settings_post },
             { .uri = "/api/test", .method = HTTP_POST, .handler = test_post },
+            { .uri = "/api/hold", .method = HTTP_POST, .handler = hold_post },
             { .uri = "/api/ota", .method = HTTP_POST, .handler = ota_post },
         };
         for (size_t i = 0; i < sizeof uris / sizeof uris[0]; i++) {

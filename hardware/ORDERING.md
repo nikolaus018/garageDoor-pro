@@ -99,8 +99,8 @@ If something is off, rotate it in the preview (JLCPCB offers this) and note the 
 4. Connect the GNSS antenna, put it near a window: within ~1 minute the panel shows a fix.
 5. Wire the spare remote to the screw terminal, open the panel, press **Test**:
    the red LED lights and the remote transmits.
-6. Measure across the screw terminal with a multimeter (continuity mode): open normally, closed
-   for 150 ms per press, either probe polarity.
+6. Measure across the screw terminal with a multimeter (continuity mode), either probe polarity:
+   open normally, closed for the 5 s after **Hold the remote for 5 s** in the panel.
 
 Only then install it in the car (see `docs/user-guide.md`).
 

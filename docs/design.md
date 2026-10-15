@@ -40,7 +40,8 @@ Implementation: `firmware/main/trip.c` (pure C, unit-tested on the host).
   - It can't use the phone's location, because browsers only allow that on HTTPS pages.
   - It can't show a map, because the phone has no internet while it's on the board's network.
 - Settings: arrive/leave radius, presses on leaving, arrival pressing duration.
-- Live status, a **Press the remote once** test, and a firmware update (OTA with rollback).
+- Live status, **Press the remote once** and **Hold the remote for 5 s** tests, and a firmware update
+  (OTA with rollback).
 - Wi-Fi is off otherwise, which keeps 2.4 GHz noise away from the GPS.
 
 ## Block diagram

@@ -84,6 +84,7 @@ void app_get_status(app_status_t *out)
     xSemaphoreGive(s_lock);
     out->gnss_age_s = gnss_seconds_since_message();
     out->presses_remaining = presser_remaining();
+    out->holding = presser_holding();
     out->uptime_s = (uint32_t)(esp_timer_get_time() / 1000000);
 }
 
@@ -140,6 +141,11 @@ const char *app_apply_settings(const settings_t *in)
 void app_test_press(void)
 {
     presser_press(1);
+}
+
+void app_test_hold(void)
+{
+    presser_hold(HOLD_TEST_MS);
 }
 
 // Button callbacks run in the small UI task; the main loop does the actual work.
