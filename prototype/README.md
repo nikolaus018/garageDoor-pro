@@ -39,9 +39,9 @@ car USB-C ─► USB-C
 | 4 | Resistor 330 Ω, ¼ W | 1 | R1. A resistor assortment kit is handy. | – |
 | 5 | Resistor 100 kΩ, ¼ W | 1 | R2 | – |
 | 6 | Screw terminal, 2-pin, 5.08 mm pitch, e.g. KF301-2P | 1 | J1, for the remote wires. 5.0 mm pitch fits too; 3.5 / 3.81 mm don't. | 0.3 |
-| 7 | Perfboard 5 × 7 cm, 2.54 mm, plated holes | 1 | Packs of several are cheap | 1 |
+| 7 | Perfboard 5 × 7 cm, 2.54 mm, double-sided with plated holes, the common green one with `50*70MM`, letters A–R and numbers 1–24 printed on it | 1 | The guide uses its printed hole names. Packs of several are cheap | 1 |
 | 8 | Female pin header 1×8, 2.54 mm | 2 | The SuperMini plugs in, so it can be swapped and wires fit underneath | 0.5 |
-| 9 | Male pin header 1×4, 2.54 mm | 1 | GPS connector at B2–B5 | 0.2 |
+| 9 | Male pin header 1×4, 2.54 mm | 1 | GPS connector at M2–M5 | 0.2 |
 | 10 | 4 female–female Dupont jumper wires, 20–30 cm | 4 | Board header to the GPS module's pins | 1 |
 | 11 | Insulated hookup wire, 26–30 AWG (silicone or wire-wrap) | 1 m | W1–W3, and the remote wires | 2 |
 | 12 | Bare tinned copper wire, 0.4–0.6 mm | – | Trails T1–T7; the resistor leg offcuts are enough | – |
@@ -59,13 +59,21 @@ is the easiest), flux pen, flush cutters, tweezers, multimeter with continuity b
 
 ![perfboard layout, top and bottom view](img/layout.svg)
 
-Holes are named **row letter + column number**: rows **A–M** top to bottom, columns **1–20** left to
-right, looking at the **component side** with the USB-C on the left. The right half of the drawing
-is the **bottom** as you see it while soldering, so it's mirrored: column 1 is on the right there.
+The guide is drawn for the common green **50 × 70 mm** perfboard (24 × 18 holes) that has
+`50*70MM`, the letters **A–R** and the numbers **1–24** printed on one side. Every hole is named by
+that print: **printed letter + printed number**, e.g. C11 = row C, column 11.
 
-Turn the 5 × 7 cm board so the **7 cm side is horizontal** (24 × 18 holes), use the top-left
-20 × 13 holes, and mark row A and column 1 with a pen before you start. `make_layout.py` draws all the pictures in `img/` and checks that the trails and wires produce exactly
-the circuit above.
+- **Parts go on the printed side.** Hold it so you can read the print: `50*70MM` at the top, the
+  letters up the left edge with **A at the bottom**, the numbers along the bottom edge with **1 on
+  the left**. That's the left half of the drawing, and the SuperMini sits there **chip side up with
+  USB-C on the left**.
+- **Soldering happens on the other side.** Turn the board over like a page: row A stays at the
+  bottom, column 1 is now on the **right**. That's the right half of the drawing. There's no print
+  on that side (the drawing shows it faded), so find your way by the solder joints of the parts.
+- The circuit uses rows **B–M** and columns **1–18**. Row A, rows N–R and columns 19–24 stay empty.
+
+`make_layout.py` draws all the pictures in `img/` and checks that the trails and wires produce
+exactly the circuit above.
 
 ### Bridge, trail or wire?
 
@@ -82,52 +90,52 @@ trails T5/T6/T7 (three side by side: GND, 3V3, GPIO4). Leave every hole that isn
 
 1. **Check the SuperMini.** The pin labels should read `5V G 3.3 4 3 2 1 0` on one side and
    `5 6 7 8 9 10 20 21` on the other. Hold it **chip and buttons facing up, USB-C on the left**:
-   then `5V … 0` is the row farther from you and `5 … 21` the nearer one, and that's how it goes
-   into the board. If its male pins came loose, solder them on now (long side down).
-2. **Headers.** Plug both 1×8 female headers onto the SuperMini and set it into the board:
-   chip side up, USB-C toward the left edge, the `5V … 0` row in **D2–D9** (5V in D2) and the
-   `5 … 21` row in **J2–J9** (5 in J2).
-   - The rows are 6 holes (15.24 mm) apart on the SuperMini. If yours don't line up with D and J,
+   then `5V … 0` is the upper row and `5 … 21` the lower one, and that's how it goes onto the
+   board. If its male pins came loose, solder them on now (long side down).
+2. **Headers.** Board **printed side up**, print readable (A bottom left). Plug both 1×8 female
+   headers onto the SuperMini and set it in chip side up, USB-C toward the left edge: the `5V … 0`
+   row in **K2–K9** (5V in K2) and the `5 … 21` row in **E2–E9** (5 in E2).
+   - The rows are 6 holes (15.24 mm) apart on the SuperMini. If yours don't line up with K and E,
      stop and measure.
    - Solder the header pins from the bottom, then pull the SuperMini off again.
-   - **1×4 male header:** B2–B5 (the GPS connector), short pins through the board.
+   - **1×4 male header:** M2–M5 (the GPS connector), short pins through the board.
 
    ![step 1: headers](img/step1.svg)
-3. **Parts on top** (solder from the bottom, and keep the cut-off legs for the trails):
-   - **R1 330 Ω:** L4 and L9, lying flat.
-   - **R2 100 kΩ:** L10 and M10, standing upright with the body on L10 (bend the M10 leg down
+3. **Parts on the printed side** (solder from the bottom, and keep the cut-off legs for the trails):
+   - **R1 330 Ω:** C4 and C9, lying flat.
+   - **R2 100 kΩ:** C10 and B10, standing upright with the body on C10 (bend the B10 leg down
      alongside the body).
-   - **K1 PC817C:** **pin 1 (dot or notch) in L11**. The pins then go to L11, M11, M14 and L14.
-   - **J1 screw terminal:** K18 (screw 1) and M18 (screw 2), with the wire openings toward the
+   - **K1 PC817C:** **pin 1 (dot or notch) in C11**. The pins then go to C11, B11, B14 and C14.
+   - **J1 screw terminal:** D18 (screw 1) and B18 (screw 2), with the wire openings toward the
      right edge.
 
    ![step 2: parts on top](img/step2.svg)
-4. **Trails on the bottom:** T1 J4–K4–L4, T2 L9–L10–L11, T3 M10–M11, T4 M14 → M18 along row M,
-   T5 D4–C4–B4, T6 D3–C3–B3, T7 D5–C5–B5.
+4. **Trails on the bottom** (board turned over like a page, column 1 on the right): T1 E4–D4–C4,
+   T2 C9–C10–C11, T3 B10–B11, T4 B14 → B18 along row B, T5 K4–L4–M4, T6 K3–L3–M3, T7 K5–L5–M5.
 
    ![step 3: trails underneath](img/step3.svg)
 5. **Wires on the bottom:**
-   - **W1:** B2 → J2 (GPS TX → GPIO5).
-   - **W2:** C3 → M11 (GND → K1 pin 2).
-   - **W3:** L14 → K18 (K1 pin 4 → terminal 1).
+   - **W1:** M2 → E2 (GPS TX → GPIO5).
+   - **W2:** L3 → B11 (GND → K1 pin 2).
+   - **W3:** C14 → D18 (K1 pin 4 → terminal 1).
 
    ![step 4: wires underneath](img/step4.svg)
 6. **Measure before plugging anything in** (multimeter, SuperMini still unplugged):
 
    | Between | Expect |
    |---------|--------|
-   | D4 (3V3) and D3 (GND) | **open, no beep**. If this beeps, find the short before going on. |
-   | D2 (5V) and D3 (GND) | open |
-   | D4 and B4, D3 and B3, D5 and B5, J2 and B2 | beep (connected) |
-   | J4 (GPIO7) and L11 (K1 pin 1) | ~330 Ω |
-   | L11 and D3 (GND) | ~100 kΩ (some meters show less: their test voltage lights the optocoupler's LED) |
-   | M11 and D3 | beep |
-   | Terminal screw 1 and L14 / screw 2 and M14 | beep |
+   | K4 (3V3) and K3 (GND) | **open, no beep**. If this beeps, find the short before going on. |
+   | K2 (5V) and K3 (GND) | open |
+   | K4 and M4, K3 and M3, K5 and M5, E2 and M2 | beep (connected) |
+   | E4 (GPIO7) and C11 (K1 pin 1) | ~330 Ω |
+   | C11 and K3 (GND) | ~100 kΩ (some meters show less: their test voltage lights the optocoupler's LED) |
+   | B11 and K3 | beep |
+   | Terminal screw 1 and C14 / screw 2 and B14 | beep |
    | Terminal screw 1 and screw 2 | open |
-   | Every pair of neighbouring pads in D2–D9, J2–J9 and B2–B5 | open |
+   | Every pair of neighbouring pads in K2–K9, E2–E9 and M2–M5 | open |
 7. **GPS.** Connect the module with 4 female–female Dupont jumpers, by the labels **on the module**:
-   **TX → B2, GND → B3, VCC → B4, RX → B5**.
-   - Check VCC twice: it must go to B4 (3.3 V). Never connect it to the SuperMini's 5V pin.
+   **TX → M2, GND → M3, VCC → M4, RX → M5**.
+   - Check VCC twice: it must go to M4 (3.3 V). Never connect it to the SuperMini's 5V pin.
    - If your module has a cable instead of pins, cut it and solder the jumpers on (wire colours are
      not standard, go by the labels).
 
