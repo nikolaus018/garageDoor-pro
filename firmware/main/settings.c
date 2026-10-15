@@ -11,7 +11,7 @@
 #define NS "garage"
 #define KEY_SETTINGS "cfg"
 #define KEY_PARKED "parked"
-#define SETTINGS_VERSION 1
+#define SETTINGS_VERSION 2   // 2: Wi-Fi password fields removed (the setup Wi-Fi is open)
 
 static const char *TAG = "settings";
 static SemaphoreHandle_t s_lock;
@@ -29,7 +29,6 @@ static void defaults(settings_t *s)
     s->leave_radius_m = 300;
     s->leave_presses = 10;
     s->arrive_duration_s = 180;
-    strcpy(s->ap_password, SETTINGS_DEFAULT_AP_PASSWORD);
 }
 
 const char *settings_validate(const settings_t *s)
@@ -45,10 +44,6 @@ const char *settings_validate(const settings_t *s)
     }
     if (s->arrive_duration_s < 10 || s->arrive_duration_s > 600) {
         return "Arrival pressing must last 10-600 s";
-    }
-    size_t pw = strnlen(s->ap_password, sizeof(s->ap_password));
-    if (pw < 8 || pw > 63) {
-        return "Wi-Fi password must be 8-63 characters";
     }
     if (s->home_set && (s->home_lat_e7 < -900000000 || s->home_lat_e7 > 900000000 ||
                         s->home_lon_e7 < -1800000000 || s->home_lon_e7 > 1800000000)) {

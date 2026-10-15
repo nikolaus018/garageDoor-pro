@@ -60,16 +60,16 @@ receiver (PCB only, the modules have no reset pin).
 | Button | Effect |
 |--------|--------|
 | hold 3 s (LED goes solid), release | setup Wi-Fi on for 10 minutes of inactivity |
-| hold 10 s (LED flickers), release | factory reset: forget home, settings and password |
+| hold 10 s (LED flickers), release | factory reset: forget home and settings |
 
 Status LED, one pattern every 3 s: **1 flash** GPS fix, **2** no fix, **3** home not set; fast
 blinking = setup Wi-Fi on. PCB only: red LED = the remote is being pressed.
 
 ## Web panel
 
-Setup Wi-Fi `GarageDoor-XXXX`, WPA2, default password `garagedoor`. Phones open the panel
-automatically (captive portal), otherwise go to http://192.168.4.1. Until the default password is
-changed, the panel only shows status and the password form.
+Setup Wi-Fi `GarageDoor-XXXX`, open (no password). Phones open the panel automatically (captive
+portal), otherwise go to http://192.168.4.1. It only runs during setup and switches off after 10
+minutes without use.
 
 - **Set home to where the car is now** (needs a GPS fix), or enter coordinates
 - Arrive / leave radius, presses on leaving, arrival pressing duration

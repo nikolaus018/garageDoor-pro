@@ -29,11 +29,13 @@ Implementation: `firmware/main/trip.c` (pure C, unit-tested on the host).
 
 ## Web panel
 
-- Hold SETUP for 3 s: a WPA2 Wi-Fi `GarageDoor-XXXX` opens until 10 minutes pass without use.
+- Hold SETUP for 3 s: an open Wi-Fi `GarageDoor-XXXX` (no password) opens until 10 minutes pass
+  without use.
   It also opens on every start while no home is set. Phones open the panel automatically
   (captive portal, DHCP option 114), otherwise it is at http://192.168.4.1.
-- Default password `garagedoor`. Until it is changed, the panel only offers status and the password
-  form: no home, settings, test press or firmware upload.
+- No Wi-Fi password, by choice: the board sits in the owner's car and the Wi-Fi only runs during
+  setup. Anyone within range during those minutes can use the whole panel, firmware upload
+  included.
 - **Set home to where the car is now** uses the board's own GPS fix, or you type coordinates.
   - It can't use the phone's location, because browsers only allow that on HTTPS pages.
   - It can't show a map, because the phone has no internet while it's on the board's network.

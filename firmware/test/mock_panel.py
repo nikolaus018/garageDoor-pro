@@ -8,7 +8,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import parse_qs
 
 HTML = os.path.join(os.path.dirname(__file__), "..", "main", "www", "index.html")
-state = {"password_changed": False, "home": None, "presses": 0,
+state = {"home": None, "presses": 0,
          "settings": {"arrive_radius_m": 150, "leave_radius_m": 300, "leave_presses": 10, "arrive_duration_s": 180}}
 FIX = (48.2081760, 16.3738190)
 
@@ -36,7 +36,7 @@ class Handler(BaseHTTPRequestHandler):
                         "sats": 14, "age_s": 0},
                 "home": {"set": bool(home), "lat": home[0] if home else 0, "lon": home[1] if home else 0},
                 "settings": state["settings"], "presses_remaining": state["presses"],
-                "password_changed": state["password_changed"], "version": "1.0.0", "uptime_s": 754}))
+                "version": "1.0.0", "uptime_s": 754}))
         self.send(404, "{}")
 
     def do_POST(self):
@@ -44,13 +44,6 @@ class Handler(BaseHTTPRequestHandler):
         get = lambda k: body.get(k, [""])[0]
         ok = lambda: self.send(200, '{"ok":true}')
         err = lambda m: self.send(400, json.dumps({"ok": False, "error": m}))
-        if self.path == "/api/password":
-            if len(get("password")) < 8:
-                return err("Wi-Fi password must be 8-63 characters")
-            state["password_changed"] = True
-            return ok()
-        if not state["password_changed"]:
-            return self.send(403, '{"ok":false,"error":"Change the Wi-Fi password first."}')
         if self.path == "/api/home":
             state["home"] = FIX if get("mode") == "here" else (float(get("lat")), float(get("lon")))
             return ok()

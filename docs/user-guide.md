@@ -31,12 +31,11 @@ Keep the remote's battery in it: the board only "presses" the button, the remote
 1. Park at home, with the antenna seeing the sky (outdoors, not in the underground garage), and
    switch the ignition on. A new board opens its setup Wi-Fi by itself (status LED blinks fast).
    Later you open it by holding the SETUP button (BOOT on the SuperMini) for 3 s.
-2. On your phone, join the Wi-Fi **GarageDoor-XXXX**, password `garagedoor`. The panel opens by
+2. On your phone, join the Wi-Fi **GarageDoor-XXXX** (open, no password). The panel opens by
    itself; if not, browse to http://192.168.4.1.
-3. Choose your own Wi-Fi password and reconnect with it.
-4. Wait until the panel shows a GPS fix, then tap **Set home to where the car is now**.
-5. Tap **Press the remote once** and check that the door reacts.
-6. Optional: adjust the radii. Arriving starts inside the arrive radius (default 150 m), and you
+3. Wait until the panel shows a GPS fix, then tap **Set home to where the car is now**.
+4. Tap **Press the remote once** and check that the door reacts.
+5. Optional: adjust the radii. Arriving starts inside the arrive radius (default 150 m), and you
    count as gone beyond the leave radius (default 300 m). If the door opens too late when you
    come home, increase the arrive radius; the board keeps pressing for 3 minutes.
 
@@ -59,5 +58,5 @@ the remote.
 
 ## Factory reset
 
-Hold SETUP (BOOT on the SuperMini) for 10 s (the LED flickers), then release. Home, settings and the Wi-Fi password are
-erased and the board opens the setup Wi-Fi by itself again; set it up again from step 2 (default password `garagedoor`).
+Hold SETUP (BOOT on the SuperMini) for 10 s (the LED flickers), then release. Home and settings are
+erased and the board opens the setup Wi-Fi by itself again; set it up again from step 2.

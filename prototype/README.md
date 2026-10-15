@@ -154,8 +154,8 @@ trails T5/T6/T7 (three side by side: GND, 3V3, GPIO4). Leave every hole that isn
    Wi-Fi is on.
 2. **GPS:** near a window, the log shows `receiver found at 9600 baud (NMEA)` (ATGM336H, NEO-6M; u-blox M9/M10
    modules show `115200 baud (UBX)`). Within about a minute the panel shows a fix.
-3. **Panel:** on the phone, join **GarageDoor-XXXX** (password `garagedoor`), set your own password,
-   then tap **Press the remote once**. A multimeter in continuity mode across the two terminal screws
+3. **Panel:** on the phone, join **GarageDoor-XXXX** (open, no password), then tap **Press the
+   remote once**. A multimeter in continuity mode across the two terminal screws
    (red probe on screw 1: the optocoupler only conducts that way) may beep briefly. No beep is fine:
    the switched optocoupler measures around 100 Ω, above many meters' beep threshold. The real test
    is the next step.

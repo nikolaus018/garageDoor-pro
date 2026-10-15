@@ -36,7 +36,7 @@ static SemaphoreHandle_t s_lock;
 static esp_netif_t *s_netif;
 static httpd_handle_t s_http;
 static dns_server_handle_t s_dns;
-static esp_timer_handle_t s_idle_timer, s_restart_timer, s_reboot_timer;
+static esp_timer_handle_t s_idle_timer, s_reboot_timer;
 static volatile int64_t s_last_activity_us;
 static bool s_active;
 
@@ -123,17 +123,6 @@ static esp_err_t send_result(httpd_req_t *req, const char *err)
     return send_json(req, "400 Bad Request", json);
 }
 
-// Everything except status and changing the password needs the default password changed first.
-static bool locked(httpd_req_t *req)
-{
-    if (settings_get().password_changed) {
-        return false;
-    }
-    send_json(req, "403 Forbidden",
-              "{\"ok\":false,\"error\":\"Change the Wi-Fi password first.\"}");
-    return true;
-}
-
 // ---------- handlers ----------
 
 static esp_err_t index_get(httpd_req_t *req)
@@ -159,7 +148,7 @@ static esp_err_t status_get(httpd_req_t *req)
              "\"home\":{\"set\":%s,\"lat\":%.7f,\"lon\":%.7f},"
              "\"settings\":{\"arrive_radius_m\":%u,\"leave_radius_m\":%u,\"leave_presses\":%u,"
              "\"arrive_duration_s\":%u},"
-             "\"presses_remaining\":%u,\"password_changed\":%s,\"version\":\"%s\",\"uptime_s\":%lu}",
+             "\"presses_remaining\":%u,\"version\":\"%s\",\"uptime_s\":%lu}",
              trip_state_name(st.state), st.parked == PARKED_HOME ? "HOME" : "AWAY", st.distance_m,
              st.have_fix ? "true" : "false", st.fix_usable ? "true" : "false", st.fix.valid ? "true" : "false",
              st.fix.lat_e7 * 1e-7, st.fix.lon_e7 * 1e-7, st.fix.h_acc_mm / 1000.0, st.fix.num_sv,
@@ -167,7 +156,7 @@ static esp_err_t status_get(httpd_req_t *req)
              gnss_protocol() == GNSS_UBX ? "UBX" : gnss_protocol() == GNSS_NMEA ? "NMEA" : "none",
              s.home_set ? "true" : "false", s.home_lat_e7 * 1e-7, s.home_lon_e7 * 1e-7,
              s.arrive_radius_m, s.leave_radius_m, s.leave_presses, s.arrive_duration_s,
-             st.presses_remaining, s.password_changed ? "true" : "false", app->version,
+             st.presses_remaining, app->version,
              (unsigned long)st.uptime_s);
     return send_json(req, "200 OK", json);
 }
@@ -175,9 +164,6 @@ static esp_err_t status_get(httpd_req_t *req)
 static esp_err_t home_post(httpd_req_t *req)
 {
     touch();
-    if (locked(req)) {
-        return ESP_OK;
-    }
     char body[BODY_MAX], mode[16], lat[24], lon[24];
     if (read_body(req, body, sizeof body) != ESP_OK) {
         return send_result(req, "Bad request");
@@ -200,9 +186,6 @@ static esp_err_t home_post(httpd_req_t *req)
 static esp_err_t settings_post(httpd_req_t *req)
 {
     touch();
-    if (locked(req)) {
-        return ESP_OK;
-    }
     char body[BODY_MAX];
     long arrive, leave, presses, duration;
     if (read_body(req, body, sizeof body) != ESP_OK ||
@@ -220,47 +203,8 @@ static esp_err_t settings_post(httpd_req_t *req)
 static esp_err_t test_post(httpd_req_t *req)
 {
     touch();
-    if (locked(req)) {
-        return ESP_OK;
-    }
     app_test_press();
     return send_result(req, NULL);
-}
-
-static void apply_ap_config(void);
-
-static void restart_ap_cb(void *arg)
-{
-    if (s_active) {
-        apply_ap_config();  // new password; clients reconnect with it
-    }
-}
-
-static esp_err_t password_post(httpd_req_t *req)
-{
-    touch();
-    char body[BODY_MAX], pw[96];
-    if (read_body(req, body, sizeof body) != ESP_OK || !form_value(body, "password", pw, sizeof pw)) {
-        return send_result(req, "Enter a password");
-    }
-    settings_t s = settings_get();
-    if (strlen(pw) >= sizeof s.ap_password) {
-        return send_result(req, "Wi-Fi password must be 8-63 characters");
-    }
-    if (strcmp(pw, SETTINGS_DEFAULT_AP_PASSWORD) == 0) {
-        return send_result(req, "Choose a password other than the default");
-    }
-    strcpy(s.ap_password, pw);
-    s.password_changed = true;
-    const char *err = settings_validate(&s);
-    if (!err && settings_set(&s) != ESP_OK) {
-        err = "Could not save settings";
-    }
-    esp_err_t r = send_result(req, err);
-    if (!err) {
-        esp_timer_start_once(s_restart_timer, 1500 * 1000);  // let the response reach the phone first
-    }
-    return r;
 }
 
 static void reboot_cb(void *arg)
@@ -271,9 +215,6 @@ static void reboot_cb(void *arg)
 static esp_err_t ota_post(httpd_req_t *req)
 {
     touch();
-    if (locked(req)) {
-        return ESP_OK;
-    }
     const esp_partition_t *part = esp_ota_get_next_update_partition(NULL);
     if (!part || req->content_len == 0 || req->content_len > part->size) {
         return send_result(req, "Firmware file missing or too large");
@@ -318,17 +259,14 @@ static esp_err_t not_found(httpd_req_t *req, httpd_err_code_t err)
 
 static void apply_ap_config(void)
 {
-    settings_t s = settings_get();
     uint8_t mac[6];
     esp_read_mac(mac, ESP_MAC_WIFI_SOFTAP);
     wifi_config_t cfg = { 0 };
     int n = snprintf((char *)cfg.ap.ssid, sizeof cfg.ap.ssid, "GarageDoor-%02X%02X", mac[4], mac[5]);
     cfg.ap.ssid_len = n;
-    strlcpy((char *)cfg.ap.password, s.ap_password, sizeof cfg.ap.password);
     cfg.ap.channel = 6;
     cfg.ap.max_connection = 2;
-    cfg.ap.authmode = WIFI_AUTH_WPA2_PSK;
-    cfg.ap.pmf_cfg.required = false;
+    cfg.ap.authmode = WIFI_AUTH_OPEN;   // no password: it only runs during setup, then switches off
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &cfg));
     ESP_LOGI(TAG, "setup Wi-Fi \"%s\" on http://" AP_IP, (char *)cfg.ap.ssid);
 }
@@ -367,10 +305,8 @@ void web_init(void)
     ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_AP_STACONNECTED, wifi_event, NULL));
 
     const esp_timer_create_args_t idle = { .callback = idle_cb, .name = "web_idle" };
-    const esp_timer_create_args_t restart = { .callback = restart_ap_cb, .name = "web_ap" };
     const esp_timer_create_args_t reboot = { .callback = reboot_cb, .name = "web_reboot" };
     ESP_ERROR_CHECK(esp_timer_create(&idle, &s_idle_timer));
-    ESP_ERROR_CHECK(esp_timer_create(&restart, &s_restart_timer));
     ESP_ERROR_CHECK(esp_timer_create(&reboot, &s_reboot_timer));
 }
 
@@ -406,7 +342,6 @@ void web_start(void)
             { .uri = "/api/home", .method = HTTP_POST, .handler = home_post },
             { .uri = "/api/settings", .method = HTTP_POST, .handler = settings_post },
             { .uri = "/api/test", .method = HTTP_POST, .handler = test_post },
-            { .uri = "/api/password", .method = HTTP_POST, .handler = password_post },
             { .uri = "/api/ota", .method = HTTP_POST, .handler = ota_post },
         };
         for (size_t i = 0; i < sizeof uris / sizeof uris[0]; i++) {

@@ -97,7 +97,7 @@ If something is off, rotate it in the preview (JLCPCB offers this) and note the 
 3. Serial log shows `start: NO_HOME` and the green LED flashes 3× every 3 s; the setup Wi-Fi
    `GarageDoor-XXXX` appears (fast green blinking).
 4. Connect the GNSS antenna, put it near a window: within ~1 minute the panel shows a fix.
-5. Wire the spare remote to the screw terminal, set a password in the panel, press **Test**:
+5. Wire the spare remote to the screw terminal, open the panel, press **Test**:
    the red LED lights and the remote transmits.
 6. Measure across the screw terminal with a multimeter (continuity mode): open normally, closed
    for 150 ms per press, either probe polarity.

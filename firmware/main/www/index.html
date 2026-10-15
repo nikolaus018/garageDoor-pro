@@ -39,16 +39,6 @@
 <main>
   <h1>garageDoor</h1>
 
-  <section id="pw-first" class="hidden">
-    <h2>First: secure this Wi-Fi</h2>
-    <p class="hint">The setup Wi-Fi still uses the default password. Choose your own (8–63 characters);
-      you will reconnect with it.</p>
-    <label for="pw1">New Wi-Fi password</label>
-    <input id="pw1" type="password" minlength="8" maxlength="63" autocomplete="new-password">
-    <button onclick="setPassword('pw1', 'pw1-msg')">Save password</button>
-    <div class="msg" id="pw1-msg"></div>
-  </section>
-
   <section>
     <h2>Status</h2>
     <dl class="grid">
@@ -61,55 +51,45 @@
     </dl>
   </section>
 
-  <div id="needs-pw">
-    <section>
-      <h2>Home</h2>
-      <p class="hint">Park at home with the antenna seeing the sky, wait for a GPS fix, then:</p>
-      <button id="here" onclick="post('/api/home', {mode:'here'}, 'home-msg')">Set home to where the car is now</button>
-      <div class="row">
-        <div><label for="lat">Latitude</label><input id="lat" inputmode="decimal" placeholder="48.208176"></div>
-        <div><label for="lon">Longitude</label><input id="lon" inputmode="decimal" placeholder="16.373819"></div>
-      </div>
-      <button class="secondary" onclick="post('/api/home', {lat:val('lat'), lon:val('lon')}, 'home-msg')">Set home to these coordinates</button>
-      <div class="msg" id="home-msg"></div>
-    </section>
+  <section>
+    <h2>Home</h2>
+    <p class="hint">Park at home with the antenna seeing the sky, wait for a GPS fix, then:</p>
+    <button id="here" onclick="post('/api/home', {mode:'here'}, 'home-msg')">Set home to where the car is now</button>
+    <div class="row">
+      <div><label for="lat">Latitude</label><input id="lat" inputmode="decimal" placeholder="48.208176"></div>
+      <div><label for="lon">Longitude</label><input id="lon" inputmode="decimal" placeholder="16.373819"></div>
+    </div>
+    <button class="secondary" onclick="post('/api/home', {lat:val('lat'), lon:val('lon')}, 'home-msg')">Set home to these coordinates</button>
+    <div class="msg" id="home-msg"></div>
+  </section>
 
-    <section>
-      <h2>Behaviour</h2>
-      <div class="row">
-        <div><label for="arrive">Arrive radius (m)</label><input id="arrive" type="number" min="30" max="2000"></div>
-        <div><label for="leave">Leave radius (m)</label><input id="leave" type="number" min="80" max="5000"></div>
-        <div><label for="presses">Presses on leaving</label><input id="presses" type="number" min="0" max="30"></div>
-        <div><label for="duration">Arrival pressing (s)</label><input id="duration" type="number" min="10" max="600"></div>
-      </div>
-      <p class="hint">Arriving starts inside the arrive radius; you count as gone beyond the leave radius.
-        Presses are 2 s apart.</p>
-      <button onclick="saveSettings()">Save</button>
-      <div class="msg" id="set-msg"></div>
-    </section>
+  <section>
+    <h2>Behaviour</h2>
+    <div class="row">
+      <div><label for="arrive">Arrive radius (m)</label><input id="arrive" type="number" min="30" max="2000"></div>
+      <div><label for="leave">Leave radius (m)</label><input id="leave" type="number" min="80" max="5000"></div>
+      <div><label for="presses">Presses on leaving</label><input id="presses" type="number" min="0" max="30"></div>
+      <div><label for="duration">Arrival pressing (s)</label><input id="duration" type="number" min="10" max="600"></div>
+    </div>
+    <p class="hint">Arriving starts inside the arrive radius; you count as gone beyond the leave radius.
+      Presses are 2 s apart.</p>
+    <button onclick="saveSettings()">Save</button>
+    <div class="msg" id="set-msg"></div>
+  </section>
 
-    <section>
-      <h2>Test</h2>
-      <button class="secondary" onclick="post('/api/test', {}, 'test-msg')">Press the remote once</button>
-      <div class="msg" id="test-msg"></div>
-    </section>
+  <section>
+    <h2>Test</h2>
+    <button class="secondary" onclick="post('/api/test', {}, 'test-msg')">Press the remote once</button>
+    <div class="msg" id="test-msg"></div>
+  </section>
 
-    <section>
-      <h2>Wi-Fi password</h2>
-      <label for="pw2">New password</label>
-      <input id="pw2" type="password" minlength="8" maxlength="63" autocomplete="new-password">
-      <button class="secondary" onclick="setPassword('pw2', 'pw2-msg')">Change password</button>
-      <div class="msg" id="pw2-msg"></div>
-    </section>
-
-    <section>
-      <h2>Firmware</h2>
-      <p class="hint" id="version">–</p>
-      <input id="fw" type="file" accept=".bin">
-      <button class="secondary" onclick="upload()">Install update</button>
-      <div class="msg" id="fw-msg"></div>
-    </section>
-  </div>
+  <section>
+    <h2>Firmware</h2>
+    <p class="hint" id="version">–</p>
+    <input id="fw" type="file" accept=".bin">
+    <button class="secondary" onclick="upload()">Install update</button>
+    <div class="msg" id="fw-msg"></div>
+  </section>
 </main>
 <script>
 const $ = id => document.getElementById(id);
@@ -128,11 +108,6 @@ async function post(url, data, msg) {
     refresh();
     return j.ok;
   } catch (e) { say(msg, 'No connection to the board.', 'bad'); return false; }
-}
-
-async function setPassword(field, msg) {
-  if (await post('/api/password', { password: $(field).value }, msg))
-    say(msg, 'Saved. The Wi-Fi restarts now - reconnect with the new password.', 'ok');
 }
 
 function saveSettings() {
@@ -169,8 +144,6 @@ async function refresh() {
   $('pressing').textContent = s.presses_remaining ? `${s.presses_remaining} presses left` : 'no';
   $('here').disabled = !g.usable;
   $('version').textContent = `Installed: v${s.version} · up ${Math.round(s.uptime_s / 60)} min`;
-  $('pw-first').classList.toggle('hidden', s.password_changed);
-  $('needs-pw').classList.toggle('hidden', !s.password_changed);
   if (!loaded) {
     loaded = true;
     $('arrive').value = s.settings.arrive_radius_m; $('leave').value = s.settings.leave_radius_m;

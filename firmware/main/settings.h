@@ -7,8 +7,6 @@
 #include "esp_err.h"
 #include "trip.h"
 
-#define SETTINGS_DEFAULT_AP_PASSWORD "garagedoor"
-
 typedef struct {
     bool home_set;
     int32_t home_lat_e7, home_lon_e7;
@@ -16,8 +14,6 @@ typedef struct {
     uint16_t leave_radius_m;      // default 300, always > arrive_radius_m
     uint8_t leave_presses;        // default 10
     uint16_t arrive_duration_s;   // default 180
-    char ap_password[64];         // WPA2, 8..63 characters
-    bool password_changed;        // false until the user replaced the default password
 } settings_t;
 
 esp_err_t settings_init(void);           // initialises NVS and loads (defaults if empty)

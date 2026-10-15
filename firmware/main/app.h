@@ -24,6 +24,6 @@ void app_get_status(app_status_t *out);
 // Sets home to the current GPS position. Returns NULL on success, else a message.
 const char *app_set_home_here(void);
 const char *app_set_home(int32_t lat_e7, int32_t lon_e7);
-// Applies radius / press settings (home and password fields of `s` are ignored).
+// Applies radius / press settings (the home fields of `s` are ignored).
 const char *app_apply_settings(const settings_t *s);
 void app_test_press(void);
