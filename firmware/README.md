@@ -63,7 +63,7 @@ receiver (PCB only, the modules have no reset pin).
 | hold 10 s (LED flickers), release | factory reset: forget home and settings |
 
 Status LED, one pattern every 3 s: **1 flash** GPS fix, **2** no fix, **3** home not set; fast
-blinking = setup Wi-Fi on. PCB only: red LED = the remote is being pressed.
+blinking = setup Wi-Fi on. Red LED = the remote is being pressed.
 
 ## Web panel
 

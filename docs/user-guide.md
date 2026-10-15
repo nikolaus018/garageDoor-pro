@@ -53,8 +53,8 @@ The setup Wi-Fi switches itself off after 10 minutes without use.
 ## LED codes
 
 Status LED (blue on the SuperMini, green on the PCB), every 3 s: 1 flash = GPS fix, 2 = no fix yet
-(normal in the garage), 3 = home not set. Fast blinking = setup Wi-Fi is on. PCB only: red = pressing
-the remote.
+(normal in the garage), 3 = home not set. Fast blinking = setup Wi-Fi is on. Red = pressing the
+remote.
 
 ## Factory reset
 
