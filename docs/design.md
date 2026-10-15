@@ -1,8 +1,8 @@
 # garageDoor-pro: design
 
 One small board that lives in the car and opens the garage door on its own, when you leave home
-and when you arrive. No phone, no app. Successor to the legacy setup in `~/Documents/garageDoor`
-(tag `legacy-v1`: car ESP32 + BLE + iOS Shortcuts).
+and when you arrive. No phone, no app. Successor to an earlier setup (car ESP32 + BLE + iOS
+Shortcuts).
 
 ## Behaviour
 
@@ -22,7 +22,7 @@ no home set        -> nothing is pressed; setup Wi-Fi opens on every start
   Both are configurable, and the leave radius is always at least 50 m larger.
 - A fix only counts with gnssFixOK, ≤ 50 m accuracy and ≥ 4 satellites.
 - Extra presses while the door moves just keep it open longer (checked on the real door).
-- Compared with legacy: it presses on start only when the car was parked at home, arrival needs
+- Compared with the earlier setup: it presses on start only when the car was parked at home, arrival needs
   no phone, and driving past home is detected and stops the pressing.
 
 Implementation: `firmware/main/trip.c` (pure C, unit-tested on the host).
@@ -54,7 +54,7 @@ USB-C ─► 500 mA polyfuse ─► SMF5.0A TVS ─► AP2112K-3.3 ─► 3V3 (i
 ESP32-C3-MINI-1-H4X
   ├ UART1 (GPIO4/5) ◄──► MAX-M10S ◄── bias-T ◄── U.FL ◄── active GNSS antenna
   ├ GPIO6 ──► MAX-M10S RESET_N (open-drain)
-  ├ GPIO7 ──► CPC1017N PhotoMOS ──► 2-pin screw terminal ──► spare remote's button
+  ├ GPIO7 ──► SS8050 NPN transistor ──► 2-pin screw terminal ──► spare remote's button
   │        └► red LED
   ├ GPIO10 ─► green status LED
   └ GPIO9 ◄─ SETUP button (also BOOT strap)
@@ -71,7 +71,7 @@ LCSC stock and prices were checked live on 2026-10-14. The full list with every 
 | U2 | GNSS receiver | u-blox MAX-M10S-00B | C4153167 | −40…85 °C |
 | U3 | 3.3 V LDO 600 mA | AP2112K-3.3TRG1 | C51118 | −40…85 °C |
 | U4 | USB ESD | USBLC6-2SC6 | C7519 | −40…125 °C |
-| K1 | Isolated switch, 60 V / 100 mA, either polarity | Littelfuse CPC1017NTR | C81521 | −40…85 °C |
+| Q1 | Remote switch, NPN 25 V / 1.5 A | JSCJ SS8050 (SOT-23) | C2150 | −55…150 °C |
 | J1 | USB-C 16-pin | HRO TYPE-C-31-M-12 | C165948 | |
 | J2 | GNSS antenna | Hirose U.FL-R-SMT-1(10) | C88373 | −40…90 °C |
 | J3 | Remote wires, 0.2–2.5 mm² | KEFA KF128-5.08-2P screw terminal | C474952 | −40…105 °C |
@@ -81,8 +81,11 @@ LCSC stock and prices were checked live on 2026-10-14. The full list with every 
 The parts cost about 18–20 $ per board at prototype quantities, more than half of it the GNSS module.
 
 **Why these parts**
-- **CPC1017N instead of the AQY212GS** from the first draft: it has an exact KiCad library footprint,
-  23k in stock, and 100 mA is plenty for a remote's button.
+- **A plain NPN transistor for the remote:** many remotes switch their whole supply with the
+  button. A transistor driven from GPIO7 switches fully on and carries that current, as proven on
+  the perfboard prototype. The price: no
+  isolation, so the remote's − side shares the board's GND, which is harmless for a
+  battery-powered remote. The SS8050 is a JLCPCB basic part.
 - **ESP32-C3-MINI-1 footprint, symbol and 3D model:** from Espressif's official KiCad library 3.2.1,
   which includes the antenna keep-out.
 - **No V_BCKP backup supercap:** typical SMD supercaps are rated to only 60 °C. Per the u-blox
@@ -99,8 +102,9 @@ The parts cost about 18–20 $ per board at prototype quantities, more than half
   10 nF to GND, plus a 47 pF C0G DC block before RF_IN.
 - **ESP32-C3:** EN has a 10 kΩ pull-up and 1 µF. GPIO2, GPIO8 and GPIO9 have 10 kΩ pull-ups.
   USB goes straight to D−/D+ (GPIO18/19) through the USBLC6.
-- **Switch:** GPIO7 → 330 Ω → CPC1017N LED (~6 mA), with a 100 kΩ pull-down so the switch stays open
-  during boot. The firmware drives GPIO7 low before anything else.
+- **Switch:** GPIO7 → 330 Ω → SS8050 base (~8 mA, drives it well into saturation), emitter to GND,
+  collector to screw terminal pin 1 (marked +); pin 2 (marked −) is GND. A 100 kΩ pull-down keeps
+  the transistor off during boot. The firmware drives GPIO7 low before anything else.
 
 ## PCB
 
@@ -126,6 +130,7 @@ direct sun; only the antenna needs sky view.
 
 ## Status
 
-The design is complete and checked; the order package is in `hardware/production/`. Before larger
-quantities, a first run of assembled boards has to pass the bring-up checklist in
-`hardware/ORDERING.md` and a real drive (leave + arrive).
+The perfboard prototype is built and presses the remote through its transistor. The PCB uses the
+same switch circuit; its design is complete and checked, and the order package is in
+`hardware/production/`. Before larger quantities, a first run of assembled boards has to pass the
+bring-up checklist in `hardware/ORDERING.md` and a real drive (leave + arrive).

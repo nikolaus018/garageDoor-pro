@@ -12,8 +12,9 @@
 
 Open the spare remote and find the button that opens the door. Solder two thin wires across the
 button's two contacts (the two sides that the button connects when pressed). Put the other ends
-into the screw terminal. On the PCB, polarity does not matter. On the perfboard prototype (PC817C)
-it does: the button's + side goes to screw 1, see `prototype/README.md`, Bench test.
+into the screw terminal, **+ side to screw 1, − side to screw 2** (marked + and − on the PCB). To
+find the + side: battery in, multimeter on DC volts across the two contacts; if it reads positive,
+the red probe is on the + side. Wrong way round, the remote does nothing: swap the wires.
 
 Keep the remote's battery in it: the board only "presses" the button, the remote transmits.
 

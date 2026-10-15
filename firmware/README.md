@@ -7,9 +7,9 @@ ESP-IDF v6.1. One firmware for three boards (menuconfig: garageDoor -> Board, pi
 |-------|-------|---------------------|
 | **ESP32-C3 SuperMini on perfboard** (the prototype, `prototype/README.md`) | default: `idf.py build` | on-board blue LED (GPIO8) / BOOT (GPIO9) |
 | ESP32-S3 DevKitC on perfboard | `idf.py set-target esp32s3 build` | LED + 1 kΩ on GPIO10 / BOOT (GPIO0) |
-| garageDoor-pro PCB v1.0 | `idf.py -D SDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.defaults.pcb-v1" build` | green LED (GPIO10) / SETUP (GPIO9) |
+| garageDoor-pro PCB (v1.1) | `idf.py -D SDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.defaults.pcb-v1" build` | green LED (GPIO10) / SETUP (GPIO9) |
 
-All boards: GPIO4 → GPS RX, GPIO5 ← GPS TX, GPIO7 → remote switch (PhotoMOS on the PCB, PC817C on the perfboard; high = pressed).
+All boards: GPIO4 → GPS RX, GPIO5 ← GPS TX, GPIO7 → NPN transistor across the remote's button, plus a red LED (high = pressed).
 
 ## Build, test, flash
 

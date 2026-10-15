@@ -11,28 +11,28 @@ car USB-C ────► USB-C
                 GPIO5 ◄──────────────────────────────────── GPS TX
                 GPIO4 ────────────────────────────────────► GPS RX
 
-                GPIO7 ──┬── R1 330Ω ──┬── 1 ┌──────────┐ 4 ──► screw 1 ─┐  across the
-                        │             │     │    K1    │  (C)   (+ side)├─ remote's
-                     R3 1k       R2 100k    │  PC817C  │                │  button
-                        │             │     │  opto-   │                │
-                  D1 red LED          │     │ coupler  │  (E)   (− side)│
-                        │             │     │          │                │
-                GND  ───┴─────────────┴── 2 └──────────┘ 3 ──► screw 2 ─┘
+                                                   ┌ C ──────► screw 1 ─┐  across the
+                GPIO7 ──┬── R1 330Ω ──┬────── B ── Q1 NPN               ├─ remote's button,
+                        │             │            └ E ──┐              │  + side to screw 1
+                     R3 1k       R2 100k                 │              │
+                        │             │                  │              │
+                  D1 red LED          │                  │              │
+                        │             │                  │              │
+                GND  ───┴─────────────┴──────────────────┴──► screw 2 ──┘
                 GPIO8: blue LED on the SuperMini (status)   GPIO9: BOOT button (= SETUP)
 ```
 
 ![what connects to what](img/wiring.svg)
 
-- **R1** sets the optocoupler's LED current (~6 mA).
-- **R2** keeps the switch off while the ESP32 boots.
+- **Q1, an NPN transistor,** connects the two screw-terminal wires like a pressed button. Unpowered,
+  it stays open. It switches fully on and carries far more than any remote needs, including remotes
+  whose button switches the whole remote on.
+- **Polarity matters:** screw 1 (collector) goes to the button's **+ side**, screw 2 (GND) to the
+  **− side** (see Bench test). The remote's − side then shares the board's GND, which is harmless:
+  the remote runs on its own battery and has no other connection.
+- **R1** (330 Ω) drives Q1's base (~8 mA) and **R2** keeps Q1 off while the ESP32 boots.
 - **R3 and D1:** the red LED lights whenever the board presses the remote. If it flashes and the
-  remote doesn't react, the problem is on the remote side of K1.
-- **The PC817C** connects the two screw-terminal wires like a pressed button, and it's fully
-  isolated from the rest of the board. Unpowered, it stays open. Its output is a transistor, so
-  **polarity matters**: terminal 1 goes to the button's **+ side**, terminal 2 to the **− side**
-  (see Bench test). It switches up to ~10–20 mA, plenty for a remote's button that only signals
-  the remote's chip. Some remotes' buttons switch the whole remote on instead; see
-  [If the remote doesn't react](#if-the-remote-doesnt-react).
+  remote doesn't react, the problem is between Q1 and the remote.
 
 ## Parts list
 
@@ -40,7 +40,7 @@ car USB-C ────► USB-C
 |---|------|----:|-------|---:|
 | 1 | **ESP32-C3 SuperMini** | 2 | Get the **standard** one, not "SuperMini **Plus**": the Plus has different pins and an RGB LED on GPIO8. The second one is a spare. | 3 each |
 | 2 | **GPS module with UART that runs on 3.3 V**, e.g. **ATGM336H** or **GY-NEO6MV2**, with its antenna | 1 | Powered from the SuperMini's **3V3** pin (most of these modules are 2.7–3.6 V only; boards with their own regulator work on 3.3 V too). The firmware finds the baud rate itself and reads NMEA (ATGM336H, NEO-6M, ...) or u-blox UBX. A module that needs 5 V (e.g. Beitian BE-220) does **not** fit this layout. | 12–18 |
-| 3 | **PC817C** optocoupler, DIP-4 | 2 | K1. Sold in cheap packs; the second one is a spare. Must be the **4-pin** through-hole version (PC827/PC847 are 8/16 pins; "PC817C SMD"/"S" types don't fit). | 0.1–0.5 |
+| 3 | **NPN transistor, TO-92**: 2N2222 / PN2222, S8050, 2N3904, BC547 or BC337 | 2 | Q1. Any common small NPN works; the legs come in a different order on different parts (assembly step 3). The second one is a spare. | 0.1 |
 | 4 | Resistor 330 Ω, ¼ W | 1 | R1. A resistor assortment kit is handy. | – |
 | 5 | Resistor 100 kΩ, ¼ W | 1 | R2 | – |
 | 6 | Resistor 1 kΩ, ¼ W | 1 | R3 | – |
@@ -51,7 +51,7 @@ car USB-C ────► USB-C
 | 11 | Male pin header 1×4, 2.54 mm | 1 | GPS connector at M2–M5 | 0.2 |
 | 12 | 4 female–female Dupont jumper wires, 20–30 cm | 4 | Board header to the GPS module's pins | 1 |
 | 13 | Insulated hookup wire, 26–30 AWG (silicone or wire-wrap) | 1 m | W1, W2, and the remote wires | 2 |
-| 14 | Bare tinned copper wire, 0.4–0.6 mm | – | Trails T1–T10; the resistor leg offcuts are enough | – |
+| 14 | Bare tinned copper wire, 0.4–0.6 mm | – | Trails T1–T9; the resistor leg offcuts are enough | – |
 | 15 | **Spare garage remote** for your door, already working | 1 | It stays in use as the transmitter | own / 15–30 |
 | 16 | USB car charger + USB-C cable | 1 | On a socket that **switches off with the ignition**. Some SuperMini clones lack the USB-C resistors that a C-to-C cable needs and get no power from a USB-C charger (or a USB-C-only Mac): if it shows no sign of life (no LED at all, no `/dev/cu.usbmodem…` port on the Mac), use a **USB-A charger with an A-to-C cable** (and a USB-A hub or adapter on the Mac). | 10 |
 | 17 | Small enclosure (e.g. 70 × 50 × 25 mm) | 1 | Or 3D-print one | 3 |
@@ -82,7 +82,7 @@ number**, e.g. C11 = row C, column 11.
   end is now on the **right**, the screw terminal on the left. That's the right half of the drawing.
   That side has **no print at all**, so the drawing shows none either: dashed outlines mark where
   the parts sit on the other side, and every solder joint is labelled (SuperMini pin names, GPS
-  pins, K1 pins 1–4, J1 screws 1/2, D1+ / D1−). The trails and wires below are described by those
+  pins, Q1 legs E/B/C, J1 screws 1/2, D1+ / D1−). The trails and wires below are described by those
   joints.
 - The circuit uses rows **A–M** and columns **1–18**. Row N and columns 19–20 stay empty.
 
@@ -93,12 +93,12 @@ exactly the circuit above.
 
 | Connection | Use | Here |
 |------------|-----|------|
-| Two **neighbouring** holes (one step) | a short trail, or a **solder bridge**: heat both pads and feed solder until it flows across | T3, T9, T10, and the first step of T8 |
-| A **straight run** over 2+ neighbouring holes | a **trail**: bare tinned wire laid flat over the pads, soldered at **every** pad. Don't chain solder blobs; they crack. | T1, T2, T4–T8 |
+| Two **neighbouring** holes (one step) | a short trail, or a **solder bridge**: heat both pads and feed solder until it flows across | T8, T9 |
+| A **straight run** over 2+ neighbouring holes | a **trail**: bare tinned wire laid flat over the pads, soldered at **every** pad. Don't chain solder blobs; they crack. | T1–T7 |
 | Anything else (long runs, crossing other connections, under the SuperMini) | **insulated wire**, soldered pad to pad on the bottom | W1, W2 |
 
 Keep trails centred on their row. A trail must never touch the pad beside it, so watch the parallel
-trails T5/T6/T7 (three side by side: GND, 3V3, GPIO4) and T4/T8 (the two terminal wires).
+trails T5/T6/T7 (three side by side: GND, 3V3, GPIO4) and T2/T3 (Q1's base next to GND).
 Leave every hole that isn't in the drawing unsoldered.
 
 ## Assembly
@@ -127,7 +127,16 @@ Leave every hole that isn't in the drawing unsoldered.
      alongside the body).
    - **R3 1 kΩ:** A4 and A8, lying flat along the bottom edge.
    - **D1 red LED:** **long leg (+) in A9**, short leg (the flat side of the rim, −) in A10.
-   - **K1 PC817C:** **pin 1 (dot or notch) in C11**. The pins then go to C11, B11, B14 and C14.
+   - **Q1 NPN transistor:** its three legs in one column: **emitter in B12, base in C12, collector
+     in D12**. Read the number on its flat side, then turn it so the legs land like that:
+
+     | Transistor | Legs (flat side facing you, legs down, left to right) | Flat side faces |
+     |------------|------|-----------------|
+     | 2N2222 / PN2222, S8050, S9013, 2N3904 | E B C | right, toward the screw terminal (as drawn) |
+     | BC547, BC548, BC337 | C B E | left, toward R2 and the SuperMini |
+
+     Another part: check its datasheet; only E in B12, B in C12, C in D12 is right. Leave a few
+     millimetres of leg under the body.
    - **J1 screw terminal:** D18 (screw 1) and B18 (screw 2), with the wire openings toward the
      right edge.
 
@@ -136,22 +145,20 @@ Leave every hole that isn't in the drawing unsoldered.
    Hole names in brackets are the printed ones from the parts side, for cross-checking:
    - **T1:** SuperMini pin 7 → R1 → R3, straight down 4 pads (E4–D4–C4–B4–A4). B4 has no part, the
      trail just passes it.
-   - **T2:** R1's other leg → R2's upper leg → K1 pin 1, 3 pads in a row (C9–C10–C11).
-   - **T3:** R2's lower leg → K1 pin 2, neighbours (B10–B11).
-   - **T4:** K1 pin 3 → J1 screw 2, 5 pads along the row (B14–B18).
+   - **T2:** R1's other leg → R2's upper leg → Q1 base, 4 pads in a row (C9–C10–C11–C12). C11 has
+     no part, the trail just passes it.
+   - **T3:** R2's lower leg → Q1 emitter → J1 screw 2, all along the row (B10–B18). This is GND.
+   - **T4:** Q1 collector → J1 screw 1, along the row (D12–D18).
    - **T5:** SuperMini 3V3 → GPS VCC, straight, 3 pads (K4–L4–M4).
    - **T6:** SuperMini G → GPS GND (K3–L3–M3).
    - **T7:** SuperMini pin 4 → GPS RX (K5–L5–M5).
-   - **T8:** K1 pin 4 → J1 screw 1. Bridge K1 pin 4 one step **away from pin 3** (C14–D14), then a
-     trail along that row to screw 1 (D14–D18). K1 pin 1 is in the same row as pin 4, three holes
-     along: nothing on the output side goes there.
-   - **T9:** R3's leg next to the LED → D1+, neighbours (A8–A9).
-   - **T10:** D1− → R2's lower leg, neighbours (A10–B10). R2's lower leg is GND.
+   - **T8:** R3's leg next to the LED → D1+, neighbours (A8–A9).
+   - **T9:** D1− → R2's lower leg, neighbours (A10–B10). R2's lower leg is GND.
 
    ![step 3: trails underneath](img/step3.svg)
 5. **Wires on the bottom:**
    - **W1:** GPS TX → SuperMini pin 5 (M2 → E2).
-   - **W2:** the middle pad of T6 → K1 pin 2 (L3 → B11).
+   - **W2:** the middle pad of T6 → T3, which makes T3 GND (L3 → B11).
 
    ![step 4: wires underneath](img/step4.svg)
 6. **Measure before plugging anything in** (multimeter, SuperMini unplugged or, if soldered in, the
@@ -165,13 +172,13 @@ Leave every hole that isn't in the drawing unsoldered.
    | K2 (5V) and K3 (GND) | open |
    | K4 and M4, K3 and M3, K5 and M5, E2 and M2 | beep (connected) |
    | E4 (GPIO7) and A4 (R3) | beep |
-   | E4 (GPIO7) and C11 (K1 pin 1) | ~330 Ω |
-   | C11 and K3 (GND) | ~100 kΩ (some meters show less: their test voltage lights K1's LED) |
-   | B11 and K3, A10 and K3 | beep |
+   | E4 (GPIO7) and C12 (Q1 base) | ~330 Ω |
+   | C12 and K3 (GND) | **no beep** (R2's 100 kΩ; a beep means T2 touches T3) |
+   | B12, A10 and screw 2, each to K3 (GND) | beep |
    | A8 and A9 | beep |
-   | Screw 1 and C14 / screw 2 and B14 | beep |
-   | Screw 1 and screw 2 | open |
-   | Screw 1 and C11, screw 1 and E4, screw 1 and K3, screw 2 and K3 | **open**: the terminal side must not touch anything but K1 pins 3 and 4 |
+   | Screw 1 and D12 (Q1 collector) | beep |
+   | Screw 1 and screw 2 | **no beep** |
+   | Screw 1 and E4, screw 1 and C12 | no beep |
    | Every pair of neighbouring pads in K2–K9, E2–E9 and M2–M5 | open |
 7. **GPS.** Connect the module with 4 female–female Dupont jumpers, by the labels **on the module**:
    **TX → M2, GND → M3, VCC → M4, RX → M5**.
@@ -203,8 +210,7 @@ battery out until the wiring is proven.
    - No flash: GPIO7 isn't reaching R3/D1. Check T1 and that D1's long leg is in A9.
    - Then, remote not connected yet: multimeter on Ω, red probe on screw 1, black on screw 2, and
      tap **Hold the remote for 5 s**. D1 stays lit and the meter drops from open to a low reading
-     (typically under 1 kΩ) for 5 s. Still open: the PC817C isn't switching; check T2, T3, W2
-     and that its dot is in C11.
+     for 5 s. Still open: Q1 isn't switching; check T2 and T3 and Q1's leg order (step 3).
 4. **Remote, on its own first:** open the spare remote and solder two thin wires across the
    button's contacts (the two sides it connects). Keep them short and away from the remote's
    antenna (the copper loop or wire near its edge). Touch the two free wire ends together: the
@@ -214,20 +220,11 @@ battery out until the wiring is proven.
 5. **Remote on the board:** find the button's **+ side**: battery in, multimeter on DC volts across
    the two button contacts. If it reads positive, the red probe is on the + side; if negative, the
    black one is. **+ side → J1 screw 1, − side → screw 2.** Tap **Press the remote once**: D1
-   flashes, the remote's LED lights and the door reacts.
-
-## If the remote doesn't react
-
-D1 flashes, the remote works on its own (Bench test step 4), but pressing through the board does
-nothing:
-
-1. Check the wires in J1 and the measurements above (screw 1 ↔ C14, screw 2 ↔ B14). Tap **Hold
-   the remote for 5 s** and watch the remote's LED: it should stay lit for the whole 5 s.
-2. Swap the two remote wires in J1 once. The PC817C only conducts from screw 1 to screw 2.
-3. Still nothing: this remote's button carries more current than the PC817C can switch (many cheap
-   433 MHz remotes switch their battery on with the button). A **PhotoMOS relay** (AQY212EH,
-   TLP222A or G3VM-61A1, DIP-4) goes into the same four holes, pin 1 in C11, and works either way
-   round.
+   flashes, the remote's LED lights and the door reacts. Tap **Hold the remote for 5 s**: the
+   remote's LED stays on steadily for the whole 5 s.
+   - Nothing at all: the wires are the wrong way round. Swap them once.
+   - The remote's LED flickers or stays dim: Q1 isn't fully on. Check E4 ↔ C12 reads ~330 Ω and
+     Q1's leg order (assembly step 3).
 
 ## Install in the car
 

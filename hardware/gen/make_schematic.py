@@ -28,7 +28,7 @@ SCH_POS = {
     "U2": (355.6, 147.32), "C7": (322.58, 198.12), "C8": (335.28, 198.12), "R1": (381.0, 93.98),
     "C1": (393.7, 106.68), "L1": (381.0, 116.84), "C2": (393.7, 147.32), "J2": (398.78, 175.26),
     "R8": (45.72, 210.82), "R9": (58.42, 210.82), "R10": (71.12, 210.82), "D2": (88.9, 226.06),
-    "K1": (124.46, 210.82), "J3": (162.56, 213.36),
+    "Q1": (124.46, 210.82), "J3": (162.56, 213.36),
 }
 TP_ROW_Y = 264.16
 TEXTS = [
@@ -37,7 +37,7 @@ TEXTS = [
      137.16, 106.68),
     ("GNSS: MAX-M10S, active antenna bias-T per u-blox UBX-20053088 Fig. 28 (10R / 27nH / 10nF, 47pF DC block)",
      238.76, 76.2),
-    ("Switch output: CPC1017N PhotoMOS -> screw terminal to the remote's button (either polarity)", 30.48, 190.5),
+    ("Switch output: SS8050 NPN transistor -> screw terminal to the remote's button (+ to pin 1, - to pin 2)", 30.48, 190.5),
     ("Test pads (bottom side, not assembled)", 30.48, 251.46),
 ]
 
@@ -219,7 +219,7 @@ def build():
 
 
 STD_SYMBOL_LIBS = ["power", "Device", "Connector", "Regulator_Linear", "Power_Protection", "RF_GPS",
-                   "Relay_SolidState", "Switch", "Mechanical"]
+                   "Transistor_BJT", "Switch", "Mechanical"]
 
 
 def footprint_libs():

@@ -14,7 +14,7 @@ menu "garageDoor"
             bool "ESP32-S3 DevKitC on perfboard"
             depends on IDF_TARGET_ESP32S3
         config GARAGE_BOARD_PCB_V1
-            bool "garageDoor-pro PCB v1.0 (ESP32-C3-MINI-1)"
+            bool "garageDoor-pro PCB (ESP32-C3-MINI-1)"
             depends on IDF_TARGET_ESP32C3
     endchoice
 

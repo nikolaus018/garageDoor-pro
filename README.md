@@ -1,7 +1,7 @@
 # garageDoor-pro
 
-Opens the garage door when you leave home and when you arrive: an ESP32-C3, a GPS and an isolated
-switch output wired to a spare remote, powered over USB-C from the car. Home is set from a small
+Opens the garage door when you leave home and when you arrive: an ESP32-C3, a GPS and a transistor
+that presses the button of a spare remote, powered over USB-C from the car. Home is set from a small
 Wi-Fi web panel.
 
 **What gets built now:** the perfboard prototype from ready-made modules, see

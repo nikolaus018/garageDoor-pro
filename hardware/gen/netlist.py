@@ -18,8 +18,8 @@ PARTS = {
            "C51118", "AP2112K-3.3TRG1", "3.3 V 600 mA LDO"),
     "U4": ("USBLC6-2SC6", "Power_Protection:USBLC6-2SC6", "Package_TO_SOT_SMD:SOT-23-6",
            "C7519", "USBLC6-2SC6", "USB data line ESD protection"),
-    "K1": ("CPC1017N", "Relay_SolidState:CPC1017N", "Package_SO:SOP-4_3.8x4.1mm_P2.54mm",
-           "C81521", "CPC1017NTR", "PhotoMOS relay 60 V 100 mA, isolated switch output"),
+    "Q1": ("SS8050", "Transistor_BJT:SS8050", "Package_TO_SOT_SMD:SOT-23",
+           "C2150", "SS8050", "NPN transistor 25 V 1.5 A, switches the remote's button"),
     "J1": ("USB-C", "Connector:USB_C_Receptacle_USB2.0_16P",
            "Connector_USB:USB_C_Receptacle_HRO_TYPE-C-31-M-12",
            "C165948", "TYPE-C-31-M-12", "USB-C receptacle, power + data"),
@@ -49,7 +49,7 @@ PARTS = {
     "R5": ("10k", "Device:R", "Resistor_SMD:R_0402_1005Metric", "C25744", "0402WGF1002TCE", "GPIO2 pull-up"),
     "R6": ("5.1k", "Device:R", "Resistor_SMD:R_0402_1005Metric", "C25905", "0402WGF5101TCE", "CC1 pull-down"),
     "R7": ("5.1k", "Device:R", "Resistor_SMD:R_0402_1005Metric", "C25905", "0402WGF5101TCE", "CC2 pull-down"),
-    "R8": ("330R", "Device:R", "Resistor_SMD:R_0402_1005Metric", "C25104", "0402WGF3300TCE", "PhotoMOS LED current"),
+    "R8": ("330R", "Device:R", "Resistor_SMD:R_0402_1005Metric", "C25104", "0402WGF3300TCE", "Transistor base current"),
     "R9": ("100k", "Device:R", "Resistor_SMD:R_0402_1005Metric", "C25741", "0402WGF1003TCE", "Switch off during boot"),
     "R10": ("1k", "Device:R", "Resistor_SMD:R_0603_1608Metric", "C21190", "0603WAF1001T5E", "Red LED"),
     "R11": ("1k", "Device:R", "Resistor_SMD:R_0603_1608Metric", "C21190", "0603WAF1001T5E", "Green LED"),
@@ -76,7 +76,7 @@ ESP_NC = ["4", "7", "9", "10", "15", "17", "24", "25", "28", "29", "32", "33", "
 
 NETS = {
     "GND": [("U1", p) for p in ESP_GND] + [
-        ("U2", "1"), ("U2", "10"), ("U2", "12"), ("U3", "2"), ("U4", "2"), ("K1", "2"),
+        ("U2", "1"), ("U2", "10"), ("U2", "12"), ("U3", "2"), ("U4", "2"), ("Q1", "2"), ("J3", "2"),
         ("J1", "A1"), ("J1", "A12"), ("J1", "B1"), ("J1", "B12"), ("J1", "SH"), ("J2", "2"),
         ("D1", "2"), ("D2", "1"), ("D3", "1"), ("SW1", "2"), ("R6", "2"), ("R7", "2"), ("R9", "2"),
         ("C1", "2"), ("C3", "2"), ("C4", "2"), ("C5", "2"), ("C6", "2"), ("C7", "2"), ("C8", "2"),
@@ -96,10 +96,9 @@ NETS = {
     "LED_STATUS": [("U1", "16"), ("R11", "1")],
     "LED_G_A": [("R11", "2"), ("D3", "2")],
     "SWITCH": [("U1", "21"), ("R8", "1"), ("R9", "1"), ("R10", "1")],
-    "K1_LED_A": [("R8", "2"), ("K1", "1")],
+    "Q1_BASE": [("R8", "2"), ("Q1", "1")],
     "LED_R_A": [("R10", "2"), ("D2", "2")],
-    "OUT_A": [("K1", "4"), ("J3", "1")],
-    "OUT_B": [("K1", "3"), ("J3", "2")],
+    "REMOTE_PLUS": [("Q1", "3"), ("J3", "1")],   # collector; J3 pin 2 is GND (emitter)
     "GPS_TX": [("U2", "2"), ("U1", "19")],     # GNSS TXD -> ESP GPIO5 (UART1 RX)
     "GPS_RX": [("U2", "3"), ("U1", "18")],     # GNSS RXD <- ESP GPIO4 (UART1 TX)
     "GPS_RESET_N": [("U2", "9"), ("U1", "20")],
@@ -150,7 +149,7 @@ PLACEMENT = {
     "R2": (12.8, 24.4, 0, "F"),
     "C9": (15.0, 24.4, 0, "F"),
     "SW1": (20.2, 26.6, 0, "F"),
-    "K1": (28.5, 26.0, 0, "F"),
+    "Q1": (28.5, 26.0, 0, "F"),
     "R8": (25.6, 21.4, 90, "F"),
     "R9": (27.0, 21.4, 90, "F"),
     "R10": (11.6, 27.0, 0, "F"),

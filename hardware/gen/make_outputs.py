@@ -27,7 +27,6 @@ GERBER_LAYERS = ["F.Cu", "In1.Cu", "In2.Cu", "B.Cu", "F.Paste", "B.Paste", "F.Si
 # order preview still has to be checked, see hardware/ORDERING.md.
 ROTATION_OFFSETS = [
     (r"^Package_TO_SOT_SMD:SOT-23", 180),
-    (r"^Package_SO:SOP-4", 270),
     (r"^Diode_SMD:D_SOD-123", 180),
 ]
 

@@ -7,12 +7,12 @@
 #define GNSS_UART UART_NUM_1
 
 #if CONFIG_GARAGE_BOARD_PCB_V1
-// garageDoor-pro PCB v1.0 (hardware/gen/netlist.py)
+// garageDoor-pro PCB (hardware/gen/netlist.py)
 #define PIN_GPS_TX_TO_GNSS   GPIO_NUM_4   // UART1 TX -> receiver RXD
 #define PIN_GPS_RX_FROM_GNSS GPIO_NUM_5   // UART1 RX <- receiver TXD
 #define PIN_GPS_RESET_N      GPIO_NUM_6   // open-drain, low >= 1 ms resets the receiver
 #define HAS_GPS_RESET        1
-#define PIN_SWITCH           GPIO_NUM_7   // high closes the PhotoMOS (remote button) + red LED
+#define PIN_SWITCH           GPIO_NUM_7   // high turns the transistor on (remote button) + red LED
 #define PIN_BUTTON           GPIO_NUM_9   // BOOT / SETUP, active low
 #define PIN_LED_STATUS       GPIO_NUM_10
 #define LED_ACTIVE_LOW       0

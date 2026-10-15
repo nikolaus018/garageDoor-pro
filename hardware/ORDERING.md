@@ -74,7 +74,7 @@ preview before paying. Pin 1 of the part must sit on the pin-1 mark of the footp
 | U1 | ESP32-C3-MINI-1-H4X | antenna end over the bare copper-free area at the board edge |
 | U2 | MAX-M10S | pin 1 in the top-left corner of U2 (toward the USB-C side) |
 | U3, U4 | SOT-23-5 / SOT-23-6 | pin 1 dot matches |
-| K1 | CPC1017N | pin 1 (dot) next to R8 |
+| Q1 | SS8050 (SOT-23) | the single pin (collector) on the right, toward the screw terminal |
 | J1 | USB-C | receptacle opening at the top board edge |
 | J2 | U.FL | centre pin toward C2 |
 | D1 | SMF5.0A TVS | cathode band on the right, toward C3 (VIN_5V); anode to GND |
@@ -97,10 +97,11 @@ If something is off, rotate it in the preview (JLCPCB offers this) and note the 
 3. Serial log shows `start: NO_HOME` and the green LED flashes 3× every 3 s; the setup Wi-Fi
    `GarageDoor-XXXX` appears (fast green blinking).
 4. Connect the GNSS antenna, put it near a window: within ~1 minute the panel shows a fix.
-5. Wire the spare remote to the screw terminal, open the panel, press **Test**:
-   the red LED lights and the remote transmits.
-6. Measure across the screw terminal with a multimeter (continuity mode), either probe polarity:
-   open normally, closed for the 5 s after **Hold the remote for 5 s** in the panel.
+5. Remote not connected yet: multimeter on Ω across the screw terminal, red probe on **+**, black on
+   **−**. It reads open; tap **Hold the remote for 5 s** in the panel and it reads low for 5 s,
+   while the red LED is lit.
+6. Wire the spare remote: button + side to **+**, − side to **−** (see `docs/user-guide.md`). Tap
+   **Press the remote once**: the red LED flashes and the remote transmits.
 
 Only then install it in the car (see `docs/user-guide.md`).
 

@@ -91,10 +91,30 @@ def widen_narrow_tracks(board):
     return widened, kept
 
 
+def remove_dangling_vias(board):
+    """Router vias with copper on one layer only connect nothing (DRC via_dangling): drop them."""
+    tracks = [t for t in board.GetTracks() if t.Type() == pcbnew.PCB_TRACE_T]
+    pads = [p for fp in board.GetFootprints() for p in fp.Pads()]
+    removed = 0
+    for v in [t for t in board.GetTracks() if t.Type() == pcbnew.PCB_VIA_T]:
+        if v.GetNetname() in netlist.POWER_NETS:   # these reach the inner planes
+            continue
+        pos, code = v.GetPosition(), v.GetNetCode()
+        layers = {t.GetLayer() for t in tracks if t.GetNetCode() == code and pos in (t.GetStart(), t.GetEnd())}
+        for p in pads:
+            if p.GetNetCode() == code and p.HitTest(pos):
+                layers |= {lay for lay in (pcbnew.F_Cu, pcbnew.B_Cu) if p.IsOnLayer(lay)}
+        if len(layers) <= 1:
+            board.Remove(v)
+            removed += 1
+    return removed
+
+
 def main():
     board = freeroute()
     widened, kept = widen_narrow_tracks(board)
     print(f"widened {widened} necked-down tracks, {kept} stay narrow")
+    print(f"removed {remove_dangling_vias(board)} dangling router vias")
     gnd = board.FindNet("GND")
     nets = {"GND": gnd}
     add_zone(board, nets, "GND", pcbnew.F_Cu, 0)

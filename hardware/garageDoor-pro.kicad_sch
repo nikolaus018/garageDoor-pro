@@ -2238,213 +2238,6 @@
           (number "5" (effects (font (size 1.27 1.27))))))
       (embedded_fonts no))
     (symbol
-      "Relay_SolidState:CPC1017N"
-      (exclude_from_sim no)
-      (in_bom yes)
-      (on_board yes)
-      (in_pos_files yes)
-      (duplicate_pin_numbers_are_jumpers no)
-      (property
-        "Reference"
-        "U"
-        (at -5.08 5.08 0)
-        (show_name no)
-        (do_not_autoplace no)
-        (effects (font (size 1.27 1.27)) (justify left)))
-      (property
-        "Value"
-        "CPC1017N"
-        (at 0 5.08 0)
-        (show_name no)
-        (do_not_autoplace no)
-        (effects (font (size 1.27 1.27)) (justify left)))
-      (property
-        "Footprint"
-        "Package_SO:SOP-4_3.8x4.1mm_P2.54mm"
-        (at 0 -5.334 0)
-        (show_name no)
-        (do_not_autoplace no)
-        (hide yes)
-        (effects (font (size 1.27 1.27) (italic yes))))
-      (property
-        "Datasheet"
-        "https://www.littelfuse.com/assetdocs/littelfuse-integrated-circuits-cpc1017n-datasheet?assetguid=b4f177f1-629f-4104-97a5-8b8d709e83de"
-        (at 0 -9.398 0)
-        (show_name no)
-        (do_not_autoplace no)
-        (hide yes)
-        (effects (font (size 1.27 1.27))))
-      (property
-        "Description"
-        "Form A, Solid State Relay (Photo MOSFET) 60V, 0.1A, 16Ohm, AC/DC, SO-4"
-        (at 0 -7.366 0)
-        (show_name no)
-        (do_not_autoplace no)
-        (hide yes)
-        (effects (font (size 1.27 1.27))))
-      (property
-        "ki_keywords"
-        "MOSFET Output Photorelay 1-Form-A NO"
-        (at 0 0 0)
-        (show_name no)
-        (do_not_autoplace no)
-        (hide yes)
-        (effects (font (size 1.27 1.27))))
-      (property
-        "ki_fp_filters"
-        "SOP*3.8x4.1mm*P2.54mm*"
-        (at 0 0 0)
-        (show_name no)
-        (do_not_autoplace no)
-        (hide yes)
-        (effects (font (size 1.27 1.27))))
-      (symbol
-        "CPC1017N_0_1"
-        (rectangle
-          (start -5.08 3.81)
-          (end 5.08 -3.81)
-          (stroke (width 0.254) (type default))
-          (fill (type background)))
-        (polyline
-          (pts (xy -5.08 2.54) (xy -3.175 2.54) (xy -3.175 -2.54) (xy -5.08 -2.54))
-          (stroke (width 0) (type default))
-          (fill (type none)))
-        (polyline
-          (pts (xy -3.81 -0.635) (xy -2.54 -0.635))
-          (stroke (width 0) (type default))
-          (fill (type none)))
-        (polyline
-          (pts (xy -3.175 -0.635) (xy -3.81 0.635) (xy -2.54 0.635) (xy -3.175 -0.635))
-          (stroke (width 0) (type default))
-          (fill (type none)))
-        (polyline
-          (pts (xy -1.905 0.508) (xy -0.635 0.508) (xy -1.016 0.381) (xy -1.016 0.635) (xy -0.635 0.508))
-          (stroke (width 0) (type default))
-          (fill (type none)))
-        (polyline
-          (pts (xy -1.905 -0.508) (xy -0.635 -0.508) (xy -1.016 -0.635) (xy -1.016 -0.381) (xy -0.635 -0.508))
-          (stroke (width 0) (type default))
-          (fill (type none)))
-        (polyline
-          (pts (xy 1.016 2.159) (xy 1.016 0.635))
-          (stroke (width 0.2032) (type default))
-          (fill (type none)))
-        (polyline
-          (pts (xy 1.016 1.397) (xy 0.508 1.397) (xy 0.508 -1.397) (xy 1.016 -1.397))
-          (stroke (width 0) (type default))
-          (fill (type none)))
-        (polyline
-          (pts (xy 1.016 -0.635) (xy 1.016 -2.159))
-          (stroke (width 0.2032) (type default))
-          (fill (type none)))
-        (polyline
-          (pts (xy 1.651 2.159) (xy 2.794 2.159) (xy 2.794 2.54) (xy 5.08 2.54))
-          (stroke (width 0) (type default))
-          (fill (type none)))
-        (polyline
-          (pts (xy 1.651 1.397) (xy 2.794 1.397) (xy 2.794 0.635))
-          (stroke (width 0) (type default))
-          (fill (type none)))
-        (polyline
-          (pts (xy 1.651 -0.635) (xy 2.794 -0.635) (xy 2.794 0.635) (xy 1.651 0.635))
-          (stroke (width 0) (type default))
-          (fill (type none)))
-        (polyline
-          (pts (xy 1.651 -1.397) (xy 2.794 -1.397) (xy 2.794 -0.635))
-          (stroke (width 0) (type default))
-          (fill (type none)))
-        (polyline
-          (pts (xy 1.651 -2.159) (xy 2.794 -2.159) (xy 2.794 -2.54) (xy 5.08 -2.54))
-          (stroke (width 0) (type default))
-          (fill (type none)))
-        (polyline
-          (pts (xy 1.778 1.397) (xy 2.286 1.524) (xy 2.286 1.27) (xy 1.778 1.397))
-          (stroke (width 0) (type default))
-          (fill (type none)))
-        (polyline
-          (pts (xy 1.778 -1.397) (xy 2.286 -1.27) (xy 2.286 -1.524) (xy 1.778 -1.397))
-          (stroke (width 0) (type default))
-          (fill (type none)))
-        (circle (center 2.794 0.635) (radius 0.127) (stroke (width 0) (type default)) (fill (type none)))
-        (polyline (pts (xy 2.794 0) (xy 3.81 0)) (stroke (width 0) (type default)) (fill (type none)))
-        (circle (center 2.794 0) (radius 0.127) (stroke (width 0) (type default)) (fill (type none)))
-        (circle (center 2.794 -0.635) (radius 0.127) (stroke (width 0) (type default)) (fill (type none)))
-        (polyline
-          (pts (xy 3.429 1.651) (xy 4.191 1.651))
-          (stroke (width 0) (type default))
-          (fill (type none)))
-        (polyline
-          (pts (xy 3.429 -1.651) (xy 4.191 -1.651))
-          (stroke (width 0) (type default))
-          (fill (type none)))
-        (circle (center 3.81 2.54) (radius 0.127) (stroke (width 0) (type default)) (fill (type none)))
-        (polyline
-          (pts (xy 3.81 1.651) (xy 3.429 0.889) (xy 4.191 0.889) (xy 3.81 1.651))
-          (stroke (width 0) (type default))
-          (fill (type none)))
-        (circle (center 3.81 0) (radius 0.127) (stroke (width 0) (type default)) (fill (type none)))
-        (polyline
-          (pts (xy 3.81 -1.651) (xy 3.429 -0.889) (xy 4.191 -0.889) (xy 3.81 -1.651))
-          (stroke (width 0) (type default))
-          (fill (type none)))
-        (polyline (pts (xy 3.81 -2.54) (xy 3.81 2.54)) (stroke (width 0) (type default)) (fill (type none)))
-        (circle (center 3.81 -2.54) (radius 0.127) (stroke (width 0) (type default)) (fill (type none))))
-      (symbol
-        "CPC1017N_1_1"
-        (polyline
-          (pts (xy 1.524 2.286) (xy 1.524 2.032))
-          (stroke (width 0.3302) (type solid))
-          (fill (type none)))
-        (polyline
-          (pts (xy 1.524 1.524) (xy 1.524 1.27))
-          (stroke (width 0.3302) (type solid))
-          (fill (type none)))
-        (polyline
-          (pts (xy 1.524 0.762) (xy 1.524 0.508))
-          (stroke (width 0.3302) (type solid))
-          (fill (type none)))
-        (polyline
-          (pts (xy 1.524 -0.508) (xy 1.524 -0.762))
-          (stroke (width 0.3302) (type solid))
-          (fill (type none)))
-        (polyline
-          (pts (xy 1.524 -1.27) (xy 1.524 -1.524))
-          (stroke (width 0.3302) (type solid))
-          (fill (type none)))
-        (polyline
-          (pts (xy 1.524 -2.032) (xy 1.524 -2.286))
-          (stroke (width 0.3302) (type solid))
-          (fill (type none)))
-        (pin
-          passive
-          line
-          (at -7.62 2.54 0)
-          (length 2.54)
-          (name "" (effects (font (size 1.27 1.27))))
-          (number "1" (effects (font (size 1.27 1.27)))))
-        (pin
-          passive
-          line
-          (at -7.62 -2.54 0)
-          (length 2.54)
-          (name "" (effects (font (size 1.27 1.27))))
-          (number "2" (effects (font (size 1.27 1.27)))))
-        (pin
-          passive
-          line
-          (at 7.62 -2.54 180)
-          (length 2.54)
-          (name "" (effects (font (size 1.27 1.27))))
-          (number "3" (effects (font (size 1.27 1.27)))))
-        (pin
-          passive
-          line
-          (at 7.62 2.54 180)
-          (length 2.54)
-          (name "" (effects (font (size 1.27 1.27))))
-          (number "4" (effects (font (size 1.27 1.27))))))
-      (embedded_fonts no))
-    (symbol
       "Switch:SW_Push"
       (pin_numbers (hide yes))
       (pin_names (offset 1.016) (hide yes))
@@ -2519,6 +2312,126 @@
           (length 2.54)
           (name "2" (effects (font (size 1.27 1.27))))
           (number "2" (effects (font (size 1.27 1.27))))))
+      (embedded_fonts no))
+    (symbol
+      "Transistor_BJT:SS8050"
+      (property
+        "Reference"
+        "Q"
+        (at 5.08 1.905 0)
+        (show_name no)
+        (do_not_autoplace no)
+        (effects (font (size 1.27 1.27)) (justify left)))
+      (property
+        "Value"
+        "SS8050"
+        (at 5.08 0 0)
+        (show_name no)
+        (do_not_autoplace no)
+        (effects (font (size 1.27 1.27)) (justify left)))
+      (property
+        "Footprint"
+        "Package_TO_SOT_SMD:SOT-23"
+        (at 5.08 -7.366 0)
+        (show_name no)
+        (do_not_autoplace no)
+        (hide yes)
+        (effects (font (size 1.27 1.27) (italic yes)) (justify left)))
+      (property
+        "Datasheet"
+        "http://www.secosgmbh.com/datasheet/products/SSMPTransistor/SOT-23/SS8050.pdf"
+        (at 5.08 -4.826 0)
+        (show_name no)
+        (do_not_autoplace no)
+        (hide yes)
+        (effects (font (size 1.27 1.27)) (justify left)))
+      (property
+        "Description"
+        "General Purpose NPN Transistor, 1.5A Ic, 25V Vce, SOT-23"
+        (at 34.036 -2.286 0)
+        (show_name no)
+        (do_not_autoplace no)
+        (hide yes)
+        (effects (font (size 1.27 1.27))))
+      (property
+        "ki_keywords"
+        "SS8050 NPN Transistor"
+        (at 0 0 0)
+        (show_name no)
+        (do_not_autoplace no)
+        (hide yes)
+        (effects (font (size 1.27 1.27))))
+      (property
+        "ki_fp_filters"
+        "SOT?23*"
+        (at 0 0 0)
+        (show_name no)
+        (do_not_autoplace no)
+        (hide yes)
+        (effects (font (size 1.27 1.27))))
+      (embedded_fonts no)
+      (pin_names (offset 0) (hide yes))
+      (exclude_from_sim no)
+      (in_bom yes)
+      (on_board yes)
+      (in_pos_files yes)
+      (duplicate_pin_numbers_are_jumpers no)
+      (property
+        "Sim.Device"
+        "NPN"
+        (at 0 0 0)
+        (show_name no)
+        (do_not_autoplace no)
+        (hide yes)
+        (effects (font (size 1.27 1.27))))
+      (property
+        "Sim.Pins"
+        "1=B 2=E 3=C"
+        (at 0 0 0)
+        (show_name no)
+        (do_not_autoplace no)
+        (hide yes)
+        (effects (font (size 1.27 1.27))))
+      (symbol
+        "SS8050_0_1"
+        (polyline (pts (xy -2.54 0) (xy 0.635 0)) (stroke (width 0) (type default)) (fill (type none)))
+        (polyline
+          (pts (xy 0.635 1.905) (xy 0.635 -1.905))
+          (stroke (width 0.508) (type default))
+          (fill (type none)))
+        (circle (center 1.27 0) (radius 2.8194) (stroke (width 0.254) (type default)) (fill (type none))))
+      (symbol
+        "SS8050_1_1"
+        (polyline (pts (xy 0.635 0.635) (xy 2.54 2.54)) (stroke (width 0) (type default)) (fill (type none)))
+        (polyline
+          (pts (xy 0.635 -0.635) (xy 2.54 -2.54))
+          (stroke (width 0) (type default))
+          (fill (type none)))
+        (polyline
+          (pts (xy 1.27 -1.778) (xy 1.778 -1.27) (xy 2.286 -2.286) (xy 1.27 -1.778))
+          (stroke (width 0) (type default))
+          (fill (type outline)))
+        (pin
+          input
+          line
+          (at -5.08 0 0)
+          (length 2.54)
+          (name "B" (effects (font (size 1.27 1.27))))
+          (number "1" (effects (font (size 1.27 1.27)))))
+        (pin
+          passive
+          line
+          (at 2.54 -5.08 90)
+          (length 2.54)
+          (name "E" (effects (font (size 1.27 1.27))))
+          (number "2" (effects (font (size 1.27 1.27)))))
+        (pin
+          passive
+          line
+          (at 2.54 5.08 270)
+          (length 2.54)
+          (name "C" (effects (font (size 1.27 1.27))))
+          (number "3" (effects (font (size 1.27 1.27))))))
       (embedded_fonts no))
     (symbol
       "power:+3V3"
@@ -3638,74 +3551,73 @@
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid "d673aa70-04a2-5a17-aa45-f432f0ec2d2c"))
   (symbol
-    (lib_id "Relay_SolidState:CPC1017N")
+    (lib_id "Transistor_BJT:SS8050")
     (at 124.46 210.82 0)
     (unit 1)
     (exclude_from_sim no)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "893b060b-c777-591c-ab82-20eb089a57d3")
+    (uuid "e1d94f6d-357e-5418-a497-090bbdaba1fd")
     (property
       "Reference"
-      "K1"
-      (at 119.38 205.74 0)
+      "Q1"
+      (at 129.54 208.915 0)
       (effects (font (size 1.27 1.27))))
     (property
       "Value"
-      "CPC1017N"
-      (at 124.46 205.74 0)
+      "SS8050"
+      (at 129.54 210.82 0)
       (effects (font (size 1.27 1.27))))
     (property
       "Footprint"
-      "Package_SO:SOP-4_3.8x4.1mm_P2.54mm"
-      (at 124.46 216.154 0)
+      "Package_TO_SOT_SMD:SOT-23"
+      (at 129.54 218.186 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
     (property
       "Datasheet"
-      "https://www.littelfuse.com/assetdocs/littelfuse-integrated-circuits-cpc1017n-datasheet?assetguid=b4f177f1-629f-4104-97a5-8b8d709e83de"
-      (at 124.46 220.218 0)
+      "http://www.secosgmbh.com/datasheet/products/SSMPTransistor/SOT-23/SS8050.pdf"
+      (at 129.54 215.646 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
     (property
       "LCSC"
-      "C81521"
+      "C2150"
       (at 124.46 210.82 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
     (property
       "MPN"
-      "CPC1017NTR"
+      "SS8050"
       (at 124.46 210.82 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
     (property
       "Description"
-      "PhotoMOS relay 60 V 100 mA, isolated switch output"
+      "NPN transistor 25 V 1.5 A, switches the remote's button"
       (at 124.46 210.82 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "eb0d4795-4985-5083-b973-e59b823d05d9"))
-    (pin "2" (uuid "a47cc140-7add-5d07-8609-6fc47f9bbc4b"))
-    (pin "3" (uuid "2547babd-cf80-5fbf-8f04-ee80277ff8ee"))
-    (pin "4" (uuid "7096f9ca-145d-5dcb-ad2d-78bd6cf48c94"))
+    (pin "1" (uuid "38678077-c5cd-56be-81a0-06fbeb8dd8d5"))
+    (pin "2" (uuid "30f99d4a-3a0d-5058-b78d-f61b3197a38b"))
+    (pin "3" (uuid "848afa8c-ebee-5494-82e7-0fa4fd82ebaa"))
     (instances
       (project
         "garageDoor-pro"
-        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "K1") (unit 1)))))
+        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "Q1") (unit 1)))))
   (wire
-    (pts (xy 116.84 208.28) (xy 114.3 208.28))
+    (pts (xy 119.38 210.82) (xy 116.84 210.82))
     (stroke (width 0) (type default))
-    (uuid "d99ed1f7-234e-596e-a991-15b61b459fe3"))
+    (uuid "ff83cd57-9ae6-5053-a401-0fde5070bc38"))
   (label
-    "K1_LED_A"
-    (at 114.3 208.28 180)
+    "Q1_BASE"
+    (at 116.84 210.82 180)
     (fields_autoplaced yes)
     (effects (font (size 1.27 1.27)) (justify right bottom))
-    (uuid "4b7a9ee0-cca7-515b-b77c-7c4be81b9ca8"))
+    (uuid "32464aef-51a0-5069-a297-f5b98cf1b59f"))
   (wire
-    (pts (xy 116.84 213.36) (xy 114.3 213.36))
+    (pts (xy 127 215.9) (xy 127 218.44))
     (stroke (width 0) (type default))
-    (uuid "945e339d-2b21-5a15-86c7-8c7c4675320b"))
+    (uuid "9060ac5c-70dd-5ec3-8a49-ed4af1941290"))
   (symbol
     (lib_id "power:GND")
-    (at 114.3 213.36 270)
+    (at 127 218.44 0)
     (unit 1)
     (exclude_from_sim no)
     (in_bom yes)
@@ -3715,22 +3627,22 @@
     (property
       "Reference"
       "#PWR009"
-      (at 114.3 219.71 0)
+      (at 127 224.79 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
     (property
       "Value"
       "GND"
-      (at 114.3 217.17 0)
+      (at 127 222.25 0)
       (effects (font (size 1.27 1.27))))
     (property
       "Footprint"
       ""
-      (at 114.3 213.36 0)
+      (at 127 218.44 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
     (property
       "Datasheet"
       "~"
-      (at 114.3 213.36 0)
+      (at 127 218.44 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
     (pin "1" (uuid "377dad26-1c82-59ec-b545-60ce6ec64c51"))
     (instances
@@ -3738,25 +3650,15 @@
         "garageDoor-pro"
         (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR009") (unit 1)))))
   (wire
-    (pts (xy 132.08 213.36) (xy 134.62 213.36))
+    (pts (xy 127 205.74) (xy 127 203.2))
     (stroke (width 0) (type default))
-    (uuid "41c9db51-ecc5-55b4-a125-2e28373b8494"))
+    (uuid "139544dd-4969-5020-bfd7-30d319eda356"))
   (label
-    "OUT_B"
-    (at 134.62 213.36 0)
+    "REMOTE_PLUS"
+    (at 127 203.2 90)
     (fields_autoplaced yes)
     (effects (font (size 1.27 1.27)) (justify left bottom))
-    (uuid "755754ea-0985-5e54-bb13-7cd0cbcbad24"))
-  (wire
-    (pts (xy 132.08 208.28) (xy 134.62 208.28))
-    (stroke (width 0) (type default))
-    (uuid "598a7a20-3e99-573d-8e3c-9ffaed30f109"))
-  (label
-    "OUT_A"
-    (at 134.62 208.28 0)
-    (fields_autoplaced yes)
-    (effects (font (size 1.27 1.27)) (justify left bottom))
-    (uuid "65ed42f3-24b1-569a-8503-686d1793ebde"))
+    (uuid "14135be0-6847-5592-be15-39b96c65ac78"))
   (symbol
     (lib_id "Connector:USB_C_Receptacle_USB2.0_16P")
     (at 45.72 76.2 0)
@@ -4123,7 +4025,7 @@
     (stroke (width 0) (type default))
     (uuid "ce74fd6c-7ef1-556f-a5a0-13b56d2738c7"))
   (label
-    "OUT_A"
+    "REMOTE_PLUS"
     (at 154.94 213.36 180)
     (fields_autoplaced yes)
     (effects (font (size 1.27 1.27)) (justify right bottom))
@@ -4132,12 +4034,40 @@
     (pts (xy 157.48 215.9) (xy 154.94 215.9))
     (stroke (width 0) (type default))
     (uuid "68a03536-3019-5126-a6ac-5ce6dfd66400"))
-  (label
-    "OUT_B"
-    (at 154.94 215.9 180)
-    (fields_autoplaced yes)
-    (effects (font (size 1.27 1.27)) (justify right bottom))
-    (uuid "fc5ea5cd-3f17-5506-b4c2-89209498e82e"))
+  (symbol
+    (lib_id "power:GND")
+    (at 154.94 215.9 270)
+    (unit 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (uuid "f852dfb2-361b-5042-953b-5c17e2aa24f9")
+    (property
+      "Reference"
+      "#PWR013"
+      (at 154.94 222.25 0)
+      (effects (font (size 1.27 1.27)) (hide yes)))
+    (property
+      "Value"
+      "GND"
+      (at 154.94 219.71 0)
+      (effects (font (size 1.27 1.27))))
+    (property
+      "Footprint"
+      ""
+      (at 154.94 215.9 0)
+      (effects (font (size 1.27 1.27)) (hide yes)))
+    (property
+      "Datasheet"
+      "~"
+      (at 154.94 215.9 0)
+      (effects (font (size 1.27 1.27)) (hide yes)))
+    (pin "1" (uuid "0e8f78ae-8724-5862-8ee1-7c14aca072f0"))
+    (instances
+      (project
+        "garageDoor-pro"
+        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR013") (unit 1)))))
   (symbol
     (lib_id "Device:Polyfuse")
     (at 101.6 50.8 0)
@@ -4280,10 +4210,10 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "f852dfb2-361b-5042-953b-5c17e2aa24f9")
+    (uuid "049fe033-7ef5-5aba-a3fa-246ad0f571a0")
     (property
       "Reference"
-      "#PWR013"
+      "#PWR014"
       (at 133.35 72.39 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
     (property
@@ -4301,11 +4231,11 @@
       "~"
       (at 133.35 66.04 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "0e8f78ae-8724-5862-8ee1-7c14aca072f0"))
+    (pin "1" (uuid "b67ecdbd-aec2-5c9f-bba3-84ccf461aa11"))
     (instances
       (project
         "garageDoor-pro"
-        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR013") (unit 1)))))
+        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR014") (unit 1)))))
   (symbol
     (lib_id "Device:LED")
     (at 88.9 226.06 0)
@@ -4368,10 +4298,10 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "049fe033-7ef5-5aba-a3fa-246ad0f571a0")
+    (uuid "142c553f-c355-55d0-a4d0-069cb26603a4")
     (property
       "Reference"
-      "#PWR014"
+      "#PWR015"
       (at 82.55 232.41 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
     (property
@@ -4389,11 +4319,11 @@
       "~"
       (at 82.55 226.06 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "b67ecdbd-aec2-5c9f-bba3-84ccf461aa11"))
+    (pin "1" (uuid "9b235446-89ca-5249-9bce-86024246327b"))
     (instances
       (project
         "garageDoor-pro"
-        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR014") (unit 1)))))
+        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR015") (unit 1)))))
   (wire
     (pts (xy 92.71 226.06) (xy 95.25 226.06))
     (stroke (width 0) (type default))
@@ -4466,10 +4396,10 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "142c553f-c355-55d0-a4d0-069cb26603a4")
+    (uuid "4256ae97-90a4-5ccc-9dd3-ba6d52515852")
     (property
       "Reference"
-      "#PWR015"
+      "#PWR016"
       (at 275.59 219.71 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
     (property
@@ -4487,11 +4417,11 @@
       "~"
       (at 275.59 213.36 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "9b235446-89ca-5249-9bce-86024246327b"))
+    (pin "1" (uuid "ae8d2b69-3b6d-5451-a06c-e460a755c401"))
     (instances
       (project
         "garageDoor-pro"
-        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR015") (unit 1)))))
+        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR016") (unit 1)))))
   (wire
     (pts (xy 285.75 213.36) (xy 288.29 213.36))
     (stroke (width 0) (type default))
@@ -4644,10 +4574,10 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "4256ae97-90a4-5ccc-9dd3-ba6d52515852")
+    (uuid "b7108e8c-09cd-58bf-a220-f9b7de6d5371")
     (property
       "Reference"
-      "#PWR016"
+      "#PWR017"
       (at 289.56 184.15 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
     (property
@@ -4665,11 +4595,11 @@
       "~"
       (at 289.56 177.8 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "ae8d2b69-3b6d-5451-a06c-e460a755c401"))
+    (pin "1" (uuid "d5ffd29a-9cf2-5b69-827a-58e522b03807"))
     (instances
       (project
         "garageDoor-pro"
-        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR016") (unit 1)))))
+        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR017") (unit 1)))))
   (symbol
     (lib_id "Device:R")
     (at 381 93.98 0)
@@ -4802,10 +4732,10 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "b7108e8c-09cd-58bf-a220-f9b7de6d5371")
+    (uuid "a61f0416-9143-5677-92a3-7b60cd10071c")
     (property
       "Reference"
-      "#PWR017"
+      "#PWR018"
       (at 264.16 114.3 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
     (property
@@ -4823,11 +4753,11 @@
       "~"
       (at 264.16 110.49 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "d5ffd29a-9cf2-5b69-827a-58e522b03807"))
+    (pin "1" (uuid "98f9fbb8-b4fc-55cc-a337-708440093a2b"))
     (instances
       (project
         "garageDoor-pro"
-        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR017") (unit 1)))))
+        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR018") (unit 1)))))
   (wire
     (pts (xy 264.16 120.65) (xy 264.16 123.19))
     (stroke (width 0) (type default))
@@ -4900,10 +4830,10 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "a61f0416-9143-5677-92a3-7b60cd10071c")
+    (uuid "02423abe-ba72-5e3a-b2ca-2159815a3f74")
     (property
       "Reference"
-      "#PWR018"
+      "#PWR019"
       (at 264.16 147.32 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
     (property
@@ -4921,11 +4851,11 @@
       "~"
       (at 264.16 143.51 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "98f9fbb8-b4fc-55cc-a337-708440093a2b"))
+    (pin "1" (uuid "d12c1b67-414a-532a-bdde-81b5fbdce6a9"))
     (instances
       (project
         "garageDoor-pro"
-        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR018") (unit 1)))))
+        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR019") (unit 1)))))
   (wire
     (pts (xy 264.16 153.67) (xy 264.16 156.21))
     (stroke (width 0) (type default))
@@ -4998,10 +4928,10 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "02423abe-ba72-5e3a-b2ca-2159815a3f74")
+    (uuid "317f94e5-5b45-53eb-bea4-ffeee735701d")
     (property
       "Reference"
-      "#PWR019"
+      "#PWR020"
       (at 276.86 147.32 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
     (property
@@ -5019,11 +4949,11 @@
       "~"
       (at 276.86 143.51 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "d12c1b67-414a-532a-bdde-81b5fbdce6a9"))
+    (pin "1" (uuid "83b6e450-17d9-55b4-9170-46339291b059"))
     (instances
       (project
         "garageDoor-pro"
-        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR019") (unit 1)))))
+        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR020") (unit 1)))))
   (wire
     (pts (xy 276.86 153.67) (xy 276.86 156.21))
     (stroke (width 0) (type default))
@@ -5096,10 +5026,10 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "317f94e5-5b45-53eb-bea4-ffeee735701d")
+    (uuid "9bbbc638-c82b-5208-bf0d-4c1e8283c225")
     (property
       "Reference"
-      "#PWR020"
+      "#PWR021"
       (at 289.56 147.32 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
     (property
@@ -5117,11 +5047,11 @@
       "~"
       (at 289.56 143.51 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "83b6e450-17d9-55b4-9170-46339291b059"))
+    (pin "1" (uuid "2f83af6a-65bc-5a85-843d-a66175826e90"))
     (instances
       (project
         "garageDoor-pro"
-        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR020") (unit 1)))))
+        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR021") (unit 1)))))
   (wire
     (pts (xy 289.56 153.67) (xy 289.56 156.21))
     (stroke (width 0) (type default))
@@ -5204,10 +5134,10 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "9bbbc638-c82b-5208-bf0d-4c1e8283c225")
+    (uuid "da934d29-ae62-59d1-901f-a4b1e805c0d4")
     (property
       "Reference"
-      "#PWR021"
+      "#PWR022"
       (at 60.96 139.7 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
     (property
@@ -5225,11 +5155,11 @@
       "~"
       (at 60.96 133.35 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "2f83af6a-65bc-5a85-843d-a66175826e90"))
+    (pin "1" (uuid "3bfc3920-2be1-5e05-bdb9-3094d3403dbb"))
     (instances
       (project
         "garageDoor-pro"
-        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR021") (unit 1)))))
+        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR022") (unit 1)))))
   (symbol
     (lib_id "Device:R")
     (at 76.2 127 0)
@@ -5302,10 +5232,10 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "da934d29-ae62-59d1-901f-a4b1e805c0d4")
+    (uuid "4f5631c6-b7d2-5f6d-97da-1bb312a5bdc4")
     (property
       "Reference"
-      "#PWR022"
+      "#PWR023"
       (at 76.2 139.7 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
     (property
@@ -5323,11 +5253,11 @@
       "~"
       (at 76.2 133.35 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "3bfc3920-2be1-5e05-bdb9-3094d3403dbb"))
+    (pin "1" (uuid "8c638cfc-bd56-56c3-93e9-b1a362faeee1"))
     (instances
       (project
         "garageDoor-pro"
-        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR022") (unit 1)))))
+        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR023") (unit 1)))))
   (symbol
     (lib_id "Device:R")
     (at 45.72 210.82 0)
@@ -5369,7 +5299,7 @@
       (effects (font (size 1.27 1.27)) (hide yes)))
     (property
       "Description"
-      "PhotoMOS LED current"
+      "Transistor base current"
       (at 45.72 210.82 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
     (pin "1" (uuid "261a2dcd-8dcd-57f8-8750-c820e05cc721"))
@@ -5393,7 +5323,7 @@
     (stroke (width 0) (type default))
     (uuid "5ec3cce0-7ddb-5de5-820e-d2470676d781"))
   (label
-    "K1_LED_A"
+    "Q1_BASE"
     (at 45.72 217.17 270)
     (fields_autoplaced yes)
     (effects (font (size 1.27 1.27)) (justify right bottom))
@@ -5470,10 +5400,10 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "4f5631c6-b7d2-5f6d-97da-1bb312a5bdc4")
+    (uuid "79230c74-3a43-5409-aae1-41a35a3fb7ed")
     (property
       "Reference"
-      "#PWR023"
+      "#PWR024"
       (at 58.42 223.52 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
     (property
@@ -5491,11 +5421,11 @@
       "~"
       (at 58.42 217.17 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "8c638cfc-bd56-56c3-93e9-b1a362faeee1"))
+    (pin "1" (uuid "a73fb3a6-b6a2-558c-b28d-b7c48d2c87df"))
     (instances
       (project
         "garageDoor-pro"
-        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR023") (unit 1)))))
+        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR024") (unit 1)))))
   (symbol
     (lib_id "Device:R")
     (at 71.12 210.82 0)
@@ -5708,10 +5638,10 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "79230c74-3a43-5409-aae1-41a35a3fb7ed")
+    (uuid "8add67c2-b8a8-5f1e-9114-095fd52d14dd")
     (property
       "Reference"
-      "#PWR024"
+      "#PWR025"
       (at 393.7 119.38 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
     (property
@@ -5729,11 +5659,11 @@
       "~"
       (at 393.7 113.03 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "a73fb3a6-b6a2-558c-b28d-b7c48d2c87df"))
+    (pin "1" (uuid "4198acf9-b0d3-5cdf-8279-17042410a4a5"))
     (instances
       (project
         "garageDoor-pro"
-        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR024") (unit 1)))))
+        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR025") (unit 1)))))
   (symbol
     (lib_id "Device:C")
     (at 393.7 147.32 0)
@@ -5876,10 +5806,10 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "8add67c2-b8a8-5f1e-9114-095fd52d14dd")
+    (uuid "72c8cd17-995e-585a-85db-1473f56bb8ec")
     (property
       "Reference"
-      "#PWR025"
+      "#PWR026"
       (at 149.86 78.74 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
     (property
@@ -5897,11 +5827,11 @@
       "~"
       (at 149.86 72.39 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "4198acf9-b0d3-5cdf-8279-17042410a4a5"))
+    (pin "1" (uuid "02560154-0d5d-5e91-a60e-d57ea4576a87"))
     (instances
       (project
         "garageDoor-pro"
-        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR025") (unit 1)))))
+        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR026") (unit 1)))))
   (symbol
     (lib_id "Device:C")
     (at 215.9 66.04 0)
@@ -5964,10 +5894,10 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "72c8cd17-995e-585a-85db-1473f56bb8ec")
+    (uuid "54b28aab-70bd-5abf-a2c4-5683fa246bbc")
     (property
       "Reference"
-      "#PWR026"
+      "#PWR027"
       (at 215.9 63.5 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
     (property
@@ -5985,11 +5915,11 @@
       "~"
       (at 215.9 59.69 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "02560154-0d5d-5e91-a60e-d57ea4576a87"))
+    (pin "1" (uuid "10fbc7bd-5562-5b92-a13e-2321f1aeb21b"))
     (instances
       (project
         "garageDoor-pro"
-        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR026") (unit 1)))))
+        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR027") (unit 1)))))
   (wire
     (pts (xy 215.9 69.85) (xy 215.9 72.39))
     (stroke (width 0) (type default))
@@ -6002,10 +5932,10 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "54b28aab-70bd-5abf-a2c4-5683fa246bbc")
+    (uuid "5b655425-a1e3-54f4-bf78-4151c7e86ab6")
     (property
       "Reference"
-      "#PWR027"
+      "#PWR028"
       (at 215.9 78.74 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
     (property
@@ -6023,11 +5953,11 @@
       "~"
       (at 215.9 72.39 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "10fbc7bd-5562-5b92-a13e-2321f1aeb21b"))
+    (pin "1" (uuid "5138456d-a895-5660-b66d-0dd2cd0d3118"))
     (instances
       (project
         "garageDoor-pro"
-        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR027") (unit 1)))))
+        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR028") (unit 1)))))
   (symbol
     (lib_id "Device:C")
     (at 137.16 205.74 0)
@@ -6090,10 +6020,10 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "5b655425-a1e3-54f4-bf78-4151c7e86ab6")
+    (uuid "9fd03234-5728-500c-b91c-67c5c771996a")
     (property
       "Reference"
-      "#PWR028"
+      "#PWR029"
       (at 137.16 203.2 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
     (property
@@ -6111,11 +6041,11 @@
       "~"
       (at 137.16 199.39 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "5138456d-a895-5660-b66d-0dd2cd0d3118"))
+    (pin "1" (uuid "8d8b9246-b2cd-5b29-964c-d5f6e4500c84"))
     (instances
       (project
         "garageDoor-pro"
-        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR028") (unit 1)))))
+        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR029") (unit 1)))))
   (wire
     (pts (xy 137.16 209.55) (xy 137.16 212.09))
     (stroke (width 0) (type default))
@@ -6128,10 +6058,10 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "9fd03234-5728-500c-b91c-67c5c771996a")
+    (uuid "5465f944-4263-5e15-ab54-9ee348106a23")
     (property
       "Reference"
-      "#PWR029"
+      "#PWR030"
       (at 137.16 218.44 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
     (property
@@ -6149,11 +6079,11 @@
       "~"
       (at 137.16 212.09 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "8d8b9246-b2cd-5b29-964c-d5f6e4500c84"))
+    (pin "1" (uuid "5f052d1c-2d70-50c2-970c-fd46d29c49f3"))
     (instances
       (project
         "garageDoor-pro"
-        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR029") (unit 1)))))
+        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR030") (unit 1)))))
   (symbol
     (lib_id "Device:C")
     (at 149.86 205.74 0)
@@ -6216,10 +6146,10 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "5465f944-4263-5e15-ab54-9ee348106a23")
+    (uuid "80861d54-28f8-5e84-84b7-b73fa8a5ca54")
     (property
       "Reference"
-      "#PWR030"
+      "#PWR031"
       (at 149.86 203.2 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
     (property
@@ -6237,11 +6167,11 @@
       "~"
       (at 149.86 199.39 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "5f052d1c-2d70-50c2-970c-fd46d29c49f3"))
+    (pin "1" (uuid "63a86ef2-1d51-5676-a17e-c60bc016b9ce"))
     (instances
       (project
         "garageDoor-pro"
-        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR030") (unit 1)))))
+        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR031") (unit 1)))))
   (wire
     (pts (xy 149.86 209.55) (xy 149.86 212.09))
     (stroke (width 0) (type default))
@@ -6254,10 +6184,10 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "80861d54-28f8-5e84-84b7-b73fa8a5ca54")
+    (uuid "076ebbdd-7228-5d4f-b3ab-8dbcb65dd1be")
     (property
       "Reference"
-      "#PWR031"
+      "#PWR032"
       (at 149.86 218.44 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
     (property
@@ -6275,11 +6205,11 @@
       "~"
       (at 149.86 212.09 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "63a86ef2-1d51-5676-a17e-c60bc016b9ce"))
+    (pin "1" (uuid "7f68cee7-8827-5e0d-a3f7-aedc3a4d906b"))
     (instances
       (project
         "garageDoor-pro"
-        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR031") (unit 1)))))
+        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR032") (unit 1)))))
   (symbol
     (lib_id "Device:C")
     (at 322.58 198.12 0)
@@ -6342,10 +6272,10 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "076ebbdd-7228-5d4f-b3ab-8dbcb65dd1be")
+    (uuid "b18cb653-06db-53ff-9871-8461b198ee0a")
     (property
       "Reference"
-      "#PWR032"
+      "#PWR033"
       (at 322.58 195.58 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
     (property
@@ -6363,11 +6293,11 @@
       "~"
       (at 322.58 191.77 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "7f68cee7-8827-5e0d-a3f7-aedc3a4d906b"))
+    (pin "1" (uuid "969f049f-31e6-5b8c-adf0-4206a38be424"))
     (instances
       (project
         "garageDoor-pro"
-        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR032") (unit 1)))))
+        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR033") (unit 1)))))
   (wire
     (pts (xy 322.58 201.93) (xy 322.58 204.47))
     (stroke (width 0) (type default))
@@ -6380,10 +6310,10 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "b18cb653-06db-53ff-9871-8461b198ee0a")
+    (uuid "0563e2b0-1380-5222-9730-9ff2c7d2a192")
     (property
       "Reference"
-      "#PWR033"
+      "#PWR034"
       (at 322.58 210.82 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
     (property
@@ -6401,11 +6331,11 @@
       "~"
       (at 322.58 204.47 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "969f049f-31e6-5b8c-adf0-4206a38be424"))
+    (pin "1" (uuid "b4ae630f-e76a-57dc-8538-743004a4a515"))
     (instances
       (project
         "garageDoor-pro"
-        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR033") (unit 1)))))
+        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR034") (unit 1)))))
   (symbol
     (lib_id "Device:C")
     (at 335.28 198.12 0)
@@ -6468,10 +6398,10 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "0563e2b0-1380-5222-9730-9ff2c7d2a192")
+    (uuid "6a7052e6-050d-57ef-a0ab-898e0fbc8374")
     (property
       "Reference"
-      "#PWR034"
+      "#PWR035"
       (at 335.28 195.58 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
     (property
@@ -6489,11 +6419,11 @@
       "~"
       (at 335.28 191.77 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "b4ae630f-e76a-57dc-8538-743004a4a515"))
+    (pin "1" (uuid "ab29ceb7-82b0-5620-9f6f-d842e402d9e6"))
     (instances
       (project
         "garageDoor-pro"
-        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR034") (unit 1)))))
+        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR035") (unit 1)))))
   (wire
     (pts (xy 335.28 201.93) (xy 335.28 204.47))
     (stroke (width 0) (type default))
@@ -6506,10 +6436,10 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "6a7052e6-050d-57ef-a0ab-898e0fbc8374")
+    (uuid "169d8e55-25c1-5c0e-a9cf-d2279bb56584")
     (property
       "Reference"
-      "#PWR035"
+      "#PWR036"
       (at 335.28 210.82 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
     (property
@@ -6527,11 +6457,11 @@
       "~"
       (at 335.28 204.47 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "ab29ceb7-82b0-5620-9f6f-d842e402d9e6"))
+    (pin "1" (uuid "f6c236ef-cd87-5f12-996c-e455e53e027c"))
     (instances
       (project
         "garageDoor-pro"
-        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR035") (unit 1)))))
+        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR036") (unit 1)))))
   (symbol
     (lib_id "Device:C")
     (at 276.86 127 0)
@@ -6604,10 +6534,10 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "169d8e55-25c1-5c0e-a9cf-d2279bb56584")
+    (uuid "42c1df91-4c50-5c6c-a214-df351359e11b")
     (property
       "Reference"
-      "#PWR036"
+      "#PWR037"
       (at 276.86 139.7 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
     (property
@@ -6625,11 +6555,11 @@
       "~"
       (at 276.86 133.35 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "f6c236ef-cd87-5f12-996c-e455e53e027c"))
+    (pin "1" (uuid "44289b9e-a8d2-59d2-808d-2699d33eeb83"))
     (instances
       (project
         "garageDoor-pro"
-        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR036") (unit 1)))))
+        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR037") (unit 1)))))
   (symbol
     (lib_id "Connector:TestPoint")
     (at 40.64 264.16 0)
@@ -6676,10 +6606,10 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "42c1df91-4c50-5c6c-a214-df351359e11b")
+    (uuid "3428273f-2afb-5d94-ac1d-03865f1a73ae")
     (property
       "Reference"
-      "#PWR037"
+      "#PWR038"
       (at 40.64 270.51 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
     (property
@@ -6697,11 +6627,11 @@
       "~"
       (at 40.64 266.7 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "44289b9e-a8d2-59d2-808d-2699d33eeb83"))
+    (pin "1" (uuid "6b7e8a15-4cda-588b-b458-13c37609a47b"))
     (instances
       (project
         "garageDoor-pro"
-        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR037") (unit 1)))))
+        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR038") (unit 1)))))
   (symbol
     (lib_id "Connector:TestPoint")
     (at 60.96 264.16 0)
@@ -6748,10 +6678,10 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "3428273f-2afb-5d94-ac1d-03865f1a73ae")
+    (uuid "62abe729-712e-5f08-9d8f-3ccf46b822ec")
     (property
       "Reference"
-      "#PWR038"
+      "#PWR039"
       (at 60.96 273.05 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
     (property
@@ -6769,11 +6699,11 @@
       "~"
       (at 60.96 266.7 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "6b7e8a15-4cda-588b-b458-13c37609a47b"))
+    (pin "1" (uuid "0bdff13f-b20d-528b-badc-7e57b7fdb9d0"))
     (instances
       (project
         "garageDoor-pro"
-        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR038") (unit 1)))))
+        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR039") (unit 1)))))
   (symbol
     (lib_id "Connector:TestPoint")
     (at 81.28 264.16 0)
@@ -7234,10 +7164,10 @@
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (uuid "62abe729-712e-5f08-9d8f-3ccf46b822ec")
+    (uuid "be4c42ed-fd5e-5302-a53e-5ba2ba8e2596")
     (property
       "Reference"
-      "#PWR039"
+      "#PWR040"
       (at 299.72 257.81 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
     (property
@@ -7255,11 +7185,11 @@
       "~"
       (at 299.72 251.46 0)
       (effects (font (size 1.27 1.27)) (hide yes)))
-    (pin "1" (uuid "0bdff13f-b20d-528b-badc-7e57b7fdb9d0"))
+    (pin "1" (uuid "5c6e7beb-0202-5c6a-9e8f-6aa674568878"))
     (instances
       (project
         "garageDoor-pro"
-        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR039") (unit 1)))))
+        (path "/9d4a4a72-1ff2-54be-8ead-f7a37cd8b149" (reference "#PWR040") (unit 1)))))
   (symbol
     (lib_id "power:PWR_FLAG")
     (at 322.58 251.46 0)
@@ -7359,11 +7289,11 @@
     (effects (font (size 2 2)) (justify left bottom))
     (uuid "54c854ea-a2e6-5373-a656-07d9696cff74"))
   (text
-    "Switch output: CPC1017N PhotoMOS -> screw terminal to the remote's button (either polarity)"
+    "Switch output: SS8050 NPN transistor -> screw terminal to the remote's button (+ to pin 1, - to pin 2)"
     (exclude_from_sim no)
     (at 30.48 190.5 0)
     (effects (font (size 2 2)) (justify left bottom))
-    (uuid "0917388d-fb6d-52b6-aa0c-b5626416d061"))
+    (uuid "e758c301-f0d2-5346-9026-10a04a83d98c"))
   (text
     "Test pads (bottom side, not assembled)"
     (exclude_from_sim no)

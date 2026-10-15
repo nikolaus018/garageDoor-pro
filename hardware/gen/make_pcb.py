@@ -481,8 +481,10 @@ def add_silkscreen(board):
         board.Add(t)
         return t
 
-    text("garageDoor-pro v1.0", 25.6, 30.1, 0.8)
-    text("<- REMOTE", 49.0, 25.4, 0.8)
+    text("garageDoor-pro v1.1", 25.6, 30.1, 0.8)
+    text("+", 32.2, 25.4, 1.2)          # beside J3 pin 1 (collector): the button's + side
+    text("-", 45.0, 25.4, 1.2)          # beside J3 pin 2 (GND)
+    text("<- REMOTE", 50.2, 25.4, 0.8)
     text("5V", 30.0, 2.0, 0.8)
     text("ANT", 55.75, 21.1, 0.8)
     text("SETUP", 20.2, 22.9, 0.8)
