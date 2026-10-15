@@ -190,7 +190,8 @@ static esp_err_t home_post(httpd_req_t *req)
     }
     char *e1, *e2;
     double la = strtod(lat, &e1), lo = strtod(lon, &e2);
-    if (e1 == lat || *e1 || e2 == lon || *e2 || fabs(la) > 90 || fabs(lo) > 180) {
+    // !(x <= max) also rejects "nan", which strtod accepts
+    if (e1 == lat || *e1 || e2 == lon || *e2 || !(fabs(la) <= 90) || !(fabs(lo) <= 180)) {
         return send_result(req, "Latitude/longitude must be decimal degrees, e.g. 48.208176 and 16.373819");
     }
     return send_result(req, app_set_home((int32_t)lround(la * 1e7), (int32_t)lround(lo * 1e7)));

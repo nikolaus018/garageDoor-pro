@@ -46,7 +46,7 @@ car USB-C ─► USB-C
 | 11 | Insulated hookup wire, 26–30 AWG (silicone or wire-wrap) | 1 m | W1–W3, and the remote wires | 2 |
 | 12 | Bare tinned copper wire, 0.4–0.6 mm | – | Trails T1–T7; the resistor leg offcuts are enough | – |
 | 13 | **Spare garage remote** for your door, already working | 1 | It stays in use as the transmitter | own / 15–30 |
-| 14 | USB car charger + USB-C cable | 1 | On a socket that **switches off with the ignition** | 10 |
+| 14 | USB car charger + USB-C cable | 1 | On a socket that **switches off with the ignition**. Some SuperMini clones lack the USB-C resistors that a C-to-C cable needs and get no power from a USB-C charger (or a USB-C-only Mac): if it shows no sign of life (no LED at all, no `/dev/cu.usbmodem…` port on the Mac), use a **USB-A charger with an A-to-C cable** (and a USB-A hub or adapter on the Mac). | 10 |
 | 15 | Small enclosure (e.g. 70 × 50 × 25 mm) | 1 | Or 3D-print one | 3 |
 | 16 | Heat-shrink tubing, double-sided tape / Velcro | – | | – |
 
@@ -156,12 +156,15 @@ trails T5/T6/T7 (three side by side: GND, 3V3, GPIO4). Leave every hole that isn
    modules show `115200 baud (UBX)`). Within about a minute the panel shows a fix.
 3. **Panel:** on the phone, join **GarageDoor-XXXX** (password `garagedoor`), set your own password,
    then tap **Press the remote once**. A multimeter in continuity mode across the two terminal screws
-   beeps briefly (red probe on screw 1: the optocoupler only conducts that way).
+   (red probe on screw 1: the optocoupler only conducts that way) may beep briefly. No beep is fine:
+   the switched optocoupler measures around 100 Ω, above many meters' beep threshold. The real test
+   is the next step.
 4. **Remote:** open the spare remote and solder two thin wires across the button's contacts (the two
    sides it connects).
    - Find the **+ side**: battery in, multimeter on DC volts across the two contacts. If it reads
      positive, the red probe is on the + side; if negative, the black one is.
-   - **+ side → J1 screw 1, − side → screw 2.** Test press again: the door reacts.
+   - **+ side → J1 screw 1, − side → screw 2.** Test press again: the remote's LED (if it has one)
+     lights up and the door reacts.
    - Nothing happens? Swap the two wires once. Still nothing: this remote's button carries more
      current than the PC817C switches, use a PhotoMOS relay (see Parts list).
 
@@ -169,7 +172,7 @@ trails T5/T6/T7 (three side by side: GND, 3V3, GPIO4). Leave every hole that isn
 
 - **Board:** put it in the enclosure and mount it out of direct sun (console, glovebox).
   - Wi-Fi is only used for setup, with the phone right next to it, so the board's position doesn't
-    matter for range. That was different for the old beacon.
+    matter for range.
   - Still, don't put the SuperMini's antenna end (opposite the USB-C) against metal.
 - **GPS module:** put it (or its antenna) where it sees the sky, e.g. on the dashboard under the
   windscreen, ceramic side up, and run the cable to the box.
