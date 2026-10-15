@@ -60,4 +60,4 @@ the remote.
 ## Factory reset
 
 Hold SETUP (BOOT on the SuperMini) for 10 s (the LED flickers), then release. Home, settings and the Wi-Fi password are
-erased; set it up again from step 3.
+erased and the board opens the setup Wi-Fi by itself again; set it up again from step 2 (default password `garagedoor`).
