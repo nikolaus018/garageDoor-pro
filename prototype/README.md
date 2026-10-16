@@ -200,6 +200,9 @@ trails T2/T3 (Q1's base next to GND). Leave every hole that isn't in the drawing
    - Clip the antenna's cable onto the module's small round socket (press straight down until it
      snaps). Stick the antenna on the module with the foam tape on its back, **ceramic side up**,
      centred, so it doesn't stick out past the module's edges.
+   - Lead the cable over the module's far end to the socket. Coil any spare length loosely (no
+     tighter than a pencil) and tuck it into the free corner beside J1, front right; the case keeps
+     that corner free for it.
 
    ![step 5: plug in and connect](img/step5.svg)
 8. **Plug in the SuperMini** and flash it from the Mac, with the SuperMini on USB:
@@ -255,17 +258,20 @@ print it as it is, **no supports**. Outside it's 75 × 47 × 30 mm.
   place, and a pillar holds up the GPS module's free end so its four pins don't carry it alone. The
   left wall has a notch for the USB-C plug, the right wall a window for the remote's wires.
 - **Lid:** a window over the SuperMini (you see the blue status LED and press BOOT through it with a
-  pen), a small hole over the red LED D1, and three posts that press the perfboard down onto its
-  seats. It clicks into four windows near the top of the tray's long walls; push a fingernail into
-  one to open it.
+  pen), a small hole over the red LED D1, a slot over J1's two screws (tighten or loosen the
+  remote's wires with a small screwdriver, lid on), and three posts that press the perfboard down
+  onto its seats. It clicks into four windows near the top of the tray's long walls; push a
+  fingernail into one to open it.
 - **Assembly:** thread the remote's two wires through the right-hand window and into J1 first, then
   set the board in, USB-C toward the notch, and click the lid on.
 - `case/make_case.py` builds the file and checks that the case clears the perfboard, the SuperMini
   and the GPS module in their sockets, the antenna on top of the GPS, J1, Q1, R2, D1, the USB-C
-  plug and the remote's wires (the plug also for a SuperMini soldered in directly). The sizes it
-  assumes are at the top of the script. **Measure your sockets:** `SOCKET_H` is the height of their plastic
-  above the board (3 mm as drawn; 8.5 mm for standard square-hole female headers), and the case
-  grows or shrinks with it. If that or your GPS board differs, change it there and run it again
+  plug and the remote's wires (the plug also for a SuperMini soldered in directly). It also keeps
+  room free for the antenna cable: over the GPS module's far end (about 6 × 25 × 9 mm) and in the
+  corner beside J1 (about 14 × 10 × 12 mm) for the spare length. The sizes it assumes are at the
+  top of the script. **Measure your sockets:** `SOCKET_H` is the height of their plastic above the
+  board (3 mm as drawn; 8.5 mm for standard square-hole female headers), and the case grows or
+  shrinks with it. If that or your GPS board differs, change it there and run it again
   (`python3 prototype/case/make_case.py`).
 - Built with the SuperMini soldered in directly (no sockets), it sits 3 mm lower: the USB-C notch
   still fits.

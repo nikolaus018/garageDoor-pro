@@ -8,15 +8,15 @@ case.png, a picture of the case with its lid lifted and the parts inside (as pla
         end, USB-C notch in the left wall, a window in the right wall for the remote's wires, snap
         windows near the top edge
   lid   printed upside down: plate with a window over the SuperMini (status LED, BOOT button), a
-        hole over the red LED D1, a skirt with snap bumps, and three posts that hold the perfboard
-        down at its corners
+        hole over the red LED D1, a window over J1's two screws, a skirt with snap bumps, and three
+        posts that hold the perfboard down at its corners
 
 No CAD package needed (standard library only). Every part is a union of boxes minus boxes, cut
 into a grid along all the box edges; the outer faces of the filled cells become the mesh, so it is
 always closed. The script fails if a mesh isn't watertight, if a part falls apart, or if the case
 touches any of the parts inside (perfboard, SuperMini and GPS module in their sockets, the
-antenna on top of the GPS, J1, Q1, R2, D1, the USB-C plug, also for a SuperMini soldered in
-directly, and the remote's wires).
+antenna on top of the GPS and room for its cable, J1, Q1, R2, D1, the USB-C plug, also for a
+SuperMini soldered in directly, and the remote's wires).
 
 Coordinates in mm, as assembled: x along the perfboard's 60 mm side (column 1 on the left), y along
 the 40 mm side (row A at the front), z up from the bottom of the tray. Seen from above, as in the
@@ -79,6 +79,11 @@ GPS_X0 = GPS_HDR_X - GPS_HDR_IN
 GPS_X1 = GPS_X0 + GPS_L
 GPS_Z0 = ZT + SOCKET_H + PIN_H
 ANT = 25.0                # ceramic patch, stuck on top of the module, ceramic side up
+ANT_X0 = (GPS_X0 + GPS_X1) / 2 - ANT / 2
+# its cable runs to the module's socket at the far end; spare length is coiled loosely in the free
+# corner beside J1 (front right), clear of the lid's corner post and the remote's wires
+CABLE_RUN = (ANT_X0 + ANT + 0.2, GPS_Y - GPS_W / 2, GPS_Z0 + 4.6, 68.5, GPS_Y + GPS_W / 2 - 1.0, ZT + ROOM - 0.3)
+CABLE_COIL = (hole_x(18) + 5.0, 3.5, ZT + 6.5, 68.5, 13.5, ZT + ROOM - 0.3)
 
 PARTS = {  # envelopes the case must stay out of: (x0, y0, z0, x1, y1, z1)
     "perfboard": (0, 0, ZB, BOARD_W, BOARD_D, ZT),
@@ -88,8 +93,9 @@ PARTS = {  # envelopes the case must stay out of: (x0, y0, z0, x1, y1, z1)
     "USB-C plug, SuperMini soldered in": (-15, SM_Y - 6.5, USB_Z_LOW - 4, SM_X0 - 0.8, SM_Y + 6.5, USB_Z_LOW + 4),
     "GPS socket + pins": (GPS_HDR_X - 1.3, hole_y("I") - 1.3, ZT, GPS_HDR_X + 1.3, hole_y("L") + 1.3, GPS_Z0),
     "GPS module": (GPS_X0, GPS_Y - GPS_W / 2, GPS_Z0, GPS_X1, GPS_Y + GPS_W / 2, GPS_Z0 + 1.6 + 3.0),
-    "antenna": ((GPS_X0 + GPS_X1) / 2 - ANT / 2, GPS_Y - ANT / 2, GPS_Z0 + 4.6,
-                (GPS_X0 + GPS_X1) / 2 + ANT / 2, GPS_Y + ANT / 2, GPS_Z0 + 4.6 + 8.0),
+    "antenna": (ANT_X0, GPS_Y - ANT / 2, GPS_Z0 + 4.6, ANT_X0 + ANT, GPS_Y + ANT / 2, GPS_Z0 + 4.6 + 8.0),
+    "antenna cable to the module": CABLE_RUN,
+    "antenna cable, spare length": CABLE_COIL,
     "J1 screw terminal": (hole_x(18) - 3.8, hole_y("B") - 2.6, ZT, hole_x(18) + 3.8, hole_y("D") + 2.6, ZT + 10.5),
     "Q1": (hole_x(12) - 2.5, hole_y("B") - 0.6, ZT, hole_x(12) + 2.5, hole_y("D") + 0.6, ZT + 9.0),
     "R2 (upright)": (hole_x(10) - 1.3, hole_y("B") - 1.3, ZT, hole_x(10) + 1.3, hole_y("C") + 1.3, ZT + 12.0),
@@ -111,6 +117,10 @@ SNAP_X = (14.0, (IX0 + IX1) / 2 + 14.0)  # snaps on the front and back walls
 SNAP_W, SNAP_Z = 8.0, ZL - SKIRT + 1.0   # bump: 1 mm tall, 0.5 mm proud, from SNAP_Z up
 LED_WIN = (hole_x(9.5) - 2.0, hole_y("A") - 2.0, hole_x(9.5) + 2.0, hole_y("A") + 2.0)
 SM_WIN = (SM_X0 - 0.5, SM_Y - 8.5, SM_X1 + 0.5, SM_Y + 8.5)
+# J1's screws sit on top of the terminal, one above each pin (B18, D18): a slot over both, so the
+# remote's wires can be fastened with the lid on
+J1_SCREWS = [(hole_x(18), hole_y("B")), (hole_x(18), hole_y("D"))]
+J1_WIN = (hole_x(18) - 3.2, hole_y("B") - 3.0, hole_x(18) + 3.2, hole_y("D") + 3.0)
 SEATS = [(0, 0), (BOARD_W, 0), (0, BOARD_D), (BOARD_W, BOARD_D)]
 POSTS = [(0, 0), (BOARD_W, 0), (0, BOARD_D)]   # the fourth corner is under the GPS module
 # a pillar from the floor under the GPS module's free end, past the perfboard's edge, 0.3 mm short
@@ -156,6 +166,7 @@ def lid():
     sub.append(box(sx0 - 1, USB_NOTCH[0], ZL - SKIRT - 1, sx0 + SKIRT_T + 1, USB_NOTCH[1], ZL))
     sub.append(box(*SM_WIN[:2], ZL - 1, *SM_WIN[2:], ZL + LID_T + 1))
     sub.append(box(*LED_WIN[:2], ZL - 1, *LED_WIN[2:], ZL + LID_T + 1))
+    sub.append(box(*J1_WIN[:2], ZL - 1, *J1_WIN[2:], ZL + LID_T + 1))
     posts = []
     for cx, cy in POSTS:   # 3 × 2.5 mm posts down onto the perfboard's free corners
         px, py = (1 if cx == 0 else -1), (1 if cy == 0 else -1)
@@ -398,6 +409,15 @@ def main():
         x, y = cx + (1.0 if cx == 0 else -1.0), cy + (1.0 if cy == 0 else -1.0)
         assert parts["lid"].at(x, y, ZT + 0.1), f"no post above the perfboard corner at {cx, cy}"
     assert parts["tray"].at((GPS_REST[0] + GPS_REST[3]) / 2, GPS_Y, GPS_Z0 - 0.4), "no rest under the GPS"
+    for x, y in J1_SCREWS:   # a screwdriver reaches each screw straight down with the lid on
+        for dx, dy in ((0, 0), (-1.5, 0), (1.5, 0), (0, -1.5), (0, 1.5)):
+            for z in (ZL - 0.5, ZL + 0.5, ZL + LID_T - 0.5):
+                assert not parts["lid"].at(x + dx, y + dy, z), f"lid covers the J1 screw at {x:.1f}, {y:.1f}"
+    for cable in ("antenna cable to the module", "antenna cable, spare length"):   # free room, not parts
+        for name, env in PARTS.items():
+            if "cable" not in name and name != "joints underneath":
+                assert not all(PARTS[cable][a] < env[a + 3] and PARTS[cable][a + 3] > env[a] for a in range(3)), \
+                    f"the {cable} space runs into the {name}"
     placed = []
     # tray as it is, moved to the origin; lid turned over (180° about x) next to it
     verts, tris = parts["tray"].mesh()
