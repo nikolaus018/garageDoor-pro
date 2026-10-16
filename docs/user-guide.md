@@ -22,8 +22,10 @@ Keep the remote's battery in it: the board only "presses" the button, the remote
 
 - Mount the board out of direct sun (console, glovebox, behind a trim panel), not on top of the
   dashboard. The board is rated to 85 °C.
-- Place the GPS antenna (the module itself on the prototype) where it sees the sky: on the dashboard
-  under the windscreen, or under a plastic trim near the rear window.
+- Place the GPS antenna where it sees the sky: on the dashboard under the windscreen, or under a
+  plastic trim near the rear window. On the prototype the antenna sits on the GPS module inside the
+  case, so the case goes where it sees the sky and still stays out of direct sun (`prototype/README.md`,
+  Install in the car).
 - Connect USB-C to the car charger. Check that the socket really switches off with the ignition:
   the board relies on starting with the car.
 

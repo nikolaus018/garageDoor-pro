@@ -11,6 +11,7 @@ below is the later, integrated version; the firmware runs on both.
 | | |
 |---|---|
 | [prototype/README.md](prototype/README.md) | **perfboard build: parts, layout, assembly, bench test** |
+| `prototype/case/` | 3D-printable case for the prototype (`garageDoor-case.3mf`) and its generator |
 | [docs/design.md](docs/design.md) | behaviour, parts, circuit and PCB decisions |
 | [docs/user-guide.md](docs/user-guide.md) | installing in the car and setting it up |
 | [hardware/ORDERING.md](hardware/ORDERING.md) | (later) ordering the custom PCB from JLCPCB, bring-up checklist |

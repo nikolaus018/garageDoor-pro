@@ -19,6 +19,7 @@ import re
 COLS, ROWS = 20, 14
 ROW_NAMES = "ABCDEFGHIJKLMN"   # printed along the left edge, A at the bottom
 P = 32            # px between holes
+PITCH_MM = 2.54
 M = 58            # margin inside the board drawing (printed labels)
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "img")
 
@@ -39,8 +40,11 @@ NETS = {
 TOP_ROW, BOTTOM_ROW = "K", "E"
 SUPERMINI_TOP = ["5V", "G", "3V3", "4", "3", "2", "1", "0"]      # row K, columns 2..9
 SUPERMINI_BOTTOM = ["5", "6", "7", "8", "9", "10", "20", "21"]   # row E, columns 2..9
-# GPS VCC sits above 3V3 (K4) so a straight trail reaches it; most of these modules are 3.3 V only.
-GPS_PADS = {"M2": "TX", "M3": "GND", "M4": "VCC", "M5": "RX"}
+# GY-GPS6MV2 on a 1×4 male header, lying chip side up with its board toward the right edge. Held
+# with the header on top, its pins read VCC RX TX GND from left to right; turned so the header runs
+# along column 12, that's I12 to L12. Most of these modules are 3.3 V only.
+GPS_PADS = {"I12": "VCC", "J12": "RX", "K12": "TX", "L12": "GND"}
+GPS_MM = (25.7, 36.5, 2.5)   # board width, length, header pins in from the short edge (case/make_case.py)
 R1 = ("C4", "C9")                                     # lying flat
 R2 = ("C10", "B10")                                   # standing upright, body on C10
 R3 = ("A4", "A8")                                     # lying flat, along the bottom edge
@@ -54,19 +58,25 @@ TRAILS = {  # bare tinned wire on the bottom, soldered at every pad
     # GND along row B: R2, W2, the emitter and screw 2.
     "T3": (["B10", "B11", "B12", "B13", "B14", "B15", "B16", "B17", "B18"], "GND"),
     "T4": (["D12", "D13", "D14", "D15", "D16", "D17", "D18"], "OUT1"),
-    "T5": (["K4", "L4", "M4"], "3V3"),
-    "T6": (["K3", "L3", "M3"], "GND"),
-    "T7": (["K5", "L5", "M5"], "RXD"),
-    "T8": (["A8", "A9"], "IND"),
-    "T9": (["A10", "B10"], "GND"),
+    "T5": (["K3", "L3", "M3"], "GND"),   # one GND pad each for W2 and W5
+    "T6": (["A8", "A9"], "IND"),
+    "T7": (["A10", "B10"], "GND"),
 }
 WIRES = {  # insulated wire on the bottom, pad to pad
-    "W1": ("M2", "E2", "TXD"),
+    "W1": ("K12", "E2", "TXD"),
     "W2": ("L3", "B11", "GND"),
+    "W3": ("J12", "K5", "RXD"),
+    "W4": ("I12", "K4", "3V3"),
+    "W5": ("L12", "M3", "GND"),
 }
+# How far a wire bows out in the pictures (share of its length; negative = to the other side).
+# W3 and W4 bow down into the free rows between the SuperMini's pins instead of over its K row;
+# W1 bows the other way too, so its label stays clear of theirs.
+WIRE_BEND = {"W1": -0.12, "W3": -0.25, "W4": -0.3}
+WIRE_LABEL_AT = {"W1": 0.62}   # where along the wire its name goes (0.5 = the middle)
 # Where a trail's name goes when the default spot is taken: (pad, dx, dy) from that pad's centre.
 TRAIL_LABELS = {"T1": ("B4", -26, 5), "T2": ("C10", 0, -14), "T3": ("B15", 0, 26), "T4": ("D15", 0, -14),
-                "T8": ("A8", 0, 30), "T9": ("A10", 30, 5)}
+                "T6": ("A8", 0, 30), "T7": ("A10", 30, 5)}
 
 PINS = {f"U1.{n}": f"{TOP_ROW}{i + 2}" for i, n in enumerate(SUPERMINI_TOP)}
 PINS.update({f"U1.{n}": f"{BOTTOM_ROW}{i + 2}" for i, n in enumerate(SUPERMINI_BOTTOM)})
@@ -96,7 +106,9 @@ STEPS = [  # (title, view, items new in this step, instructions)
         "pins 5V…0 in K2–K9, pins 5…21 in E2–E9.",
         "Solder the 16 header pins from below, then",
         "pull the SuperMini off again.",
-        "Solder the 1×4 male header into M2–M5.",
+        "1×4 male header (the GPS connector): I12–L12,",
+        "  short pins through the board, long pins up.",
+        "  Test-fit the GPS module on it (README).",
     ]),
     ("Parts on top", "top", ["R1", "R2", "R3", "D1", "Q1", "J1"], [
         "R1 330 Ω: C4 + C9, lying flat.",
@@ -122,28 +134,31 @@ STEPS = [  # (title, view, items new in this step, instructions)
         "T2  R1 → R2 → Q1 base",
         "T3  R2 → Q1 emitter → J1 screw 2 (GND)",
         "T4  Q1 collector → J1 screw 1",
-        "T5  3V3 → GPS VCC",
-        "T6  G → GPS GND",
-        "T7  pin 4 → GPS RX",
-        "T8  R3 → D1 + (bridge)",
-        "T9  D1 − → R2 (bridge)",
-        "T2 / T3 and T5 / T6 / T7 run side by side:",
-        "  they must not touch.",
+        "T5  G → 2 pads for GND wires (straight up)",
+        "T6  R3 → D1 + (bridge)",
+        "T7  D1 − → R2 (bridge)",
+        "T2 / T3 run side by side: they must not touch.",
     ]),
     ("Wires underneath", "bottom", list(WIRES), [
         "Insulated wire, 2 mm stripped at each end,",
         "soldered onto the pads:",
         "W1  GPS TX → pin 5",
-        "W2  middle pad of T6 → T3 (GND) at B11",
+        "W2  middle pad of T5 → T3 (GND) at B11",
+        "W3  GPS RX → pin 4",
+        "W4  GPS VCC → 3V3",
+        "W5  GPS GND → top pad of T5",
         "Then do the measurements in the README",
         "before plugging anything in.",
     ]),
-    ("Plug in and connect", "top", ["module", "ext"], [
-        "Printed side up again. Plug the SuperMini in:",
-        "  chip side up, USB-C on the left.",
-        "GPS onto the header with 4 jumpers, by the",
-        "labels on the GPS module: TX→M2, GND→M3,",
-        "VCC→M4, RX→M5.",
+    ("GPS, SuperMini, remote", "top", ["gps", "module", "ext"], [
+        "Printed side up again.",
+        "GPS module chip side up onto the long pins,",
+        "  its board toward the right edge: the labels",
+        "  VCC, RX, TX, GND must sit on I12, J12, K12, L12.",
+        "  Solder the 4 pins on top, trim them short.",
+        "Antenna onto the module's socket, then stick it",
+        "  on the module, ceramic side up.",
+        "Plug the SuperMini in: chip side up, USB-C left.",
         "Remote button into J1: its + side to screw 1,",
         "  its − side to screw 2.",
         "USB-C to the car charger.",
@@ -306,13 +321,36 @@ def top_item(v, key, pin_labels=True):
                 ty = yy - 20 if row == TOP_ROW else yy + 30
                 s.append(f'<text x="{x}" y="{ty}" class="lab">{lab}</text>')
     elif key == "hdrG":
-        pads = list(GPS_PADS)
-        (x0, y), (x1, _) = v.xy(pads[0]), v.xy(pads[-1])
-        s.append(f'<rect x="{x0 - 14}" y="{y - 12}" width="{x1 - x0 + 28}" height="24" rx="2" fill="#111"/>')
+        xs, ys = zip(*(v.xy(p) for p in GPS_PADS))
+        s.append(f'<rect x="{min(xs) - 12}" y="{min(ys) - 14}" width="{max(xs) - min(xs) + 24}" '
+                 f'height="{max(ys) - min(ys) + 28}" rx="2" fill="#111"/>')
         for pad, lab in GPS_PADS.items():
             x, yy = v.xy(pad)
-            s.append(f'<rect x="{x - 4}" y="{yy - 4}" width="8" height="8" fill="#fcc419"/>'
-                     f'<text x="{x}" y="{yy - 20}" class="lab">{lab}</text>')
+            s.append(f'<rect x="{x - 4}" y="{yy - 4}" width="8" height="8" fill="#fcc419"/>')
+            if pin_labels:
+                s.append(f'<text x="{x - 34}" y="{yy + 5}" class="lab">{lab}</text>')
+    elif key == "gps":
+        # GY-GPS6MV2 from above, to scale: header along its left short edge, socket for the antenna
+        # cable at the far end; the antenna is stuck on top (dashed)
+        w, l, inset = (d / PITCH_MM * P for d in GPS_MM)
+        a = 25 / PITCH_MM * P   # 25 × 25 mm patch antenna
+        xs, ys = zip(*(v.xy(p) for p in GPS_PADS))
+        x0, cy = min(xs) - inset, (min(ys) + max(ys)) / 2
+        t = cy - w / 2
+        s.append(f'<rect x="{x0}" y="{t}" width="{l}" height="{w}" rx="4" fill="#1864ab" fill-opacity="0.93" '
+                 f'stroke="#0b3d6e" stroke-width="2"/>'
+                 f'<rect x="{x0 + l * 0.38}" y="{cy - 0.32 * w}" width="{0.4 * l}" height="{0.64 * w}" rx="3" '
+                 f'fill="#dee2e6" stroke="#868e96" stroke-width="2"/>'
+                 f'<text x="{x0 + l * 0.58}" y="{cy + 5}" class="labd">NEO-6M</text>'
+                 f'<circle cx="{x0 + l - 18}" cy="{t + 22}" r="8" fill="#ced4da" stroke="#495057" stroke-width="2"/>'
+                 f'<rect x="{x0 + (l - a) / 2}" y="{cy - a / 2}" width="{a}" height="{a}" rx="6" fill="none" '
+                 f'stroke="#fff3bf" stroke-width="2" stroke-dasharray="7 5"/>'
+                 f'<text x="{x0 + l * 0.58}" y="{t + w - 14}" class="lab">GY-GPS6MV2</text>'
+                 f'<text x="{x0 + l * 0.58}" y="{t + 22}" class="lab" font-size="11">antenna on top</text>')
+        for pad, lab in GPS_PADS.items():
+            x, yy = v.xy(pad)
+            s.append(f'<circle cx="{x}" cy="{yy}" r="6" fill="#c9a65b"/>'
+                     f'<text x="{x + 30}" y="{yy + 5}" class="pinl">{lab}</text>')
     elif key in ("R1", "R3"):
         (ax, ay), (bx, by) = v.xy((R1 if key == "R1" else R3)[0]), v.xy((R1 if key == "R1" else R3)[1])
         value = "330Ω" if key == "R1" else "1k"
@@ -372,16 +410,6 @@ def top_item(v, key, pin_labels=True):
                 x, y = v.xy(f"{row}{i + 2}")
                 s.append(f'<text x="{x}" y="{y + 5}" class="pinl">{lab}</text>')
     elif key == "ext":
-        # GPS cable: four wires straight up over the free rows and off the board edge to the module
-        top = v.oy - 24
-        for pad, lab in GPS_PADS.items():
-            x, y = v.xy(pad)
-            net = {"VCC": "3V3", "GND": "GND", "TX": "TXD", "RX": "RXD"}[lab]
-            s.append(f'<path d="M{x},{y} L{x},{top}" fill="none" stroke="{NETS[net][0]}" '
-                     f'stroke-width="5" stroke-linecap="round"/>')
-        x, _ = v.xy("A7")
-        gps = ", ".join(f"{lab} → {pad}" for pad, lab in GPS_PADS.items())
-        s.append(f'<text x="{x - 6}" y="{top + 4}" class="labd" text-anchor="start">↑ GPS module: {gps}</text>')
         for net, pad in (("OUT1", J1["1"]), ("GND", J1["2"])):
             x, y = v.xy(pad)
             s.append(f'<path d="M{x + 12},{y} L{x + 2.2 * P},{y}" stroke="{NETS[net][0]}" stroke-width="5" stroke-linecap="round"/>')
@@ -392,11 +420,11 @@ def top_item(v, key, pin_labels=True):
 
 def top_board(v, show, new):
     s = v.board()
-    for key in ["hdrTop", "hdrBot", "hdrG", "R1", "R2", "R3", "D1", "Q1", "J1", "module", "ext"]:
+    for key in ["hdrTop", "hdrBot", "hdrG", "R1", "R2", "R3", "D1", "Q1", "J1", "gps", "module", "ext"]:
         if key in show:
             state = "new" if key in new else ("done" if new else "final")
-            # with the SuperMini plugged in its own pin labels replace the header labels
-            s += group(top_item(v, key, pin_labels="module" not in show), state)
+            # with the modules on, their own pin labels replace the header labels
+            s += group(top_item(v, key, pin_labels=not ({"module", "gps"} & show)), state)
     return s
 
 
@@ -417,11 +445,12 @@ def ghost_parts(v):
     l, r, t, b = box([f"{TOP_ROW}2", f"{BOTTOM_ROW}9"], 1.3 * P, 0.65 * P, None)
     usb_right = v.xy(f"{TOP_ROW}2")[0] > v.xy(f"{TOP_ROW}9")[0]
     ux = r - 18 if usb_right else l - 22
-    mx = (l + r) / 2 + (r - l) * (-0.22 if usb_right else 0.22)   # toward the far end, clear of W2
+    mx = l + 75 if usb_right else r - 75   # in the corner at the far end, clear of the wires
+    my = (t + b) / 2 + 40
     s.append(f'<rect x="{ux}" y="{(t + b) / 2 - 26}" width="40" height="52" rx="9" class="ghost"/>'
              f'<text x="{ux + 20}" y="{(t + b) / 2 + 5}" class="ghostt">USB-C</text>'
-             f'<text x="{mx}" y="{(t + b) / 2 - 4}" class="ghostt">SuperMini</text>'
-             f'<text x="{mx}" y="{(t + b) / 2 + 14}" class="ghostt">(on the other side)</text>')
+             f'<text x="{mx}" y="{my}" class="ghostt">SuperMini</text>'
+             f'<text x="{mx}" y="{my + 18}" class="ghostt">(other side)</text>')
     box(list(GPS_PADS), 14, 12, None)
     for name, (a, b) in (("R1", R1), ("R3", R3)):
         (ax, ay), (bx, _) = v.xy(a), v.xy(b)
@@ -446,9 +475,9 @@ def joint_labels(v):
     for i, name in enumerate(SUPERMINI_BOTTOM):
         x, y = v.xy(f"{BOTTOM_ROW}{i + 2}")
         lab(x, y - 15, name)
-    for pad, name in GPS_PADS.items():            # above the trail labels T5-T7
+    for pad, name in GPS_PADS.items():            # beside the header, away from the wires
         x, y = v.xy(pad)
-        lab(x, y - 32, name)
+        lab(x + (-34 if v.mirror else 34), y + 5, name)
     kx = v.xy(Q1["B"])[0]
     side = -1 if v.mirror else 1   # B toward column 13, C toward column 11: away from the trails
     for n, (dx, dy) in {"E": (0, 28), "B": (17 * side, 5), "C": (-17 * side, 5)}.items():
@@ -498,12 +527,15 @@ def bottom_board(v, show_trails, show_wires, new):
         a, b, net = WIRES[name]
         col = NETS[net][0]
         (ax, ay), (bx, by) = v.xy(a), v.xy(b)
-        mx, my = (ax + bx) / 2 + (by - ay) * 0.22, (ay + by) / 2 - (bx - ax) * 0.22
+        k = WIRE_BEND.get(name, 0.22)
+        mx, my = (ax + bx) / 2 + (by - ay) * k, (ay + by) / 2 - (bx - ax) * k
+        t = WIRE_LABEL_AT.get(name, 0.5)   # a point on the curve
+        lx, ly = ((1 - t) ** 2 * p + 2 * (1 - t) * t * m + t * t * q for p, m, q in ((ax, mx, bx), (ay, my, by)))
         items = [f'<path d="M{ax},{ay} Q{mx},{my} {bx},{by}" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round"/>',
                  f'<path d="M{ax},{ay} Q{mx},{my} {bx},{by}" fill="none" stroke="{col}" stroke-width="5" stroke-linecap="round"/>',
                  f'<circle cx="{ax}" cy="{ay}" r="6" fill="{col}" stroke="#fff" stroke-width="2"/>',
                  f'<circle cx="{bx}" cy="{by}" r="6" fill="{col}" stroke="#fff" stroke-width="2"/>',
-                 f'<text x="{(ax + bx) / 2 + (by - ay) * 0.11}" y="{(ay + by) / 2 - (bx - ax) * 0.11 + 5}" class="lab">{name}</text>']
+                 f'<text x="{lx}" y="{ly + 5}" class="lab">{name}</text>']
         s += group(items, "new" if name in new else ("done" if new else "final"))
     s += joint_labels(v)
     return s
@@ -522,7 +554,7 @@ def legend(x, y, nets):
 
 
 def step_picture(n, title, view, new, lines):
-    top = 90   # room above the board for the GPS cable in step 5
+    top = 60
     v = View(0, top, view == "bottom")
     if view == "top":
         show = set(new) | {"hdrTop", "hdrBot", "hdrG"}
@@ -531,7 +563,7 @@ def step_picture(n, title, view, new, lines):
         body = top_board(v, show, set(new))
     else:
         body = bottom_board(v, list(TRAILS), list(WIRES) if n >= 4 else [], set(new))
-    tx = bw() + 36
+    tx = bw() + 150   # clear of the GPS module, which reaches past the board's right edge
     side = "PRINTED side (parts)" if view == "top" else "UNPRINTED side (solder) · mirrored"
     text = [f'<text x="0" y="30" class="h1">Step {n} of 5 · {title}</text>',
             f'<text x="{tx}" y="{top + 26}" class="cap">{side}</text>']
@@ -546,7 +578,7 @@ def step_picture(n, title, view, new, lines):
                       key=list(NETS).index)
         text += legend(tx, y + 40, nets)
     height = max(bh() + top + 60, y + 40 + len(nets) * 25 + 20)
-    return svg(bw() + 480, height, "".join(text + body))
+    return svg(bw() + 640, height, "".join(text + body))
 
 
 def overview():
@@ -583,7 +615,7 @@ def wiring():
         return out
 
     s += box(40, 80, 300, 480, "ESP32-C3 SuperMini", "USB-C ← car charger", "#1c2b4a")
-    s += box(780, 80, 250, 210, "GPS module", "e.g. ATGM336H, 3.3 V", "#5f3dc4")
+    s += box(780, 80, 250, 210, "GPS module", "GY-GPS6MV2, 3.3 V", "#5f3dc4")
     s += box(980, 390, 170, 150, "Spare remote", "button contacts", "#495057")
     esp = {"3V3": 160, "GND": 220, "GPIO5": 280, "GPIO4": 340, "GPIO7": 440}
     for lab, y in esp.items():
