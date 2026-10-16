@@ -39,7 +39,7 @@ car USB-C ────► USB-C
 | # | Part | Qty | Notes | ~€ |
 |---|------|----:|-------|---:|
 | 1 | **ESP32-C3 SuperMini** | 2 | Get the **standard** one, not "SuperMini **Plus**": the Plus has different pins and an RGB LED on GPIO8. The second one is a spare. | 3 each |
-| 2 | **GPS module GY-GPS6MV2** (u-blox NEO-6M, also sold as GY-NEO6MV2), with its 25 × 25 mm patch antenna | 1 | Soldered straight onto the board (step 7) and powered from the SuperMini's **3V3** pin. The layout and the case are drawn for this board: about 25 × 36 mm, pins `VCC RX TX GND` on a short edge. Another 3.3 V UART module works with the firmware too (it reads NMEA or u-blox UBX at any baud rate), but then connect it to I12–L12 with 4 female–female Dupont jumpers, by the labels (VCC I12, RX J12, TX K12, GND L12), and check it fits the case (`case/make_case.py`). | 8–15 |
+| 2 | **GPS module GY-GPS6MV2** (u-blox NEO-6M, also sold as GY-NEO6MV2), with its 25 × 25 mm patch antenna | 1 | Plugs into a 1×4 socket on the board (step 7) and runs from the SuperMini's **3V3** pin. The layout and the case are drawn for this board: about 25 × 36 mm, pins `VCC RX TX GND` on a short edge. Another 3.3 V UART module works with the firmware too (it reads NMEA or u-blox UBX at any baud rate), but needs its own wiring to I12–L12 by its labels (VCC I12, RX J12, TX K12, GND L12) and may not fit the case. | 8–15 |
 | 3 | **NPN transistor, TO-92**: 2N2222 / PN2222, S8050, 2N3904, BC547 or BC337 | 2 | Q1. Any common small NPN works; the legs come in a different order on different parts (assembly step 3). The second one is a spare. | 0.1 |
 | 4 | Resistor 330 Ω, ¼ W | 1 | R1. A resistor assortment kit is handy. | – |
 | 5 | Resistor 100 kΩ, ¼ W | 1 | R2 | – |
@@ -47,8 +47,8 @@ car USB-C ────► USB-C
 | 7 | LED red, **3 mm** | 1 | D1. A 5 mm LED doesn't fit between R2 and the board edge. | 0.1 |
 | 8 | Screw terminal, 2-pin, 5.08 mm pitch, e.g. KF301-2P | 1 | J1, for the remote wires. 5.0 mm pitch fits too; 3.5 / 3.81 mm don't. | 0.3 |
 | 9 | Perfboard **4 × 6 cm**, 2.54 mm, double-sided with plated holes, **20 × 14 holes**, numbers 1–20 and letters A–N printed on it | 1 | The guide uses its printed hole names. Check the print direction before you start (Layout). Packs of several are cheap. | 1 |
-| 10 | Female pin header 1×8, 2.54 mm | 2 | The SuperMini plugs in, so it can be swapped and wires fit underneath | 0.5 |
-| 11 | Male pin header 1×4, 2.54 mm, straight | 1 | GPS connector at I12–L12; the GPS module usually comes with one | 0.2 |
+| 10 | **Round machined-pin female header** (socket strip, stackable), 2.54 mm: 2 × 1×8 and 1 × 1×4 | 1 strip of 40 | The SuperMini and the GPS module plug in, so both can be swapped. Break the pieces off a 1×40 strip (cut through a contact, you lose one each time). The case is drawn for a body 3 mm tall; measure yours (Case). | 1 |
+| 11 | **Round machined-pin male header**, 2.54 mm: 2 × 1×8 and 1 × 1×4 | 1 strip of 40 | For the SuperMini and the GPS module. Round sockets take round pins only: the square pins that come with the modules are too thick and wreck the contacts. | 1 |
 | 12 | Insulated hookup wire, 26–30 AWG (silicone or wire-wrap) | 1 m | W1–W5 and the remote wires | 2 |
 | 13 | Bare tinned copper wire, 0.4–0.6 mm | – | Trails T1–T7; the resistor leg offcuts are enough | – |
 | 14 | **Spare garage remote** for your door, already working | 1 | It stays in use as the transmitter | own / 15–30 |
@@ -106,27 +106,30 @@ trails T2/T3 (Q1's base next to GND). Leave every hole that isn't in the drawing
 1. **Check the SuperMini.** The pin labels should read `5V G 3.3 4 3 2 1 0` on one side and
    `5 6 7 8 9 10 20 21` on the other. Hold it **chip and buttons facing up, USB-C on the left**:
    then `5V … 0` is the upper row and `5 … 21` the lower one, and that's how it goes onto the
-   board. If its male pins came loose, solder them on now (long side down).
-2. **Headers.** Board **printed side up**, 1 on the left, A at the bottom (Layout). Plug both 1×8
-   female headers onto the SuperMini and set it in chip side up, USB-C toward the left edge: the
+   board. If its pins aren't soldered on yet, solder **round** male pins on now: 1×8 on each side,
+   plastic underneath, long side down.
+   - **The GPS module** gets a 1×4 round male header the same way: plastic on the underside (the
+     side without the chip), long pins pointing down, soldered on the chip side.
+   - Square pins already on a module? They don't belong in round sockets; desolder them, or use
+     standard square-hole female headers instead and build the case for their height (Case).
+2. **Sockets.** Board **printed side up**, 1 on the left, A at the bottom (Layout). Plug both 1×8
+   round sockets onto the SuperMini and set it in chip side up, USB-C toward the left edge: the
    `5V … 0` row in **K2–K9** (5V in K2) and the `5 … 21` row in **E2–E9** (5 in E2).
    - The rows are 6 holes (15.24 mm) apart on the SuperMini. If yours don't line up with K and E,
      stop and measure.
-   - Solder **all 16** header pins from the bottom, then pull the SuperMini off again. The unused
-     ones hold the module in place.
-   - **No female headers?** Solder the SuperMini in directly with the male pins it came with: pins
+   - **GPS socket:** plug the 1×4 round socket onto the GPS module's pins and set the module in
+     chip side up, its board lying toward the right edge (it reaches past it), the socket in
+     **I12–L12**, one pin per row in column 12. Its labels must read **VCC on I12, RX on J12, TX on
+     K12, GND on L12**. Held with the pins at the top, that's `VCC RX TX GND` from left to right. If
+     your module's order is different, stop: the wires in step 5 would be wrong for it.
+   - Solder **all 20** socket pins from the bottom, then pull both modules off again. The unused
+     SuperMini pins hold it in place.
+   - **No sockets for the SuperMini?** Solder it in directly with its male pins: pins
      long side down through K2–K9 and E2–E9, SuperMini on top (check the orientation twice), solder
      on top, then from the bottom, and trim the long ends flush underneath. Test-fit a USB-C cable
      before going on: the module now sits only about 2.5 mm above the board.
-   - **1×4 male header:** I12–L12 (the GPS connector), one pin per row in column 12, short pins
-     through the board and the long pins pointing up. Solder it from the bottom.
-   - **Test-fit the GPS module** on the long pins, chip side up, its board lying toward the right
-     edge (it reaches past it). Its labels must read **VCC on I12, RX on J12, TX on K12, GND on
-     L12**. Held with the pins at the top, that's `VCC RX TX GND` from left to right. If your
-     module's order is different, stop: the wires in step 5 would be wrong for it. Take it off again
-     for now.
 
-   ![step 1: headers](img/step1.svg)
+   ![step 1: sockets](img/step1.svg)
 3. **Parts on the printed side** (solder from the bottom, and keep the cut-off legs for the trails):
    - **R1 330 Ω:** C4 and C9, lying flat.
    - **R2 100 kΩ:** C10 and B10, standing upright with the body on C10 (bend the B10 leg down
@@ -160,7 +163,7 @@ trails T2/T3 (Q1's base next to GND). Leave every hole that isn't in the drawing
    - **T7:** D1− → R2's lower leg, neighbours (A10–B10). R2's lower leg is GND.
 
    ![step 3: trails underneath](img/step3.svg)
-5. **Wires on the bottom** (the GPS header's 4 joints are the short column three pads beyond the
+5. **Wires on the bottom** (the GPS socket's 4 joints are the short column three pads beyond the
    SuperMini's pin 0, VCC at the bottom):
    - **W1:** GPS TX → SuperMini pin 5 (K12 → E2).
    - **W2:** the middle pad of T5 → T3, which makes T3 GND (L3 → B11).
@@ -191,10 +194,9 @@ trails T2/T3 (Q1's base next to GND). Leave every hole that isn't in the drawing
    | Screw 1 and screw 2 | **no beep** |
    | Screw 1 and E4, screw 1 and C12 | no beep |
    | Every pair of neighbouring pads in K2–K9, E2–E9 and I12–L12 | open |
-7. **GPS.** Slide the module onto the long pins of I12–L12 as in the test fit: chip side up, its
-   board toward the right edge, **VCC on I12, RX on J12, TX on K12, GND on L12**.
-   - Push it down onto the header's plastic, keep it level and solder the 4 pins on top of the
-     module. Trim the pins that stick out to about 1 mm.
+7. **GPS.** Plug the module into its socket as in step 2: chip side up, its board toward the right
+   edge, **VCC in I12, RX in J12, TX in K12, GND in L12**. Push it straight down until the plastic of
+   its pins sits on the socket.
    - Clip the antenna's cable onto the module's small round socket (press straight down until it
      snaps). Stick the antenna on the module with the foam tape on its back, **ceramic side up**,
      centred, so it doesn't stick out past the module's edges.
@@ -250,8 +252,8 @@ print it as it is, **no supports**. Outside it's 75 × 47 × 30 mm.
 - **Material: PETG or ASA**, not PLA: in a parked car in summer PLA goes soft. 0.2 mm layers, 3 walls,
   15 % infill.
 - **Tray:** the perfboard rests on four corner seats with small lips around them, which keep it in
-  place. The left wall has a notch for the USB-C plug, the right wall a window for the remote's
-  wires.
+  place, and a pillar holds up the GPS module's free end so its four pins don't carry it alone. The
+  left wall has a notch for the USB-C plug, the right wall a window for the remote's wires.
 - **Lid:** a window over the SuperMini (you see the blue status LED and press BOOT through it with a
   pen), a small hole over the red LED D1, and three posts that press the perfboard down onto its
   seats. It clicks into four windows near the top of the tray's long walls; push a fingernail into
@@ -259,12 +261,14 @@ print it as it is, **no supports**. Outside it's 75 × 47 × 30 mm.
 - **Assembly:** thread the remote's two wires through the right-hand window and into J1 first, then
   set the board in, USB-C toward the notch, and click the lid on.
 - `case/make_case.py` builds the file and checks that the case clears the perfboard, the SuperMini
-  on its female headers, the GPS module with the antenna on top, J1, Q1, R2, D1, the USB-C plug and
-  the remote's wires (the plug also for a SuperMini soldered in directly). The sizes it assumes are
-  at the top of the script; if your GPS board or
-  headers differ, change them there and run it again (`python3 prototype/case/make_case.py`).
-- Built with the SuperMini soldered in directly (no female headers), it sits 8.5 mm lower: the USB-C
-  notch still fits, but the lid's window is then far above the BOOT button.
+  and the GPS module in their sockets, the antenna on top of the GPS, J1, Q1, R2, D1, the USB-C
+  plug and the remote's wires (the plug also for a SuperMini soldered in directly). The sizes it
+  assumes are at the top of the script. **Measure your sockets:** `SOCKET_H` is the height of their plastic
+  above the board (3 mm as drawn; 8.5 mm for standard square-hole female headers), and the case
+  grows or shrinks with it. If that or your GPS board differs, change it there and run it again
+  (`python3 prototype/case/make_case.py`).
+- Built with the SuperMini soldered in directly (no sockets), it sits 3 mm lower: the USB-C notch
+  still fits.
 
 ## Install in the car
 

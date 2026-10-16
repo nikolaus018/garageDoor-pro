@@ -40,11 +40,12 @@ NETS = {
 TOP_ROW, BOTTOM_ROW = "K", "E"
 SUPERMINI_TOP = ["5V", "G", "3V3", "4", "3", "2", "1", "0"]      # row K, columns 2..9
 SUPERMINI_BOTTOM = ["5", "6", "7", "8", "9", "10", "20", "21"]   # row E, columns 2..9
-# GY-GPS6MV2 on a 1×4 male header, lying chip side up with its board toward the right edge. Held
-# with the header on top, its pins read VCC RX TX GND from left to right; turned so the header runs
-# along column 12, that's I12 to L12. Most of these modules are 3.3 V only.
+# The SuperMini and the GPS module plug into round machined-pin female headers (sockets).
+# GY-GPS6MV2 in a 1×4 socket, lying chip side up with its board toward the right edge. Held with
+# its pins on top, they read VCC RX TX GND from left to right; turned so the socket runs along
+# column 12, that's I12 to L12. Most of these modules are 3.3 V only.
 GPS_PADS = {"I12": "VCC", "J12": "RX", "K12": "TX", "L12": "GND"}
-GPS_MM = (25.7, 36.5, 2.5)   # board width, length, header pins in from the short edge (case/make_case.py)
+GPS_MM = (25.7, 36.5, 2.5)   # board width, length, pins in from the short edge (case/make_case.py)
 R1 = ("C4", "C9")                                     # lying flat
 R2 = ("C10", "B10")                                   # standing upright, body on C10
 R3 = ("A4", "A8")                                     # lying flat, along the bottom edge
@@ -98,17 +99,17 @@ EXPECTED = [  # the circuit: each group connected, nothing else
 ]
 
 STEPS = [  # (title, view, items new in this step, instructions)
-    ("Headers", "top", ["hdrTop", "hdrBot", "hdrG"], [
+    ("Sockets", "top", ["hdrTop", "hdrBot", "hdrG"], [
         "Printed side up, 1 on the left: A must be at",
         "the bottom (if it's at the top, stop: README).",
-        "Plug both 1×8 female headers onto the SuperMini",
+        "Plug both 1×8 round sockets onto the SuperMini",
         "and set it in chip side up, USB-C to the left:",
         "pins 5V…0 in K2–K9, pins 5…21 in E2–E9.",
-        "Solder the 16 header pins from below, then",
-        "pull the SuperMini off again.",
-        "1×4 male header (the GPS connector): I12–L12,",
-        "  short pins through the board, long pins up.",
-        "  Test-fit the GPS module on it (README).",
+        "Plug the 1×4 socket onto the GPS module and set",
+        "it in chip side up, board toward the right edge:",
+        "VCC in I12, RX J12, TX K12, GND L12 (README).",
+        "Solder all 20 socket pins from below, then pull",
+        "both modules off again.",
     ]),
     ("Parts on top", "top", ["R1", "R2", "R3", "D1", "Q1", "J1"], [
         "R1 330 Ω: C4 + C9, lying flat.",
@@ -152,12 +153,10 @@ STEPS = [  # (title, view, items new in this step, instructions)
     ]),
     ("GPS, SuperMini, remote", "top", ["gps", "module", "ext"], [
         "Printed side up again.",
-        "GPS module chip side up onto the long pins,",
-        "  its board toward the right edge: the labels",
-        "  VCC, RX, TX, GND must sit on I12, J12, K12, L12.",
-        "  Solder the 4 pins on top, trim them short.",
-        "Antenna onto the module's socket, then stick it",
-        "  on the module, ceramic side up.",
+        "Plug the GPS module in: chip side up, board",
+        "  toward the right edge, VCC in I12 … GND in L12.",
+        "Antenna cable onto the module, then stick the",
+        "  antenna on the module, ceramic side up.",
         "Plug the SuperMini in: chip side up, USB-C left.",
         "Remote button into J1: its + side to screw 1,",
         "  its − side to screw 2.",
@@ -316,17 +315,17 @@ def top_item(v, key, pin_labels=True):
         labels = SUPERMINI_TOP if row == TOP_ROW else SUPERMINI_BOTTOM
         for i, lab in enumerate(labels):
             x, yy = v.xy(f"{row}{i + 2}")
-            s.append(f'<rect x="{x - 4}" y="{yy - 4}" width="8" height="8" fill="#868e96"/>')
+            s.append(f'<circle cx="{x}" cy="{yy}" r="4.5" fill="#868e96"/>')
             if pin_labels:
                 ty = yy - 20 if row == TOP_ROW else yy + 30
                 s.append(f'<text x="{x}" y="{ty}" class="lab">{lab}</text>')
     elif key == "hdrG":
         xs, ys = zip(*(v.xy(p) for p in GPS_PADS))
-        s.append(f'<rect x="{min(xs) - 12}" y="{min(ys) - 14}" width="{max(xs) - min(xs) + 24}" '
-                 f'height="{max(ys) - min(ys) + 28}" rx="2" fill="#111"/>')
+        s.append(f'<rect x="{min(xs) - 13}" y="{min(ys) - 15}" width="{max(xs) - min(xs) + 26}" '
+                 f'height="{max(ys) - min(ys) + 30}" rx="3" fill="#212529"/>')
         for pad, lab in GPS_PADS.items():
             x, yy = v.xy(pad)
-            s.append(f'<rect x="{x - 4}" y="{yy - 4}" width="8" height="8" fill="#fcc419"/>')
+            s.append(f'<circle cx="{x}" cy="{yy}" r="4.5" fill="#868e96"/>')
             if pin_labels:
                 s.append(f'<text x="{x - 34}" y="{yy + 5}" class="lab">{lab}</text>')
     elif key == "gps":

@@ -4,8 +4,9 @@
 
 Writes prototype/case/garageDoor-case.3mf with two parts, already turned for printing, and
 case.png, a picture of the case with its lid lifted and the parts inside (as plain boxes):
-  tray  the box: the perfboard rests on four corner seats, USB-C notch in the left wall, a window
-        in the right wall for the remote's wires, snap windows near the top edge
+  tray  the box: the perfboard rests on four corner seats, a rest holds up the GPS module's free
+        end, USB-C notch in the left wall, a window in the right wall for the remote's wires, snap
+        windows near the top edge
   lid   printed upside down: plate with a window over the SuperMini (status LED, BOOT button), a
         hole over the red LED D1, a skirt with snap bumps, and three posts that hold the perfboard
         down at its corners
@@ -13,9 +14,9 @@ case.png, a picture of the case with its lid lifted and the parts inside (as pla
 No CAD package needed (standard library only). Every part is a union of boxes minus boxes, cut
 into a grid along all the box edges; the outer faces of the filled cells become the mesh, so it is
 always closed. The script fails if a mesh isn't watertight, if a part falls apart, or if the case
-touches any of the parts inside (perfboard, SuperMini on female headers, GPS module with its
-antenna on top, J1, Q1, R2, D1, the USB-C plug, also for a SuperMini soldered in directly, and the
-remote's wires).
+touches any of the parts inside (perfboard, SuperMini and GPS module in their sockets, the
+antenna on top of the GPS, J1, Q1, R2, D1, the USB-C plug, also for a SuperMini soldered in
+directly, and the remote's wires).
 
 Coordinates in mm, as assembled: x along the perfboard's 60 mm side (column 1 on the left), y along
 the 40 mm side (row A at the front), z up from the bottom of the tray. Seen from above, as in the
@@ -50,35 +51,42 @@ FLOOR, WALL = 2.0, 2.0
 UNDER = 4.5               # room under the perfboard: header tails, joints, trails, wires
 ZB = FLOOR + UNDER        # bottom of the perfboard
 ZT = ZB + BOARD_T         # top of the perfboard (parts side)
-ROOM = 19.4               # perfboard top to the underside of the lid
-ZL = ZT + ROOM            # underside of the lid = top of the tray walls
 LID_T = 2.0
 GAP = 0.2                 # clearance between parts that slide together
 
-# ESP32-C3 SuperMini, 22.5 × 18 mm, on 8.5 mm female headers in rows E and K, columns 2–9
+# Both modules plug into round machined-pin female headers (sockets) on the perfboard, on the
+# plastic of their own round male pins. Measure yours: the case grows or shrinks with SOCKET_H.
+SOCKET_H = 3.0            # socket body above the perfboard
+PIN_H = 2.5               # plastic of the module's male pins
+# perfboard top to the underside of the lid: the GPS module (1.6 mm board, ~3 mm parts) with the
+# antenna on top (up to 8 mm with its tape and cable) and 1.3 mm to spare
+ROOM = SOCKET_H + PIN_H + 1.6 + 3.0 + 8.0 + 1.3
+ZL = ZT + ROOM            # underside of the lid = top of the tray walls
+
+# ESP32-C3 SuperMini, 22.5 × 18 mm, in two 1×8 sockets in rows E and K, columns 2–9
 SM_X0, SM_X1 = hole_x(2) - 2.4, hole_x(9) + 2.4
 SM_Y = (hole_y("E") + hole_y("K")) / 2
-SM_Z0 = ZT + 8.5 + 2.5    # female header + the plastic of the SuperMini's own pins
+SM_Z0 = ZT + SOCKET_H + PIN_H
 USB_Z = SM_Z0 + 1.0 + 1.6 # centre of the USB-C socket on top of the 1 mm PCB
-USB_Z_LOW = USB_Z - 8.5   # the same with the SuperMini soldered in directly (no female headers)
+USB_Z_LOW = ZT + PIN_H + 1.0 + 1.6   # the same with the SuperMini soldered in directly
 
-# GY-GPS6MV2: about 25.5 × 36 mm, header on a short edge ~2.5 mm in, lying chip side up on the
-# 1×4 male header in I12–L12, its board toward the right edge (it reaches past it)
+# GY-GPS6MV2: about 25.5 × 36 mm, pins on a short edge ~2.5 mm in, lying chip side up in the 1×4
+# socket in I12–L12, its board toward the right edge (it reaches past it)
 GPS_HDR_X = hole_x(12)
 GPS_Y = (hole_y("I") + hole_y("L")) / 2
 GPS_W, GPS_L, GPS_HDR_IN = 25.7, 36.5, 2.5
 GPS_X0 = GPS_HDR_X - GPS_HDR_IN
 GPS_X1 = GPS_X0 + GPS_L
-GPS_Z0 = ZT + 2.5         # on the header's plastic spacer
+GPS_Z0 = ZT + SOCKET_H + PIN_H
 ANT = 25.0                # ceramic patch, stuck on top of the module, ceramic side up
 
 PARTS = {  # envelopes the case must stay out of: (x0, y0, z0, x1, y1, z1)
     "perfboard": (0, 0, ZB, BOARD_W, BOARD_D, ZT),
     "joints underneath": (hole_x(1) - 1.3, hole_y("A") - 1.3, ZB - 3.5, hole_x(20) + 1.3, hole_y("N") + 1.3, ZB),
-    "SuperMini + headers": (SM_X0 - 0.8, SM_Y - 9.1, ZT, SM_X1 + 0.2, SM_Y + 9.1, SM_Z0 + 4.5),
+    "SuperMini + sockets": (SM_X0 - 0.8, SM_Y - 9.1, ZT, SM_X1 + 0.2, SM_Y + 9.1, SM_Z0 + 4.5),
     "USB-C plug": (-15, SM_Y - 6.5, USB_Z - 4, SM_X0 - 0.8, SM_Y + 6.5, USB_Z + 4),
     "USB-C plug, SuperMini soldered in": (-15, SM_Y - 6.5, USB_Z_LOW - 4, SM_X0 - 0.8, SM_Y + 6.5, USB_Z_LOW + 4),
-    "GPS header": (GPS_HDR_X - 1.3, hole_y("I") - 1.3, ZT, GPS_HDR_X + 1.3, hole_y("L") + 1.3, GPS_Z0),
+    "GPS socket + pins": (GPS_HDR_X - 1.3, hole_y("I") - 1.3, ZT, GPS_HDR_X + 1.3, hole_y("L") + 1.3, GPS_Z0),
     "GPS module": (GPS_X0, GPS_Y - GPS_W / 2, GPS_Z0, GPS_X1, GPS_Y + GPS_W / 2, GPS_Z0 + 1.6 + 3.0),
     "antenna": ((GPS_X0 + GPS_X1) / 2 - ANT / 2, GPS_Y - ANT / 2, GPS_Z0 + 4.6,
                 (GPS_X0 + GPS_X1) / 2 + ANT / 2, GPS_Y + ANT / 2, GPS_Z0 + 4.6 + 8.0),
@@ -105,6 +113,9 @@ LED_WIN = (hole_x(9.5) - 2.0, hole_y("A") - 2.0, hole_x(9.5) + 2.0, hole_y("A") 
 SM_WIN = (SM_X0 - 0.5, SM_Y - 8.5, SM_X1 + 0.5, SM_Y + 8.5)
 SEATS = [(0, 0), (BOARD_W, 0), (0, BOARD_D), (BOARD_W, BOARD_D)]
 POSTS = [(0, 0), (BOARD_W, 0), (0, BOARD_D)]   # the fourth corner is under the GPS module
+# a pillar from the floor under the GPS module's free end, past the perfboard's edge, 0.3 mm short
+# of it so the module still sits fully in its socket
+GPS_REST = (BOARD_W + 1.5, GPS_Y - 3.0, FLOOR, GPS_X1 - 2.5, GPS_Y + 3.0, GPS_Z0 - 0.3)
 
 
 def box(x0, y0, z0, x1, y1, z1):
@@ -123,6 +134,7 @@ def tray():
         lip_y = max(IY0, cy - 1.3) if sy > 0 else cy + GAP + 1.2
         seats.append(box(cx - GAP * sx, cy + 3.0 * sy, FLOOR, lip_x, lip_y, ZT + 1.0))
         seats.append(box(cx + 3.5 * sx, cy - GAP * sy, FLOOR, lip_x, lip_y, ZT + 1.0))
+    seats.append(box(*GPS_REST))
     sub.append(box(OX0 - 1, USB_NOTCH[0], USB_NOTCH[2], IX0 + 0.5, USB_NOTCH[1], ZL + 1))
     y0, y1, z0, z1 = WIRE_WIN
     sub.append(box(IX1 - 0.5, y0, z0, OX1 + 1, y1, z1))
@@ -310,7 +322,7 @@ def write_3mf(path, objects):
 # ---------------------------------------------------------------- picture
 
 COLOURS = {"tray": (206, 208, 214), "lid": (110, 150, 214), "perfboard": (38, 120, 72),
-           "SuperMini + headers": (34, 46, 84), "USB-C plug": (80, 80, 84), "GPS header": (20, 20, 20),
+           "SuperMini + sockets": (34, 46, 84), "USB-C plug": (80, 80, 84), "GPS socket + pins": (20, 20, 20),
            "GPS module": (40, 90, 190), "antenna": (226, 196, 128), "J1 screw terminal": (40, 140, 64),
            "Q1": (30, 30, 30), "R2 (upright)": (226, 205, 150), "D1": (235, 60, 60),
            "remote wires": (150, 60, 175)}
@@ -385,6 +397,7 @@ def main():
     for cx, cy in POSTS:
         x, y = cx + (1.0 if cx == 0 else -1.0), cy + (1.0 if cy == 0 else -1.0)
         assert parts["lid"].at(x, y, ZT + 0.1), f"no post above the perfboard corner at {cx, cy}"
+    assert parts["tray"].at((GPS_REST[0] + GPS_REST[3]) / 2, GPS_Y, GPS_Z0 - 0.4), "no rest under the GPS"
     placed = []
     # tray as it is, moved to the origin; lid turned over (180° about x) next to it
     verts, tris = parts["tray"].mesh()
