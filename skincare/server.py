@@ -12,13 +12,6 @@ from urllib.parse import parse_qs, urlparse
 HERE = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.environ.get("SKINCARE_DB", os.path.join(HERE, "skincare.db"))
 
-DEFAULT_STEPS = [
-    ("am", "Gesicht reinigen"), ("am", "Toner"), ("am", "Vitamin-C-Serum"),
-    ("am", "Feuchtigkeitscreme"), ("am", "Sonnencreme"),
-    ("pm", "Make-up entfernen"), ("pm", "Gesicht reinigen"), ("pm", "Serum / Wirkstoff"),
-    ("pm", "Nachtcreme"),
-]
-
 
 def db():
     con = sqlite3.connect(DB_PATH)
@@ -29,16 +22,10 @@ def db():
 def init_db():
     with db() as con:
         con.executescript("""
-            CREATE TABLE IF NOT EXISTS steps(
-                id INTEGER PRIMARY KEY, period TEXT NOT NULL, name TEXT NOT NULL, pos INTEGER NOT NULL);
-            CREATE TABLE IF NOT EXISTS checks(
-                day TEXT NOT NULL, step_id INTEGER NOT NULL, PRIMARY KEY(day, step_id));
+            CREATE TABLE IF NOT EXISTS skincare(day TEXT PRIMARY KEY);
             CREATE TABLE IF NOT EXISTS pillow_events(
                 id INTEGER PRIMARY KEY, kind TEXT NOT NULL, day TEXT NOT NULL);
         """)
-        if not con.execute("SELECT 1 FROM steps").fetchone():
-            con.executemany("INSERT INTO steps(period,name,pos) VALUES(?,?,?)",
-                            [(p, n, i) for i, (p, n) in enumerate(DEFAULT_STEPS)])
 
 
 def parse_day(s):
@@ -64,11 +51,7 @@ def pillow_state(con, today):
 
 
 def streak(con, today):
-    n_steps = con.execute("SELECT COUNT(*) FROM steps").fetchone()[0]
-    if not n_steps:
-        return 0
-    full = {r["day"] for r in con.execute(
-        "SELECT day FROM checks WHERE step_id IN (SELECT id FROM steps) GROUP BY day HAVING COUNT(*)>=?", (n_steps,))}
+    full = {r["day"] for r in con.execute("SELECT day FROM skincare")}
     d = today if today.isoformat() in full else today - timedelta(days=1)
     count = 0
     while d.isoformat() in full:
@@ -77,28 +60,15 @@ def streak(con, today):
     return count
 
 
-def week(con, today):
-    n_steps = con.execute("SELECT COUNT(*) FROM steps").fetchone()[0] or 1
-    days = [(today - timedelta(days=i)) for i in range(6, -1, -1)]
-    out = []
-    for d in days:
-        c = con.execute("SELECT COUNT(*) FROM checks WHERE day=? AND step_id IN (SELECT id FROM steps)",
-                        (d.isoformat(),)).fetchone()[0]
-        out.append({"day": d.isoformat(), "done": c, "total": n_steps})
-    return out
-
-
 def full_state(day_s, today_s):
     day, today = parse_day(day_s), parse_day(today_s)
     with db() as con:
-        steps = [dict(r) for r in con.execute("SELECT id,period,name FROM steps ORDER BY period, pos, id")]
-        done = {r["step_id"] for r in con.execute("SELECT step_id FROM checks WHERE day=?", (day.isoformat(),))}
-        for s in steps:
-            s["done"] = s["id"] in done
-        history = [dict(r) for r in con.execute(
-            "SELECT kind, day FROM pillow_events ORDER BY id DESC LIMIT 8")]
-        return {"day": day.isoformat(), "steps": steps, "streak": streak(con, today),
-                "week": week(con, today), "pillow": pillow_state(con, today), "pillow_history": history}
+        done = {r["day"] for r in con.execute("SELECT day FROM skincare")}
+        week = [{"day": d.isoformat(), "done": d.isoformat() in done}
+                for d in (today - timedelta(days=i) for i in range(6, -1, -1))]
+        history = [dict(r) for r in con.execute("SELECT kind, day FROM pillow_events ORDER BY id DESC LIMIT 8")]
+        return {"day": day.isoformat(), "done": day.isoformat() in done, "streak": streak(con, today),
+                "week": week, "pillow": pillow_state(con, today), "pillow_history": history}
 
 
 def act(body):
@@ -106,22 +76,10 @@ def act(body):
     day = parse_day(body.get("day")).isoformat()
     with db() as con:
         if kind == "toggle":
-            sid = int(body["step_id"])
-            if con.execute("SELECT 1 FROM checks WHERE day=? AND step_id=?", (day, sid)).fetchone():
-                con.execute("DELETE FROM checks WHERE day=? AND step_id=?", (day, sid))
+            if con.execute("SELECT 1 FROM skincare WHERE day=?", (day,)).fetchone():
+                con.execute("DELETE FROM skincare WHERE day=?", (day,))
             else:
-                con.execute("INSERT INTO checks(day,step_id) VALUES(?,?)", (day, sid))
-        elif kind == "add_step":
-            name = str(body.get("name", "")).strip()[:60]
-            period = body.get("period")
-            if not name or period not in ("am", "pm"):
-                return 400
-            pos = con.execute("SELECT COALESCE(MAX(pos),0)+1 FROM steps").fetchone()[0]
-            con.execute("INSERT INTO steps(period,name,pos) VALUES(?,?,?)", (period, name, pos))
-        elif kind == "delete_step":
-            sid = int(body["step_id"])
-            con.execute("DELETE FROM steps WHERE id=?", (sid,))
-            con.execute("DELETE FROM checks WHERE step_id=?", (sid,))
+                con.execute("INSERT INTO skincare(day) VALUES(?)", (day,))
         elif kind in ("change", "flip"):
             con.execute("INSERT INTO pillow_events(kind,day) VALUES(?,?)", (kind, day))
         elif kind == "undo_pillow":

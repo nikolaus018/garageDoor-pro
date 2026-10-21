@@ -28,30 +28,23 @@ h1{margin:0;font-size:28px;letter-spacing:-.02em}
 .week{display:flex;gap:6px;justify-content:space-between}
 .day{flex:1;text-align:center;border:0;background:none;cursor:pointer;color:var(--ink);font:inherit;font-size:12px;padding:0}
 .ring{width:100%;aspect-ratio:1;max-width:42px;margin:4px auto 0;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:13px;
-  background:conic-gradient(var(--ok) calc(var(--p)*1%),var(--line) 0)}
+  background:var(--line)}
 .ring i{width:74%;height:74%;border-radius:50%;background:var(--card);display:grid;place-items:center;font-style:normal}
 .day.sel .ring{outline:2px solid var(--accent);outline-offset:2px}
 .day.sel{font-weight:700}
 .bar{height:6px;border-radius:99px;background:var(--line);overflow:hidden;margin:10px 0 6px}
 .bar b{display:block;height:100%;width:0;border-radius:99px;transition:width .3s}
-ul{list-style:none;margin:0;padding:0}
-li{display:flex;align-items:center;gap:12px;padding:12px 4px;border-top:1px solid var(--line);cursor:pointer;user-select:none}
-li:first-child{border-top:0}
-.box{width:28px;height:28px;border-radius:9px;border:2px solid var(--line);display:grid;place-items:center;flex:none;transition:.15s}
-.box svg{width:16px;stroke:#fff;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;opacity:0;transform:scale(.5);transition:.15s}
-li.done .box{background:var(--c);border-color:var(--c)}
-li.done .box svg{opacity:1;transform:none}
-li.done .name{color:var(--muted);text-decoration:line-through}
-.name{flex:1}
-.x{border:0;background:none;color:var(--muted);font-size:20px;padding:4px 8px;cursor:pointer;display:none}
-.edit li .x{display:block}
-.edit li .box{display:none}
-.add{display:none;gap:8px;margin-top:10px}
-.edit .add{display:flex}
-.add input{flex:1;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;min-width:0}
-button.pill{border:0;border-radius:12px;padding:10px 14px;font:inherit;font-weight:600;cursor:pointer;background:var(--ink);color:var(--bg)}
-.link{border:0;background:none;color:var(--accent);font:inherit;font-size:13px;font-weight:600;cursor:pointer;letter-spacing:0;text-transform:none;padding:0}
-
+.today{display:flex;align-items:center;gap:16px;width:100%;border:0;font:inherit;color:inherit;text-align:left;cursor:pointer;
+  background:var(--card);border-radius:22px;padding:22px 18px;box-shadow:var(--shadow);transition:.2s}
+.today .box{width:44px;height:44px;border-radius:14px;border:2px solid var(--line);display:grid;place-items:center;flex:none;transition:.2s}
+.today .box svg{width:24px;stroke:#fff;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;opacity:0;transform:scale(.5);transition:.2s}
+.today.done .box{background:var(--ok);border-color:var(--ok)}
+.today.done .box svg{opacity:1;transform:none}
+.today b{display:block;font-size:20px;letter-spacing:-.01em}
+.today small{color:var(--muted)}
+.today:active{transform:scale(.98)}
+.ring.full{background:var(--ok)}
+.ring.full i{background:var(--ok);color:#fff}
 /* pillow */
 .pillow{display:grid;gap:14px}
 .sides{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -78,17 +71,16 @@ button.big.ghost{background:var(--line);color:var(--ink);flex:0 0 auto}
 
   <section class="card"><div class="week" id="week"></div></section>
 
-  <section class="card" id="am"></section>
-  <section class="card" id="pm"></section>
+  <button class="today" id="today"><span class="box"><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg></span>
+    <span><b>Skincare gemacht</b><small id="todaySub"></small></span></button>
 
   <section class="card pillow" id="pillow"></section>
-  <div class="sub" style="text-align:center"><button class="link" id="editBtn">Routine bearbeiten</button></div>
 </main>
 
 <script>
 const iso = d => { const z = new Date(d.getTime() - d.getTimezoneOffset()*60000); return z.toISOString().slice(0,10); };
 const TODAY = iso(new Date());
-let day = TODAY, S = null, edit = false;
+let day = TODAY, S = null;
 const $ = id => document.getElementById(id);
 const fmt = (s, o) => new Date(s + 'T12:00').toLocaleDateString('de-DE', o);
 
@@ -102,41 +94,16 @@ async function act(body){
 }
 
 function render(){
-  document.body.classList.toggle('edit', edit);
   $('date').textContent = (day === TODAY ? 'Heute · ' : '') + fmt(day, {weekday:'long', day:'numeric', month:'long'});
   $('streak').textContent = '🔥 ' + S.streak + (S.streak === 1 ? ' Tag' : ' Tage');
-  $('week').innerHTML = S.week.map(w => {
-    const p = Math.round(100 * w.done / w.total);
-    return `<button class="day ${w.day === day ? 'sel' : ''}" data-d="${w.day}">${fmt(w.day,{weekday:'short'})}
-      <div class="ring" style="--p:${p}"><i>${fmt(w.day,{day:'numeric'})}</i></div></button>`;
-  }).join('');
+  $('week').innerHTML = S.week.map(w => `<button class="day ${w.day === day ? 'sel' : ''}" data-d="${w.day}">${fmt(w.day,{weekday:'short'})}
+      <div class="ring ${w.done ? 'full' : ''}"><i>${w.done ? '✓' : fmt(w.day,{day:'numeric'})}</i></div></button>`).join('');
   document.querySelectorAll('.day').forEach(b => b.onclick = () => { day = b.dataset.d; load(); });
-  routine('am', '☀️ Morgens', 'var(--am)');
-  routine('pm', '🌙 Abends', 'var(--pm)');
+  $('today').classList.toggle('done', S.done);
+  $('todaySub').textContent = S.done ? 'Erledigt – stark!' : (day === TODAY ? 'Tippen zum Abhaken' : 'Für diesen Tag nachtragen');
+  $('today').onclick = () => act({action:'toggle'});
   pillow();
 }
-
-function routine(p, title, color){
-  const st = S.steps.filter(s => s.period === p), n = st.filter(s => s.done).length;
-  const el = $(p);
-  el.style.setProperty('--c', color);
-  el.innerHTML = `<h2><span>${title}</span><span>${n}/${st.length}</span></h2>
-    <div class="bar"><b style="width:${st.length ? 100*n/st.length : 0}%;background:${color}"></b></div>
-    <ul>${st.map(s => `<li class="${s.done ? 'done' : ''}" data-id="${s.id}" style="--c:${color}">
-      <span class="box"><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg></span>
-      <span class="name">${esc(s.name)}</span><button class="x" data-del="${s.id}" aria-label="Löschen">✕</button></li>`).join('')}</ul>
-    <form class="add"><input placeholder="Neuer Schritt…" maxlength="60"><button class="pill">+</button></form>`;
-  el.querySelectorAll('li').forEach(li => li.onclick = e => {
-    if (e.target.dataset.del) return act({action:'delete_step', step_id:+e.target.dataset.del});
-    if (!edit) act({action:'toggle', step_id:+li.dataset.id});
-  });
-  el.querySelector('form').onsubmit = e => {
-    e.preventDefault();
-    const v = e.target.querySelector('input').value.trim();
-    if (v) act({action:'add_step', period:p, name:v});
-  };
-}
-const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 function pillow(){
   const P = S.pillow, el = $('pillow');
@@ -166,7 +133,6 @@ function pillow(){
   el.querySelectorAll('[data-a]').forEach(b => b.onclick = () => act({action:b.dataset.a, day: TODAY}));
 }
 
-$('editBtn').onclick = () => { edit = !edit; $('editBtn').textContent = edit ? 'Fertig' : 'Routine bearbeiten'; render(); };
 load();
 </script>
 </body>
