@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14110f">
+<title>Glow – Skincare Tracker</title>
+<style>
+:root{
+  --bg:#f6f1ec; --card:#fffdfb; --ink:#2a2320; --muted:#8a7d75; --line:#eadfd6;
+  --am:#f2a65a; --pm:#7b6cf0; --ok:#3fa37a; --warn:#e8704f; --accent:#d9798f;
+  --shadow:0 1px 2px rgba(60,40,30,.06),0 8px 24px rgba(60,40,30,.07);
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#14110f; --card:#1e1917; --ink:#f3ebe4; --muted:#9b8d84; --line:#2e2724;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  padding:max(20px,env(safe-area-inset-top)) 16px 60px}
+main{max-width:520px;margin:0 auto;display:grid;gap:16px}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+h1{margin:0;font-size:28px;letter-spacing:-.02em}
+.sub{color:var(--muted);font-size:14px}
+.streak{background:var(--card);box-shadow:var(--shadow);border-radius:999px;padding:8px 14px;font-weight:700;white-space:nowrap}
+.card{background:var(--card);border-radius:22px;padding:18px;box-shadow:var(--shadow)}
+.card h2{margin:0 0 4px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between;align-items:center}
+.week{display:flex;gap:6px;justify-content:space-between}
+.day{flex:1;text-align:center;border:0;background:none;cursor:pointer;color:var(--ink);font:inherit;font-size:12px;padding:0}
+.ring{width:100%;aspect-ratio:1;max-width:42px;margin:4px auto 0;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:13px;
+  background:conic-gradient(var(--ok) calc(var(--p)*1%),var(--line) 0)}
+.ring i{width:74%;height:74%;border-radius:50%;background:var(--card);display:grid;place-items:center;font-style:normal}
+.day.sel .ring{outline:2px solid var(--accent);outline-offset:2px}
+.day.sel{font-weight:700}
+.bar{height:6px;border-radius:99px;background:var(--line);overflow:hidden;margin:10px 0 6px}
+.bar b{display:block;height:100%;width:0;border-radius:99px;transition:width .3s}
+ul{list-style:none;margin:0;padding:0}
+li{display:flex;align-items:center;gap:12px;padding:12px 4px;border-top:1px solid var(--line);cursor:pointer;user-select:none}
+li:first-child{border-top:0}
+.box{width:28px;height:28px;border-radius:9px;border:2px solid var(--line);display:grid;place-items:center;flex:none;transition:.15s}
+.box svg{width:16px;stroke:#fff;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;opacity:0;transform:scale(.5);transition:.15s}
+li.done .box{background:var(--c);border-color:var(--c)}
+li.done .box svg{opacity:1;transform:none}
+li.done .name{color:var(--muted);text-decoration:line-through}
+.name{flex:1}
+.x{border:0;background:none;color:var(--muted);font-size:20px;padding:4px 8px;cursor:pointer;display:none}
+.edit li .x{display:block}
+.edit li .box{display:none}
+.add{display:none;gap:8px;margin-top:10px}
+.edit .add{display:flex}
+.add input{flex:1;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;min-width:0}
+button.pill{border:0;border-radius:12px;padding:10px 14px;font:inherit;font-weight:600;cursor:pointer;background:var(--ink);color:var(--bg)}
+.link{border:0;background:none;color:var(--accent);font:inherit;font-size:13px;font-weight:600;cursor:pointer;letter-spacing:0;text-transform:none;padding:0}
+
+/* pillow */
+.pillow{display:grid;gap:14px}
+.sides{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.side{border-radius:16px;padding:14px 8px;text-align:center;border:2px dashed var(--line);color:var(--muted);transition:.25s}
+.side b{display:block;font-size:22px}
+.side small{display:block;font-size:12px}
+.side.use{border:2px solid var(--accent);color:var(--ink);background:color-mix(in srgb,var(--accent) 12%,transparent)}
+.side.used{opacity:.45;text-decoration:line-through}
+.msg{font-size:18px;font-weight:700;letter-spacing:-.01em}
+.msg.alert{color:var(--warn)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+button.big{flex:1;border:0;border-radius:14px;padding:14px;font:inherit;font-weight:700;cursor:pointer;color:#fff;background:var(--accent)}
+button.big.alt{background:var(--warn)}
+button.big.ghost{background:var(--line);color:var(--ink);flex:0 0 auto}
+.hist{font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div><h1>Glow ✨</h1><div class="sub" id="date"></div></div>
+    <div class="streak" id="streak">🔥 0</div>
+  </header>
+
+  <section class="card"><div class="week" id="week"></div></section>
+
+  <section class="card" id="am"></section>
+  <section class="card" id="pm"></section>
+
+  <section class="card pillow" id="pillow"></section>
+  <div class="sub" style="text-align:center"><button class="link" id="editBtn">Routine bearbeiten</button></div>
+</main>
+
+<script>
+const iso = d => { const z = new Date(d.getTime() - d.getTimezoneOffset()*60000); return z.toISOString().slice(0,10); };
+const TODAY = iso(new Date());
+let day = TODAY, S = null, edit = false;
+const $ = id => document.getElementById(id);
+const fmt = (s, o) => new Date(s + 'T12:00').toLocaleDateString('de-DE', o);
+
+async function load(){
+  const r = await fetch(`/api/state?day=${day}&today=${TODAY}`);
+  S = await r.json(); render();
+}
+async function act(body){
+  await fetch('/api/action', {method:'POST', body: JSON.stringify({day, ...body})});
+  load();
+}
+
+function render(){
+  document.body.classList.toggle('edit', edit);
+  $('date').textContent = (day === TODAY ? 'Heute · ' : '') + fmt(day, {weekday:'long', day:'numeric', month:'long'});
+  $('streak').textContent = '🔥 ' + S.streak + (S.streak === 1 ? ' Tag' : ' Tage');
+  $('week').innerHTML = S.week.map(w => {
+    const p = Math.round(100 * w.done / w.total);
+    return `<button class="day ${w.day === day ? 'sel' : ''}" data-d="${w.day}">${fmt(w.day,{weekday:'short'})}
+      <div class="ring" style="--p:${p}"><i>${fmt(w.day,{day:'numeric'})}</i></div></button>`;
+  }).join('');
+  document.querySelectorAll('.day').forEach(b => b.onclick = () => { day = b.dataset.d; load(); });
+  routine('am', '☀️ Morgens', 'var(--am)');
+  routine('pm', '🌙 Abends', 'var(--pm)');
+  pillow();
+}
+
+function routine(p, title, color){
+  const st = S.steps.filter(s => s.period === p), n = st.filter(s => s.done).length;
+  const el = $(p);
+  el.style.setProperty('--c', color);
+  el.innerHTML = `<h2><span>${title}</span><span>${n}/${st.length}</span></h2>
+    <div class="bar"><b style="width:${st.length ? 100*n/st.length : 0}%;background:${color}"></b></div>
+    <ul>${st.map(s => `<li class="${s.done ? 'done' : ''}" data-id="${s.id}" style="--c:${color}">
+      <span class="box"><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg></span>
+      <span class="name">${esc(s.name)}</span><button class="x" data-del="${s.id}" aria-label="Löschen">✕</button></li>`).join('')}</ul>
+    <form class="add"><input placeholder="Neuer Schritt…" maxlength="60"><button class="pill">+</button></form>`;
+  el.querySelectorAll('li').forEach(li => li.onclick = e => {
+    if (e.target.dataset.del) return act({action:'delete_step', step_id:+e.target.dataset.del});
+    if (!edit) act({action:'toggle', step_id:+li.dataset.id});
+  });
+  el.querySelector('form').onsubmit = e => {
+    e.preventDefault();
+    const v = e.target.querySelector('input').value.trim();
+    if (v) act({action:'add_step', period:p, name:v});
+  };
+}
+const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function pillow(){
+  const P = S.pillow, el = $('pillow');
+  const cls = (side) => {
+    if (P.status === 'none') return '';
+    if (P.status === 'change_due') return 'used';
+    if (side === 'A') return P.status === 'side_a' ? 'use' : 'used';
+    return P.status === 'flip_due' ? '' : P.status === 'side_b' ? 'use' : 'used';
+  };
+  const txt = {
+    none: ['Kein Bezug erfasst', 'Trag ein, wann du zuletzt frisch bezogen hast.'],
+    side_a: ['Nacht 1 · Seite A', 'Frisch bezogen. Heute Nacht auf Seite A.'],
+    flip_due: ['Kissen umdrehen!', 'Seite A ist durch – dreh den Bezug für Nacht 2 um.'],
+    side_b: ['Nacht 2 · Seite B', 'Umgedreht. Heute Nacht noch auf Seite B.'],
+    change_due: ['Neu beziehen!', 'Beide Seiten benutzt – frischen Bezug aufziehen.'],
+  }[P.status];
+  const alert = P.status === 'flip_due' || P.status === 'change_due';
+  const btn = P.status === 'flip_due' ? `<button class="big" data-a="flip">🔄 Umgedreht</button>`
+    : P.status === 'change_due' ? `<button class="big alt" data-a="change">🧺 Neu bezogen</button>`
+    : `<button class="big" data-a="change">🧺 Frisch bezogen</button>`;
+  const hist = S.pillow_history.map(h => `${h.kind === 'change' ? 'bezogen' : 'umgedreht'} ${fmt(h.day,{day:'numeric',month:'short'})}`).join(' · ');
+  el.innerHTML = `<h2><span>🛏️ Kissenbezug</span></h2>
+    <div class="msg ${alert ? 'alert' : ''}">${txt[0]}</div><div class="sub" style="margin-top:-8px">${txt[1]}</div>
+    <div class="sides"><div class="side ${cls('A')}"><b>A</b><small>Nacht 1</small></div><div class="side ${cls('B')}"><b>B</b><small>Nacht 2</small></div></div>
+    <div class="row">${btn}${P.status !== 'none' ? '<button class="big ghost" data-a="undo_pillow">↩︎</button>' : ''}</div>
+    ${hist ? `<div class="hist">${hist}</div>` : ''}`;
+  el.querySelectorAll('[data-a]').forEach(b => b.onclick = () => act({action:b.dataset.a, day: TODAY}));
+}
+
+$('editBtn').onclick = () => { edit = !edit; $('editBtn').textContent = edit ? 'Fertig' : 'Routine bearbeiten'; render(); };
+load();
+</script>
+</body>
+</html>
