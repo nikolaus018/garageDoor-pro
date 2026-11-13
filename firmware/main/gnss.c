@@ -75,7 +75,8 @@ static bool process(const uint8_t *buf, int n)
                 s_last_msg_us = s_last_ubx_us = esp_timer_get_time();
                 s_protocol = GNSS_UBX;
                 got = true;
-                trip_fix_t fix = { .valid = pvt.fix_ok && pvt.fix_type >= 2 && pvt.fix_type <= 4,
+                trip_fix_t fix = { .valid = pvt.fix_ok && !pvt.invalid_llh && pvt.fix_type >= 2 &&
+                                             pvt.fix_type <= 4,
                                    .lat_e7 = pvt.lat_e7, .lon_e7 = pvt.lon_e7, .h_acc_mm = pvt.h_acc_mm,
                                    .num_sv = pvt.num_sv };
                 s_cb(&fix);

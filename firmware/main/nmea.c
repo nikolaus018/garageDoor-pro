@@ -70,7 +70,8 @@ bool nmea_decode_gga(const char *s, nmea_gga_t *out)
     // 0 id, 1 time, 2 lat, 3 N/S, 4 lon, 5 E/W, 6 quality, 7 satellites, 8 HDOP
     memset(out, 0, sizeof(*out));
     int quality = atoi(f[6]);
-    out->num_sv = (uint8_t)atoi(f[7]);
+    int sv = atoi(f[7]);
+    out->num_sv = (uint8_t)(sv < 0 ? 0 : sv > 255 ? 255 : sv);
     out->fix = quality >= 1 && quality <= 5 && *f[2] && *f[4];
     if (!out->fix) {
         return true;  // valid sentence, no fix (normal while searching)
@@ -78,7 +79,11 @@ bool nmea_decode_gga(const char *s, nmea_gga_t *out)
     if (!coord(f[2], f[3][0], 2, &out->lat_e7) || !coord(f[4], f[5][0], 3, &out->lon_e7)) {
         return false;
     }
+    // Missing, negative or absurd HDOP (also "nan"): treat as unknown, which fails the accuracy check.
     double hdop = *f[8] ? strtod(f[8], NULL) : 99.0;
+    if (!(hdop > 0 && hdop < 99.0)) {
+        hdop = 99.0;
+    }
     out->h_acc_mm = (uint32_t)(hdop * NMEA_UERE_MM);
     return true;
 }

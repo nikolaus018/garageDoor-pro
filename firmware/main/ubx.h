@@ -53,6 +53,7 @@ bool ubx_parser_feed(ubx_parser_t *p, uint8_t byte);
 typedef struct {
     uint8_t fix_type;    // 0 none, 2 2D, 3 3D, ...
     bool fix_ok;         // flags bit 0 (gnssFixOK)
+    bool invalid_llh;    // flags3 bit 0: lat/lon are not valid (M9/M10; reserved 0 on older)
     uint8_t num_sv;
     int32_t lon_e7, lat_e7;
     uint32_t h_acc_mm;

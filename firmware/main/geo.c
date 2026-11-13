@@ -13,5 +13,6 @@ double geo_distance_m(int32_t lat1_e7, int32_t lon1_e7, int32_t lat2_e7, int32_t
     double dlon = (lon2_e7 - (double)lon1_e7) * 1e-7 * DEG_TO_RAD;
     double s1 = sin(dlat / 2), s2 = sin(dlon / 2);
     double a = s1 * s1 + cos(lat1) * cos(lat2) * s2 * s2;
+    a = a < 0 ? 0 : a > 1 ? 1 : a;   // rounding near antipodes would make sqrt(1 - a) NaN
     return 2 * EARTH_RADIUS_M * atan2(sqrt(a), sqrt(1 - a));
 }

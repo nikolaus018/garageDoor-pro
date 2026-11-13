@@ -146,6 +146,7 @@ bool ubx_decode_nav_pvt(const uint8_t *d, uint16_t len, ubx_nav_pvt_t *out)
     }
     out->fix_type = d[20];
     out->fix_ok = (d[21] & 0x01) != 0;
+    out->invalid_llh = (d[78] & 0x01) != 0;
     out->num_sv = d[23];
     out->lon_e7 = (int32_t)u4(d + 24);
     out->lat_e7 = (int32_t)u4(d + 28);

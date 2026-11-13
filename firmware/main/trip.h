@@ -7,8 +7,16 @@
 //                                   leave radius from home -> AWAY (saved)
 //   boot, parked AWAY  -> AWAY:     wait for GPS
 //   AWAY, GPS inside the arrive radius -> ARRIVED: save HOME, press for the arrival duration
+//   AWAY, GPS inside the leave radius  -> save HOME (near home: if the car stops here, e.g. it
+//                                   enters the garage before a fix inside the arrive radius came,
+//                                   the next start still presses)
 //   ARRIVED, GPS beyond the leave radius again (drove past) -> AWAY: save, stop pressing
 //   no home set yet    -> NO_HOME:  do nothing until home is set in the web panel
+//
+// Saving AWAY wrongly costs the next press on leaving, so "beyond the leave radius" needs
+// TRIP_CONFIRM_FIXES usable fixes in a row out there: a single bad fix (multipath on the garage
+// ramp, a receiver losing the sky) can't do it. Saving HOME wrongly only costs a few presses out
+// of the remote's range, so one fix is enough for that.
 #pragma once
 
 #include <stdbool.h>
@@ -43,10 +51,12 @@ typedef struct {
     trip_state_t state;
     trip_parked_t parked;
     double distance_m;   // to home from the last usable fix, < 0 if unknown
+    uint8_t far_fixes;   // usable fixes in a row beyond the leave radius
 } trip_t;
 
 #define TRIP_MAX_H_ACC_MM 50000
 #define TRIP_MIN_SATELLITES 4
+#define TRIP_CONFIRM_FIXES 5   // at 1 Hz: 5 s beyond the leave radius before it counts as gone
 
 bool trip_fix_usable(const trip_fix_t *fix);
 unsigned trip_start(trip_t *t, const trip_config_t *cfg, trip_parked_t saved);

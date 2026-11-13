@@ -14,6 +14,7 @@ board remembers in flash where the car was last parked:
 boot, parked HOME  -> LEAVING:  press 10x (every 2 s); GPS beyond the leave radius -> AWAY (saved)
 boot, parked AWAY  -> AWAY:     wait for GPS
 AWAY, GPS inside the arrive radius -> ARRIVED: save HOME, press every 2 s for up to 180 s
+AWAY, GPS inside the leave radius  -> save HOME (near home), nothing pressed
 ARRIVED, GPS beyond the leave radius (drove past) -> AWAY: save, stop pressing
 no home set        -> nothing is pressed; setup Wi-Fi opens on every start
 ```
@@ -21,6 +22,14 @@ no home set        -> nothing is pressed; setup Wi-Fi opens on every start
 - Two radii (hysteresis) so GPS jitter at the edge doesn't flap: arrive 150 m, leave 300 m by default.
   Both are configurable, and the leave radius is always at least 50 m larger.
 - A fix only counts with gnssFixOK, ≤ 50 m accuracy and ≥ 4 satellites.
+- Saving AWAY wrongly means no press on the next start, and saving HOME wrongly only means a few
+  presses out of the remote's range, so the two directions are treated differently:
+  - "Beyond the leave radius" needs 5 usable fixes in a row out there (5 s at 1 Hz). A bad or
+    missing fix in between starts the count again. Before 1.2.0 a single fix was enough, and one
+    multipath fix on the garage ramp after arriving saved AWAY, so the next start didn't press.
+  - One fix inside the leave radius saves HOME, even without an arrival. If the car goes
+    underground before a fix inside the arrive radius came, the next start still presses.
+- Starts and every change of state are kept in a 16-entry event log in NVS, shown in the panel.
 - Extra presses while the door moves just keep it open longer (checked on the real door).
 - Compared with the earlier setup: it presses on start only when the car was parked at home, arrival needs
   no phone, and driving past home is detected and stops the pressing.
@@ -40,6 +49,7 @@ Implementation: `firmware/main/trip.c` (pure C, unit-tested on the host).
   - It can't use the phone's location, because browsers only allow that on HTTPS pages.
   - It can't show a map, because the phone has no internet while it's on the board's network.
 - Settings: arrive/leave radius, presses on leaving, arrival pressing duration.
+- Recent events: the last 16 starts and changes, with distance, accuracy and satellites.
 - Live status, **Press the remote once** and **Hold the remote for 5 s** tests, and a firmware update
   (OTA with rollback).
 - Wi-Fi is off otherwise, which keeps 2.4 GHz noise away from the GPS.

@@ -51,7 +51,12 @@ The setup Wi-Fi switches itself off after 10 minutes without use.
   presses while the door moves just keep it open.
 - **Arriving:** when GPS puts you inside the arrive radius, it presses every 2 s until you switch
   the car off (at most 3 minutes).
-- Starting the car anywhere else does nothing.
+- Starting the car anywhere else does nothing. Within the leave radius of home it counts as
+  home and presses, in case the car went underground before the board saw it arrive.
+- **Door didn't open when leaving?** Open the panel (hold SETUP 3 s) and look at **Recent
+  events**: the entries before that start show why the board thought the car was away. If it
+  did press but the car was still out of the remote's range, raise **Presses on leaving** (2 s
+  each, up to 30).
 - Driving past home without stopping: the door opens briefly and then closes on its own timer.
 
 ## LED codes

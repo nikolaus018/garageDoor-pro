@@ -11,11 +11,21 @@
 #define NS "garage"
 #define KEY_SETTINGS "cfg"
 #define KEY_PARKED "parked"
+#define KEY_BOOTS "boots"
+#define KEY_LOG "log"
+#define LOG_VERSION 1
 #define SETTINGS_VERSION 2   // 2: Wi-Fi password fields removed (the setup Wi-Fi is open)
 
 static const char *TAG = "settings";
 static SemaphoreHandle_t s_lock;
 static settings_t s_settings;
+static uint16_t s_boot;
+
+typedef struct {
+    uint8_t version, head, count, reserved;
+    settings_log_entry_t e[SETTINGS_LOG_LEN];
+} stored_log_t;
+static stored_log_t s_log;
 
 typedef struct {
     uint32_t version;
@@ -91,7 +101,25 @@ esp_err_t settings_init(void)
         }
         nvs_close(h);
     }
-    ESP_LOGI(TAG, "home %s, radii %u/%u m, %u presses, %u s arrival", s_settings.home_set ? "set" : "not set",
+    if (nvs_open(NS, NVS_READWRITE, &h) == ESP_OK) {
+        uint16_t boots = 0;
+        nvs_get_u16(h, KEY_BOOTS, &boots);
+        s_boot = boots + 1;
+        if (s_boot == 0) {
+            s_boot = 1;   // wrapped
+        }
+        size_t len = sizeof(s_log);
+        if (nvs_get_blob(h, KEY_LOG, &s_log, &len) != ESP_OK || len != sizeof(s_log) ||
+            s_log.version != LOG_VERSION || s_log.head >= SETTINGS_LOG_LEN || s_log.count > SETTINGS_LOG_LEN) {
+            memset(&s_log, 0, sizeof(s_log));
+            s_log.version = LOG_VERSION;
+        }
+        if (nvs_set_u16(h, KEY_BOOTS, s_boot) == ESP_OK) {
+            nvs_commit(h);
+        }
+        nvs_close(h);
+    }
+    ESP_LOGI(TAG, "boot %u, home %s, radii %u/%u m, %u presses, %u s arrival", s_boot, s_settings.home_set ? "set" : "not set",
              s_settings.arrive_radius_m, s_settings.leave_radius_m, s_settings.leave_presses,
              s_settings.arrive_duration_s);
     return ESP_OK;
@@ -132,8 +160,52 @@ esp_err_t settings_factory_reset(void)
     }
     xSemaphoreTake(s_lock, portMAX_DELAY);
     defaults(&s_settings);
+    memset(&s_log, 0, sizeof(s_log));
+    s_log.version = LOG_VERSION;
     xSemaphoreGive(s_lock);
     return err;
+}
+
+uint16_t settings_boot_count(void)
+{
+    return s_boot;
+}
+
+void settings_log_add(const settings_log_entry_t *e)
+{
+    xSemaphoreTake(s_lock, portMAX_DELAY);
+    s_log.e[s_log.head] = *e;
+    s_log.head = (s_log.head + 1) % SETTINGS_LOG_LEN;
+    if (s_log.count < SETTINGS_LOG_LEN) {
+        s_log.count++;
+    }
+    stored_log_t copy = s_log;
+    xSemaphoreGive(s_lock);
+    nvs_handle_t h;
+    esp_err_t err = nvs_open(NS, NVS_READWRITE, &h);
+    if (err == ESP_OK) {
+        err = nvs_set_blob(h, KEY_LOG, &copy, sizeof(copy));
+        if (err == ESP_OK) {
+            err = nvs_commit(h);
+        }
+        nvs_close(h);
+    }
+    if (err != ESP_OK) {
+        ESP_LOGW(TAG, "saving the event log failed: %s", esp_err_to_name(err));
+    }
+}
+
+size_t settings_log_get(settings_log_entry_t *out, size_t max)
+{
+    xSemaphoreTake(s_lock, portMAX_DELAY);
+    size_t n = s_log.count < max ? s_log.count : max;
+    size_t first = (s_log.head + SETTINGS_LOG_LEN - s_log.count) % SETTINGS_LOG_LEN;
+    first = (first + (s_log.count - n)) % SETTINGS_LOG_LEN;   // the newest n if max is smaller
+    for (size_t i = 0; i < n; i++) {
+        out[i] = s_log.e[(first + i) % SETTINGS_LOG_LEN];
+    }
+    xSemaphoreGive(s_lock);
+    return n;
 }
 
 trip_parked_t settings_get_parked(void)

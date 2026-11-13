@@ -1,4 +1,4 @@
-// Host unit tests for the pure-C firmware modules (UBX, geo, trip). Run: firmware/test/run.sh
+// Host unit tests for the pure-C firmware modules (UBX, NMEA, geo, trip). Run: firmware/test/run.sh
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
@@ -24,6 +24,14 @@ static trip_fix_t fix_at_m_north(double metres)
     return f;
 }
 
+// Feeds the same fix n times (1 Hz receiver) and returns the OR of all actions.
+static unsigned fixes(trip_t *t, const trip_config_t *c, trip_fix_t f, int n)
+{
+    unsigned a = 0;
+    while (n-- > 0) a |= trip_on_fix(t, c, &f);
+    return a;
+}
+
 static int test_geo(void)
 {
     // Vienna Stephansdom -> Vienna Hauptbahnhof is about 2.3 km.
@@ -32,6 +40,10 @@ static int test_geo(void)
     CHECK(geo_distance_m(HOME_LAT, HOME_LON, HOME_LAT, HOME_LON) < 0.001);
     double hundred = geo_distance_m(HOME_LAT, HOME_LON, HOME_LAT + M_TO_LAT_E7(100), HOME_LON);
     CHECK(fabs(hundred - 100) < 0.5);
+    // Antipodes: rounding must not give NaN.
+    double half = geo_distance_m(0, 0, 0, 1800000000);
+    CHECK(!isnan(half) && half > 20000000 && half < 20040000);
+    CHECK(!isnan(geo_distance_m(900000000, 0, -900000000, 0)));
     return 0;
 }
 
@@ -106,6 +118,10 @@ static int test_ubx_parse_nav_pvt(void)
     CHECK(frames == 1);
     CHECK(out.fix_type == 3 && out.fix_ok && out.num_sv == 11);
     CHECK(out.lon_e7 == lon && out.lat_e7 == lat && out.h_acc_mm == hacc);
+    CHECK(!out.invalid_llh);
+    pvt[78] = 0x01;   // flags3 invalidLlh
+    CHECK(ubx_decode_nav_pvt(pvt, sizeof pvt, &out) && out.invalid_llh);
+    pvt[78] = 0;
 
     // A corrupted checksum is rejected.
     n = make_frame(stream, UBX_CLASS_NAV, UBX_ID_NAV_PVT, pvt, sizeof pvt);
@@ -141,17 +157,20 @@ static int test_trip_leaving_then_arriving(void)
     // Between the radii: still leaving (hysteresis).
     trip_fix_t mid = fix_at_m_north(250);
     CHECK(trip_on_fix(&t, &c, &mid) == TRIP_ACT_NONE && t.state == TRIP_LEAVING);
-    // Beyond the leave radius: away, saved.
+    // Beyond the leave radius: away, saved, once it is confirmed by TRIP_CONFIRM_FIXES fixes in a row.
     trip_fix_t far = fix_at_m_north(2000);
+    CHECK(fixes(&t, &c, far, TRIP_CONFIRM_FIXES - 1) == TRIP_ACT_NONE && t.state == TRIP_LEAVING);
     a = trip_on_fix(&t, &c, &far);
     CHECK(t.state == TRIP_AWAY && t.parked == PARKED_AWAY && a == TRIP_ACT_SAVE_PARKED);
+    CHECK(fixes(&t, &c, far, 10) == TRIP_ACT_NONE);
 
-    // Coming back: between the radii nothing, inside the arrive radius -> arrive.
-    CHECK(trip_on_fix(&t, &c, &mid) == TRIP_ACT_NONE && t.state == TRIP_AWAY);
+    // Coming back: between the radii counts as parked at home (no press), inside the arrive radius -> arrive.
+    CHECK(trip_on_fix(&t, &c, &mid) == TRIP_ACT_SAVE_PARKED && t.state == TRIP_AWAY && t.parked == PARKED_HOME);
+    CHECK(trip_on_fix(&t, &c, &mid) == TRIP_ACT_NONE);
     trip_fix_t close = fix_at_m_north(120);
     a = trip_on_fix(&t, &c, &close);
     CHECK(t.state == TRIP_ARRIVED && t.parked == PARKED_HOME);
-    CHECK(a == (TRIP_ACT_SAVE_PARKED | TRIP_ACT_PRESS_ARRIVE));
+    CHECK(a == TRIP_ACT_PRESS_ARRIVE);   // parked HOME was already saved between the radii
     // Further fixes at home do not press again.
     CHECK(trip_on_fix(&t, &c, &near) == TRIP_ACT_NONE);
     return 0;
@@ -166,9 +185,56 @@ static int test_trip_boot_away_and_drive_by(void)
     CHECK(trip_on_fix(&t, &c, &close) & TRIP_ACT_PRESS_ARRIVE);
     // Drove past home without stopping: back to away, stop pressing, saved.
     trip_fix_t far = fix_at_m_north(800);
+    CHECK(fixes(&t, &c, far, TRIP_CONFIRM_FIXES - 1) == TRIP_ACT_NONE && t.state == TRIP_ARRIVED);
     unsigned a = trip_on_fix(&t, &c, &far);
     CHECK(t.state == TRIP_AWAY && t.parked == PARKED_AWAY);
     CHECK(a == (TRIP_ACT_SAVE_PARKED | TRIP_ACT_STOP_PRESSING));
+    return 0;
+}
+
+// The reported bug: the car arrives, then a few bad fixes in the underground garage put it far away.
+// Before the fix one such fix saved AWAY, and the next start didn't press for leaving.
+static int test_trip_garage_glitch_keeps_home(void)
+{
+    trip_config_t c = config();
+    trip_t t;
+    trip_start(&t, &c, PARKED_AWAY);
+    trip_fix_t close = fix_at_m_north(60);
+    CHECK(trip_on_fix(&t, &c, &close) & TRIP_ACT_PRESS_ARRIVE);
+    trip_fix_t none = { 0 };
+    trip_fix_t bogus = fix_at_m_north(900);   // multipath on the ramp: far off, but "accurate"
+    for (int round = 0; round < 20; round++) {
+        // Bursts of up to TRIP_CONFIRM_FIXES - 1 bad fixes, broken by lost or near fixes.
+        CHECK(fixes(&t, &c, bogus, TRIP_CONFIRM_FIXES - 1) == TRIP_ACT_NONE);
+        CHECK(trip_on_fix(&t, &c, round % 2 ? &none : &close) == TRIP_ACT_NONE);
+    }
+    trip_fix_t inaccurate = bogus;
+    inaccurate.h_acc_mm = 90000;
+    CHECK(fixes(&t, &c, bogus, 2) == TRIP_ACT_NONE);
+    CHECK(trip_on_fix(&t, &c, &inaccurate) == TRIP_ACT_NONE);   // a bad fix breaks the row too
+    CHECK(fixes(&t, &c, bogus, TRIP_CONFIRM_FIXES - 1) == TRIP_ACT_NONE);
+    CHECK(t.state == TRIP_ARRIVED && t.parked == PARKED_HOME);
+    // Power off in the garage, next start: presses for leaving.
+    CHECK(trip_start(&t, &c, t.parked) == TRIP_ACT_PRESS_LEAVE && t.state == TRIP_LEAVING);
+    return 0;
+}
+
+// Into the garage before any fix inside the arrive radius (late fix, short trip): still parked home.
+static int test_trip_near_home_without_arrival(void)
+{
+    trip_config_t c = config();
+    trip_t t;
+    trip_start(&t, &c, PARKED_AWAY);
+    trip_fix_t far = fix_at_m_north(3000), edge = fix_at_m_north(220);
+    CHECK(fixes(&t, &c, far, 20) == TRIP_ACT_NONE && t.parked == PARKED_AWAY);
+    CHECK(trip_on_fix(&t, &c, &edge) == TRIP_ACT_SAVE_PARKED && t.parked == PARKED_HOME);
+    CHECK(t.state == TRIP_AWAY);   // nothing pressed yet
+    CHECK(trip_start(&t, &c, t.parked) == TRIP_ACT_PRESS_LEAVE);
+    // Passing near home and driving on: away again once confirmed.
+    trip_start(&t, &c, PARKED_AWAY);
+    CHECK(trip_on_fix(&t, &c, &edge) == TRIP_ACT_SAVE_PARKED);
+    CHECK(fixes(&t, &c, far, TRIP_CONFIRM_FIXES) == TRIP_ACT_SAVE_PARKED && t.parked == PARKED_AWAY);
+    CHECK(t.state == TRIP_AWAY);
     return 0;
 }
 
@@ -238,6 +304,14 @@ static int test_nmea(void)
     with_checksum(line, sizeof line, "GPRMC,123519,A,4807.038,N,01131.000,E,022.4,084.4,230394,003.1,W");
     CHECK(feed_all(&p, line, &g) == 0);
     CHECK(feed_all(&p, "\xB5\x62garbage$$$\r\n$GPGGA,broken\r\n", &g) == 0);
+    // HDOP missing, negative or "nan": accuracy unknown (fails the 50 m check), never wraps to small.
+    with_checksum(line, sizeof line, "GPGGA,1,4807.038,N,01131.000,E,1,08,-1.0,1,M,1,M,,");
+    CHECK(feed_all(&p, line, &g) == 1 && g.fix && g.h_acc_mm > TRIP_MAX_H_ACC_MM);
+    with_checksum(line, sizeof line, "GPGGA,1,4807.038,N,01131.000,E,1,08,nan,1,M,1,M,,");
+    CHECK(feed_all(&p, line, &g) == 1 && g.h_acc_mm > TRIP_MAX_H_ACC_MM);
+    // Estimated (dead-reckoning, quality 6) positions don't count as a fix.
+    with_checksum(line, sizeof line, "GPGGA,1,4807.038,N,01131.000,E,6,08,0.9,1,M,1,M,,");
+    CHECK(feed_all(&p, line, &g) == 1 && !g.fix);
     // Malformed coordinates are rejected.
     with_checksum(line, sizeof line, "GPGGA,1,48x7.0,N,01131.000,E,1,08,0.9,1,M,1,M,,");
     CHECK(feed_all(&p, line, &g) == 0);
@@ -247,7 +321,8 @@ static int test_nmea(void)
 int main(void)
 {
     int fails = test_geo() + test_ubx_valset() + test_ubx_parse_nav_pvt() + test_trip_leaving_then_arriving() +
-                test_trip_boot_away_and_drive_by() + test_trip_bad_fixes_and_no_home() + test_nmea();
+                test_trip_boot_away_and_drive_by() + test_trip_garage_glitch_keeps_home() +
+                test_trip_near_home_without_arrival() + test_trip_bad_fixes_and_no_home() + test_nmea();
     printf("%s: %d checks\n", fails ? "FAILED" : "all tests passed", checks);
     return fails ? 1 : 0;
 }

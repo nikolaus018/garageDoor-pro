@@ -24,10 +24,13 @@ flash where the car was last parked.
 | Parked at home | Presses the remote 10× (every 2 s) while you drive out, then switches to *away* once the GPS is past the leave radius |
 | Parked away | Waits for a GPS fix |
 | Away, inside the arrive radius | Presses every 2 s for up to 180 s, saves *home* |
+| Away, inside the leave radius | Counts as parked at home, so a start there presses (in case the garage swallowed the fix) |
 | Drove past home | Detects leaving the radius again and stops pressing |
 
 Two radii (150 m arrive, 300 m leave by default, both configurable) stop GPS jitter at the edge from
-flapping the state. A fix only counts with `gnssFixOK`, ≤ 50 m accuracy and ≥ 4 satellites. The
+flapping the state. A fix only counts with `gnssFixOK`, ≤ 50 m accuracy and ≥ 4 satellites, and
+*away* needs 5 such fixes in a row beyond the leave radius, so a stray fix in the garage can't
+make the board skip the next press. The
 state machine is pure C and unit-tested on the host with AddressSanitizer and UBSan.
 
 ## Two ways to build it

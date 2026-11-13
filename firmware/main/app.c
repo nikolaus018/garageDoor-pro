@@ -39,15 +39,38 @@ static void apply(unsigned actions, trip_parked_t parked)
     }
 }
 
+// Call with s_lock held: records the current state in the NVS event log.
+static settings_log_entry_t log_entry(bool start)
+{
+    bool have = s_have_fix && trip_fix_usable(&s_fix);
+    double d = s_trip.distance_m;
+    settings_log_entry_t e = {
+        .boot = settings_boot_count(),
+        .state = (uint8_t)s_trip.state,
+        .parked = (uint8_t)s_trip.parked,
+        .uptime_s = (uint32_t)(esp_timer_get_time() / 1000000),
+        .distance_m = d < 0 ? -1 : d > 2e9 ? 2000000000 : (int32_t)(d + 0.5),
+        .acc_m = have ? (uint16_t)(s_fix.h_acc_mm / 1000 > 0xFFFE ? 0xFFFE : s_fix.h_acc_mm / 1000) : 0xFFFF,
+        .sats = have ? s_fix.num_sv : 0,
+        .start = start,
+    };
+    return e;
+}
+
+static bool fix_fresh_usable(void)   // call with s_lock held
+{
+    return s_have_fix && trip_fix_usable(&s_fix) && gnss_seconds_since_message() < FIX_FRESH_S;
+}
+
 static void update_ui(void)
 {
     trip_config_t cfg = settings_trip_config();
     xSemaphoreTake(s_lock, portMAX_DELAY);
-    bool usable = s_have_fix && trip_fix_usable(&s_fix);
+    bool usable = fix_fresh_usable();
     xSemaphoreGive(s_lock);
     if (!cfg.home_set) {
         ui_set_status(UI_NO_HOME);
-    } else if (usable && gnss_seconds_since_message() < FIX_FRESH_S) {
+    } else if (usable) {
         ui_set_status(UI_FIX);
     } else {
         ui_set_status(UI_NO_FIX);
@@ -61,15 +84,23 @@ static void on_fix(const trip_fix_t *fix)
     s_fix = *fix;
     s_have_fix = true;
     trip_state_t before = s_trip.state;
+    trip_parked_t parked_before = s_trip.parked;
     unsigned actions = trip_on_fix(&s_trip, &cfg, fix);
     trip_state_t after = s_trip.state;
     trip_parked_t parked = s_trip.parked;
     double d = s_trip.distance_m;
+    bool changed = before != after || parked_before != parked;
+    settings_log_entry_t e = log_entry(false);
     xSemaphoreGive(s_lock);
-    if (before != after) {
-        ESP_LOGI(TAG, "%s -> %s (%.0f m from home)", trip_state_name(before), trip_state_name(after), d);
+    if (changed) {
+        ESP_LOGI(TAG, "%s -> %s, parked %s (%.0f m from home, +-%lu m, %u sats)", trip_state_name(before),
+                 trip_state_name(after), parked == PARKED_HOME ? "HOME" : "AWAY", d,
+                 (unsigned long)(fix->h_acc_mm / 1000), fix->num_sv);
     }
-    apply(actions, parked);
+    apply(actions, parked);   // saves parked first: the log never shows a state that wasn't stored
+    if (changed) {
+        settings_log_add(&e);
+    }
 }
 
 void app_get_status(app_status_t *out)
@@ -80,7 +111,7 @@ void app_get_status(app_status_t *out)
     out->distance_m = s_trip.distance_m;
     out->have_fix = s_have_fix;
     out->fix = s_fix;
-    out->fix_usable = s_have_fix && trip_fix_usable(&s_fix);
+    out->fix_usable = fix_fresh_usable();
     xSemaphoreGive(s_lock);
     out->gnss_age_s = gnss_seconds_since_message();
     out->presses_remaining = presser_remaining();
@@ -105,8 +136,10 @@ const char *app_set_home(int32_t lat_e7, int32_t lon_e7)
     xSemaphoreTake(s_lock, portMAX_DELAY);
     unsigned actions = trip_on_home_set(&s_trip, &cfg);
     trip_parked_t parked = s_trip.parked;
+    settings_log_entry_t e = log_entry(false);
     xSemaphoreGive(s_lock);
     apply(actions, parked);
+    settings_log_add(&e);
     ESP_LOGI(TAG, "home set to %.6f, %.6f", lat_e7 * 1e-7, lon_e7 * 1e-7);
     update_ui();
     return NULL;
@@ -115,7 +148,7 @@ const char *app_set_home(int32_t lat_e7, int32_t lon_e7)
 const char *app_set_home_here(void)
 {
     xSemaphoreTake(s_lock, portMAX_DELAY);
-    bool ok = s_have_fix && trip_fix_usable(&s_fix) && gnss_seconds_since_message() < FIX_FRESH_S;
+    bool ok = fix_fresh_usable();
     trip_fix_t f = s_fix;
     xSemaphoreGive(s_lock);
     if (!ok) {
@@ -171,6 +204,10 @@ void app_main(void)
     unsigned actions = trip_start(&s_trip, &cfg, settings_get_parked());
     ESP_LOGI(TAG, "start: %s", trip_state_name(s_trip.state));
     apply(actions, s_trip.parked);
+    if (cfg.home_set) {
+        settings_log_entry_t e = log_entry(true);   // no other task runs yet: no lock needed
+        settings_log_add(&e);
+    }
 
     ui_callbacks_t cb = { .on_setup = on_setup, .on_factory_reset = on_factory_reset };
     ui_start(&cb);

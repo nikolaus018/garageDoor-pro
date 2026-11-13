@@ -43,10 +43,13 @@ trying UI changes without hardware.
 | Car starts, last parked **at home** | presses the remote 10× (every 2 s); once GPS shows you are beyond the leave radius (300 m), it saves "away" |
 | Car starts, last parked **away** | waits for GPS |
 | GPS inside the arrive radius (150 m) while away | saves "home", presses every 2 s for 180 s (until the car switches off) |
+| GPS inside the leave radius while away | saves "home" (near home), presses nothing; the next start presses |
 | Drove past home without stopping (beyond the leave radius again) | stops pressing, saves "away" |
 | Home not set | nothing is pressed; the setup Wi-Fi opens on every start |
 
-Fixes are used only when valid, ≤ 50 m accuracy and ≥ 4 satellites.
+Fixes are used only when valid, ≤ 50 m accuracy and ≥ 4 satellites. "Beyond the leave radius"
+needs 5 of them in a row (`TRIP_CONFIRM_FIXES`), so one bad fix in the garage can't save "away".
+Starts and changes go to a 16-entry event log in NVS (`/api/log`, shown in the panel).
 
 GPS: on every boot the firmware sends the u-blox M9/M10 configuration (UBX NAV-PVT 1 Hz, 115200
 baud, automotive model, RAM only) at 115200/9600/38400/57600/230400 baud, then listens at each rate
@@ -74,6 +77,7 @@ spares the SuperMini's small regulator.
 
 - **Set home to where the car is now** (needs a GPS fix), or enter coordinates
 - Arrive / leave radius, presses on leaving, arrival pressing duration
+- Recent events: the last 16 starts and changes, to trace a missed press afterwards
 - **Press the remote once**, and **Hold the remote for 5 s** to check the wiring with a multimeter
 - Firmware update: upload `build/garageDoor_pro.bin`. The image is verified before it is
   activated; a new image that does not run for 60 s is rolled back by the bootloader.

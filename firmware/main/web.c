@@ -161,6 +161,29 @@ static esp_err_t status_get(httpd_req_t *req)
     return send_json(req, "200 OK", json);
 }
 
+static esp_err_t log_get(httpd_req_t *req)
+{
+    touch();
+    static settings_log_entry_t e[SETTINGS_LOG_LEN];   // only the one httpd task uses it
+    size_t n = settings_log_get(e, SETTINGS_LOG_LEN);
+    httpd_resp_set_type(req, "application/json");
+    httpd_resp_set_hdr(req, "Cache-Control", "no-store");
+    char line[160];
+    snprintf(line, sizeof line, "{\"boot\":%u,\"events\":[", (unsigned)settings_boot_count());
+    httpd_resp_sendstr_chunk(req, line);
+    for (size_t i = 0; i < n; i++) {
+        snprintf(line, sizeof line,
+                 "%s{\"boot\":%u,\"start\":%s,\"uptime_s\":%lu,\"state\":\"%s\",\"parked\":\"%s\","
+                 "\"distance_m\":%ld,\"acc_m\":%d,\"sats\":%u}",
+                 i ? "," : "", (unsigned)e[i].boot, e[i].start ? "true" : "false", (unsigned long)e[i].uptime_s,
+                 trip_state_name((trip_state_t)e[i].state), e[i].parked == PARKED_AWAY ? "AWAY" : "HOME",
+                 (long)e[i].distance_m, e[i].acc_m == 0xFFFF ? -1 : (int)e[i].acc_m, (unsigned)e[i].sats);
+        httpd_resp_sendstr_chunk(req, line);
+    }
+    httpd_resp_sendstr_chunk(req, "]}");
+    return httpd_resp_sendstr_chunk(req, NULL);
+}
+
 static esp_err_t home_post(httpd_req_t *req)
 {
     touch();
@@ -233,11 +256,13 @@ static esp_err_t ota_post(httpd_req_t *req)
     }
     char buf[1024];
     size_t left = req->content_len;
+    int timeouts = 0;
     while (left > 0) {
         int r = httpd_req_recv(req, buf, left < sizeof buf ? left : sizeof buf);
-        if (r == HTTPD_SOCK_ERR_TIMEOUT) {
+        if (r == HTTPD_SOCK_ERR_TIMEOUT && ++timeouts < 3) {   // 3 x recv_wait_timeout, then give up
             continue;
         }
+        timeouts = 0;
         if (r <= 0 || esp_ota_write(ota, buf, r) != ESP_OK) {
             esp_ota_abort(ota);
             return send_result(req, "Upload failed");
@@ -352,6 +377,7 @@ void web_start(void)
         static const httpd_uri_t uris[] = {
             { .uri = "/", .method = HTTP_GET, .handler = index_get },
             { .uri = "/api/status", .method = HTTP_GET, .handler = status_get },
+            { .uri = "/api/log", .method = HTTP_GET, .handler = log_get },
             { .uri = "/api/home", .method = HTTP_POST, .handler = home_post },
             { .uri = "/api/settings", .method = HTTP_POST, .handler = settings_post },
             { .uri = "/api/test", .method = HTTP_POST, .handler = test_post },

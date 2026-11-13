@@ -34,11 +34,21 @@ class Handler(BaseHTTPRequestHandler):
             return self.send(200, json.dumps({
                 "state": "LEAVING" if home else "NO_HOME", "parked": "HOME", "distance_m": 12 if home else -1,
                 "gps": {"seen": True, "usable": True, "fix": True, "lat": FIX[0], "lon": FIX[1], "acc_m": 2.4,
-                        "sats": 14, "age_s": 0},
+                        "sats": 14, "age_s": 0, "proto": "NMEA"},
                 "home": {"set": bool(home), "lat": home[0] if home else 0, "lon": home[1] if home else 0},
                 "settings": state["settings"], "presses_remaining": state["presses"],
                 "holding": time.time() < state["hold_until"],
-                "version": "1.0.0", "uptime_s": 754}))
+                "version": "1.2.0", "uptime_s": 754}))
+        if self.path == "/api/log":
+            ev = lambda boot, start, up, st, parked, d, acc, sats: {
+                "boot": boot, "start": start, "uptime_s": up, "state": st, "parked": parked,
+                "distance_m": d, "acc_m": acc, "sats": sats}
+            return self.send(200, json.dumps({"boot": 42, "events": [
+                ev(41, True, 0, "AWAY", "AWAY", -1, -1, 0),
+                ev(41, False, 612, "AWAY", "HOME", 284, 6, 9),
+                ev(41, False, 640, "ARRIVED", "HOME", 131, 5, 10),
+                ev(42, True, 0, "LEAVING", "HOME", -1, -1, 0),
+                ev(42, False, 95, "AWAY", "AWAY", 318, 4, 11)]}))
         self.send(404, "{}")
 
     def do_POST(self):
