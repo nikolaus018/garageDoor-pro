@@ -1,8 +1,9 @@
-# garageDoor-pro
+﻿# garageDoor-pro
 
-**A small box in the car that opens the garage door by itself when you leave home and when you arrive.**
-No phone, no app: an ESP32-C3, a GPS module and one transistor that presses the button of a spare
-remote, powered over USB-C from the car. Home is set once from a small Wi-Fi web panel.
+In-car controller that opens a garage door automatically on departure and arrival.
+An ESP32-C3, a GPS module and one transistor press the button of a spare remote. It is
+powered over USB-C from the car and needs no phone or app. The home position is set once
+through a Wi-Fi web panel.
 
 ![ESP32-C3](https://img.shields.io/badge/ESP32--C3-ESP--IDF_6.1-E7352C?logo=espressif&logoColor=white)
 ![KiCad](https://img.shields.io/badge/KiCad-custom_PCB-314CB0?logo=kicad&logoColor=white)
@@ -27,11 +28,24 @@ flash where the car was last parked.
 | Away, inside the leave radius | Counts as parked at home, so a start there presses (in case the garage swallowed the fix) |
 | Drove past home | Detects leaving the radius again and stops pressing |
 
+```mermaid
+stateDiagram-v2
+    [*] --> ParkedHome: boot, last position = home
+    [*] --> ParkedAway: boot, last position = away
+    ParkedHome --> Away: 5 good fixes beyond leave radius
+    ParkedHome: Press remote 10× (every 2 s)
+    ParkedAway --> Arriving: inside arrive radius
+    ParkedAway: Wait for GPS fix
+    Arriving --> ParkedHome: after ≤180 s, saves "home"
+    Arriving: Press remote every 2 s
+    Away --> Arriving: inside arrive radius
+```
+
 Two radii (150 m arrive, 300 m leave by default, both configurable) stop GPS jitter at the edge from
 flapping the state. A fix only counts with `gnssFixOK`, ≤ 50 m accuracy and ≥ 4 satellites, and
 *away* needs 5 such fixes in a row beyond the leave radius, so a stray fix in the garage can't
-make the board skip the next press. The
-state machine is pure C and unit-tested on the host with AddressSanitizer and UBSan.
+make the board skip the next press. The state machine is pure C and unit-tested on the host with
+AddressSanitizer and UBSan.
 
 ## Two ways to build it
 
